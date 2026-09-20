@@ -1,17 +1,19 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
 # test_chat.sh — 用预录音频注入一次"纯聊天"提问，观察模型原始输出
 # 目的: 判断新的工具调用 prompt 是否导致聊天也被输出成 JSON
 set +u
-source /opt/ros/humble/setup.bash
-source /data/sf_code/agent_ws/install/setup.bash
-source /data/sf_code/ros_ws/install/setup.bash 2>/dev/null
+source "$ROBOT_CORE/setup.sh"
+true
+true 2>/dev/null
 export PYTHONUNBUFFERED=1
 
-WAV=${1:-/data/sf_code/agent_ws/src/omni_node/scripts/hangzhou.wav}
-CMD_DIR=/data/sf_code/kws/sherpa-onnx-kws-cpp/commands
+WAV=${1:-$ROBOT_CORE/voice/agent/src/omni_node/scripts/hangzhou.wav}
+CMD_DIR=$ROBOT_CORE/voice/kws/sherpa-onnx-kws-cpp/commands
 
 echo "=== 启动 watch_omni 观察原始输出 ==="
-python3 /data/sf_code/agent_ws/install/omni_node/lib/omni_node/watch_omni.py \
+python3 $ROBOT_CORE/install/agent_ws/omni_node/lib/omni_node/watch_omni.py \
     > /tmp/chat_watch.log 2>&1 &
 PID_W=$!
 sleep 6

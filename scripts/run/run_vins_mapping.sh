@@ -1,4 +1,7 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
+source "$ROBOT_CORE/setup.sh"
 # run_vins_mapping.sh — VINS-Fusion 里程计 + rtabmap 建图（联合方案）
 #
 # 链路: realsense2_camera ─┬→ infra1/infra2 + IMU → vins_node → /odometry
@@ -65,10 +68,10 @@
 set +u
 
 LOG_DIR=/tmp/vins_mapping_logs
-MAP_DIR=${MAP_DIR:-/data/sf_code/rtabmap_maps}
+MAP_DIR=${MAP_DIR:-$ROBOT_CORE/data/rtabmap_maps}
 DB=${DB:-$MAP_DIR/rtabmap_vins.db}
-WS=/data/sf_code/rtabmap
-VINS_SRC=$WS/src/VINS-Fusion-ROS2-main
+WS="$ROBOT_CORE/localization/visual_slam"
+VINS_SRC=$WS/vins_fusion
 VINS_CONFIG=${VINS_CONFIG:-$VINS_SRC/config/realsense_d435i/d435i_stereo_imu_config.yaml}
 RVIZ_CFG=${RVIZ_CFG:-$MAP_DIR/vins_map.rviz}
 # PCL 报 libusb_set_option undefined 的老坑（同 fastlio2/point_lio）
@@ -94,20 +97,20 @@ CAM_ROOT=camera_link
 B2C_XYZ="--x 0.011739999987185 --y 0.00552000012248755 --z -0.00510000018402934"
 B2C_QUAT="--qx 0 --qy 0 --qz 0 --qw 1"
 ODOM_TF_NODE=/odom_to_tf
-ODOM_TF_PY=/data/sf_code/tools/odom_to_tf.py
+ODOM_TF_PY=$ROBOT_CORE/tools/odom_to_tf.py
 # 地面零点锚定(m): base_link 落地站立高度 = leg_height_default(0.25) + base_z_offset(0.0322)。
 # 该值由机器人运动学确定，勿再依赖 ground_anchor 的自动标定（分割↔锚定循环依赖会污染基准）。
 # ANCHOR_FILE 仅作可选手动覆盖；不存在时用运动学确定值 0.2822。
-ANCHOR_FILE=/data/sf_code/rtabmap_maps/ground_anchor.txt
+ANCHOR_FILE=$ROBOT_CORE/data/rtabmap_maps/ground_anchor.txt
 if [ -f "$ANCHOR_FILE" ]; then INITIAL_BASE_HEIGHT=$(cat "$ANCHOR_FILE"); else INITIAL_BASE_HEIGHT=0.2822; fi
 # 地面锚定/离地高度节点: 自动标定地面零点 + rviz 显示离地高度
 PROBE_NODE=/ground_anchor
-PROBE_PY=/data/sf_code/tools/ground_anchor.py
+PROBE_PY=$ROBOT_CORE/tools/ground_anchor.py
 
 need_source() {
     source /opt/ros/humble/setup.bash
     if [ -f "$WS/install/setup.bash" ]; then
-        source "$WS/install/setup.bash"
+        true
     else
         echo "[错误] $WS/install/setup.bash 不存在，请先编译工作空间!"
         exit 1
@@ -229,7 +232,7 @@ esac
 USE_RVIZ=1
 for a in "$@"; do [ "$a" = "--no-rviz" ] && USE_RVIZ=0; done
 
-mkdir -p "$LOG_DIR" "$MAP_DIR" /data/sf_code/vins_output
+mkdir -p "$LOG_DIR" "$MAP_DIR" $ROBOT_CORE/data/vins_output
 rm -f "$LOG_DIR"/*.log   # 清空旧日志，避免残留关键字干扰就绪检测
 need_source
 
@@ -430,7 +433,7 @@ fi
 #       + /path VINS 原始轨迹（两条对比可直观看出图优化修正了多少）
 if [ "$USE_RVIZ" = "1" ]; then
     # 走 VNC: 让窗口显示在设备物理桌面上，Mac 通过 VNC 观看
-    export XAUTHORITY=${XAUTHORITY:-/home/sunrise/.Xauthority}
+    export XAUTHORITY=${XAUTHORITY:-$HOME/.Xauthority}
     # 设备重启后桌面 X 显示号不固定(实测重启后跑到 :1001，不再是 :0)。
     # 从 /tmp/.X11-unix 探测真正能连上的显示号，都连不上再回退 :0。
     _disp=""

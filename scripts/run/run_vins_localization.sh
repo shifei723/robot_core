@@ -1,4 +1,7 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
+source "$ROBOT_CORE/setup.sh"
 # run_vins_localization.sh — VINS-Fusion 里程计 + rtabmap 重定位（不建图）
 #
 # 与 run_vins_mapping.sh 共用同一套链路（相机→VINS→odom_to_tf→rtabmap），
@@ -34,12 +37,12 @@
 set +u
 
 LOG_DIR=/tmp/vins_localization_logs
-MAP_DIR=${MAP_DIR:-/data/sf_code/rtabmap_maps}
+MAP_DIR=${MAP_DIR:-$ROBOT_CORE/data/rtabmap_maps}
 DB=${DB:-$MAP_DIR/rtabmap_vins.db}
 # 初始位姿提示（可选）: "x y z roll pitch yaw"。留空则纯靠全局视觉匹配。
 INITIAL_POSE=${INITIAL_POSE:-}
-WS=/data/sf_code/rtabmap
-VINS_SRC=$WS/src/VINS-Fusion-ROS2-main
+WS="$ROBOT_CORE/localization/visual_slam"
+VINS_SRC=$WS/vins_fusion
 VINS_CONFIG=${VINS_CONFIG:-$VINS_SRC/config/realsense_d435i/d435i_stereo_imu_config.yaml}
 # 定位专用 rviz: 显示 RealSense 正方向+实际位置、3D 地面/障碍物区分点云
 RVIZ_CFG=${RVIZ_CFG:-$MAP_DIR/vins_localization.rviz}
@@ -64,25 +67,25 @@ CAM_ROOT=camera_link
 B2C_XYZ="--x 0.011739999987185 --y 0.00552000012248755 --z -0.00510000018402934"
 B2C_QUAT="--qx 0 --qy 0 --qz 0 --qw 1"
 ODOM_TF_NODE=/odom_to_tf
-ODOM_TF_PY=/data/sf_code/tools/odom_to_tf.py
+ODOM_TF_PY=$ROBOT_CORE/tools/odom_to_tf.py
 # 地面零点锚定(m): base_link 落地站立高度 = leg_height_default(0.25) + base_z_offset(0.0322)。
 # 该值由机器人运动学确定，勿再依赖 ground_anchor 自动标定（分割↔锚定循环依赖会污染基准）。
 # ANCHOR_FILE 仅作可选手动覆盖；不存在时用运动学确定值 0.2822。
-ANCHOR_FILE=/data/sf_code/rtabmap_maps/ground_anchor.txt
+ANCHOR_FILE=$ROBOT_CORE/data/rtabmap_maps/ground_anchor.txt
 if [ -f "$ANCHOR_FILE" ]; then INITIAL_BASE_HEIGHT=$(cat "$ANCHOR_FILE"); else INITIAL_BASE_HEIGHT=0.2822; fi
 # 全局位姿发布: 把 map→base_link（含 rtabmap 重定位修正）采样成 odometry。
 # 该位姿全局一致但重定位瞬间会跳，与 /odometry_base（局部连续）互补。
 TF_ODOM_NODE=/tf_to_odom
-TF_ODOM_PY=/data/sf_code/tools/tf_to_odom.py
+TF_ODOM_PY=$ROBOT_CORE/tools/tf_to_odom.py
 GLOBAL_ODOM_TOPIC=/odometry_global
 # 地面锚定/离地高度节点: 定位侧只读锚定、仅显示离地高度
 PROBE_NODE=/ground_anchor
-PROBE_PY=/data/sf_code/tools/ground_anchor.py
+PROBE_PY=$ROBOT_CORE/tools/ground_anchor.py
 
 need_source() {
     source /opt/ros/humble/setup.bash
     if [ -f "$WS/install/setup.bash" ]; then
-        source "$WS/install/setup.bash"
+        true
     else
         echo "[错误] $WS/install/setup.bash 不存在，请先编译工作空间!"
         exit 1
@@ -184,7 +187,7 @@ fi
 USE_RVIZ=1
 for a in "$@"; do [ "$a" = "--no-rviz" ] && USE_RVIZ=0; done
 
-mkdir -p "$LOG_DIR" /data/sf_code/vins_output
+mkdir -p "$LOG_DIR" $ROBOT_CORE/data/vins_output
 rm -f "$LOG_DIR"/*.log
 need_source
 
@@ -380,7 +383,7 @@ fi
 
 # ── 6. 可视化 ──
 if [ "$USE_RVIZ" = "1" ]; then
-    export XAUTHORITY=${XAUTHORITY:-/home/sunrise/.Xauthority}
+    export XAUTHORITY=${XAUTHORITY:-$HOME/.Xauthority}
     # 设备重启后桌面 X 显示号不固定(实测重启后跑到 :1001，不再是 :0)。
     # 从 /tmp/.X11-unix 探测真正能连上的显示号，都连不上再回退 :0。
     _disp=""

@@ -1,4 +1,7 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
+source "$ROBOT_CORE/setup.sh"
 # ============================================================
 # Unitree L2 雷达串口模式自动配置脚本
 #
@@ -25,7 +28,7 @@
 #   PROBE_TIMEOUT 探测超时秒数 (默认 8)
 # ============================================================
 
-SDK_DIR=/data/sf_code/unilidar_sdk2/unitree_lidar_sdk
+SDK_DIR="$ROBOT_CORE/sensors/lidar/unitree_lidar/unitree_lidar_sdk"
 TOOL=$SDK_DIR/bin/set_lidar_mode
 
 LIDAR_IP=${LIDAR_IP:-192.168.1.62}
@@ -211,7 +214,7 @@ case "${1:-auto}" in
             echo ""
             echo "[成功] 雷达已旋转并输出点云，设备 = $port"
             echo ""
-            echo "可直接启动建图: /data/sf_code/run_mapping.sh l2"
+            echo "可直接启动建图: $ROBOT_CORE/scripts/run/run_mapping.sh l2"
             exit 0
         fi
         echo "      启转后无数据，需先切换工作模式"
@@ -227,7 +230,7 @@ case "${1:-auto}" in
                 echo "       需调整 serial_port 参数，或执行: $0 gen-udev 固定为 /dev/unilidar"
             fi
             echo ""
-            echo "可直接启动建图: /data/sf_code/run_mapping.sh l2"
+            echo "可直接启动建图: $ROBOT_CORE/scripts/run/run_mapping.sh l2"
             exit 0
         fi
         echo "      串口路径未成功（USB 可能未接）"
@@ -259,7 +262,7 @@ case "${1:-auto}" in
                 echo ""
                 echo "下一步:"
                 echo "  1. 建议固定设备名(避免编号漂移): $0 gen-udev"
-                echo "  2. 启动建图: /data/sf_code/run_mapping.sh l2"
+                echo "  2. 启动建图: $ROBOT_CORE/scripts/run/run_mapping.sh l2"
                 exit 0
             fi
             echo "      ...第 $i 次探测未成功"

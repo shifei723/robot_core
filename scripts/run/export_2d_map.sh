@@ -1,4 +1,6 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
 # export_2d_map.sh — 把 rtabmap 数据库离线导出为 2D 导航地图 (pgm+yaml，nav2 格式)
 #
 # 原理:
@@ -12,22 +14,22 @@
 #   DB=/path/to/xxx.db OUT=/path/to/map ./export_2d_map.sh   # 自定义路径
 #
 # 输出:
-#   $OUT.pgm + $OUT.yaml（默认 /data/sf_code/rtabmap_maps/nav2_map.{pgm,yaml}）
+#   $OUT.pgm + $OUT.yaml（默认 $ROBOT_CORE/data/rtabmap_maps/nav2_map.{pgm,yaml}）
 #   可直接被 nav2 map_server 加载:
 #     ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=<OUT>.yaml
 set +u
 
-MAP_DIR=${MAP_DIR:-/data/sf_code/rtabmap_maps}
+MAP_DIR=${MAP_DIR:-$ROBOT_CORE/data/rtabmap_maps}
 DB=${DB:-$MAP_DIR/rtabmap_d435i.db}
 OUT=${OUT:-$MAP_DIR/nav2_map}      # 输出前缀（不含扩展名）
-RTABMAP_WS=/data/sf_code/rtabmap
+RTABMAP_WS="$ROBOT_CORE/install/rtabmap"
 LOG_FILE=/tmp/export_2d_map.log
 export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libusb-1.0.so.0
 
 # 防止与正在运行的建图冲突
 if pgrep -f "[r]tabmap_slam/rtabmap" >/dev/null 2>&1; then
     echo "[错误] rtabmap 节点正在运行（可能正在建图），请先停止:"
-    echo "       /data/sf_code/run_rgbd_mapping.sh stop"
+    echo "       $ROBOT_CORE/scripts/run/run_rgbd_mapping.sh stop"
     exit 1
 fi
 
@@ -37,11 +39,11 @@ if [ ! -f "$DB" ]; then
     exit 1
 fi
 
-source /opt/ros/humble/setup.bash
+source "$ROBOT_CORE/setup.sh"
 if [ -f "$RTABMAP_WS/install/setup.bash" ]; then
-    source "$RTABMAP_WS/install/setup.bash"
+    true
 fi
-export LD_LIBRARY_PATH=$RTABMAP_WS/install/rtabmap/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$RTABMAP_WS/rtabmap/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:$LD_LIBRARY_PATH
 
 echo "============================================"
 echo " rtabmap 数据库 → 2D 导航地图"

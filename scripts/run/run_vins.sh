@@ -1,4 +1,7 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
+source "$ROBOT_CORE/setup.sh"
 # run_vins.sh — RealSense D435i + VINS-Fusion 视觉惯性里程计（双目红外+IMU）
 #
 # 链路: realsense2_camera(infra1+infra2+IMU) → vins_node → /vins_estimator/odometry
@@ -28,10 +31,10 @@
 set +u
 
 LOG_DIR=/tmp/vins_logs
-VINS_WS=/data/sf_code/rtabmap
-VINS_SRC=$VINS_WS/src/VINS-Fusion-ROS2-main
+VINS_WS="$ROBOT_CORE/localization/visual_slam"
+VINS_SRC=$VINS_WS/vins_fusion
 CFG_DIR=$VINS_SRC/config/realsense_d435i
-RVIZ_CFG=${RVIZ_CFG:-/data/sf_code/vins_output/vins_nav.rviz}
+RVIZ_CFG=${RVIZ_CFG:-$ROBOT_CORE/data/vins_output/vins_nav.rviz}
 
 # 模式: stereo(默认) | mono，决定配置文件与相机流
 VINS_MODE=stereo
@@ -53,10 +56,10 @@ fi
 
 need_source() {
     source /opt/ros/humble/setup.bash
-    if [ -f "$VINS_WS/install/setup.bash" ]; then
-        source "$VINS_WS/install/setup.bash"
+    if [ -f "$ROBOT_CORE/install/rtabmap/setup.bash" ]; then
+        source "$ROBOT_CORE/install/rtabmap/setup.bash"
     else
-        echo "[错误] $VINS_WS/install/setup.bash 不存在，请先编译工作空间!"
+        echo "[错误] $ROBOT_CORE/install/rtabmap/setup.bash 不存在，请先 ./build.sh rtabmap!"
         exit 1
     fi
 }
@@ -126,7 +129,7 @@ status)
         grep -E "excitation|features" "$LOG_DIR/vins.log" 2>/dev/null | tail -1 | sed 's/^/  /'
     fi
     echo ""
-    echo "轨迹文件: /data/sf_code/vins_output/vio.csv"
+    echo "轨迹文件: $ROBOT_CORE/data/vins_output/vio.csv"
     exit 0
     ;;
 stop)
@@ -142,7 +145,7 @@ stop)
             pkill -9 -f "[${pat:0:1}]${pat:1}" 2>/dev/null
         fi
     done
-    echo "已停止（轨迹保留在 /data/sf_code/vins_output/vio.csv）"
+    echo "已停止（轨迹保留在 $ROBOT_CORE/data/vins_output/vio.csv）"
     exit 0
     ;;
 esac
@@ -150,7 +153,7 @@ esac
 USE_RVIZ=1
 for a in "$@"; do [ "$a" = "--no-rviz" ] && USE_RVIZ=0; done
 
-mkdir -p "$LOG_DIR" /data/sf_code/vins_output
+mkdir -p "$LOG_DIR" $ROBOT_CORE/data/vins_output
 rm -f "$LOG_DIR"/*.log   # 清空旧日志，避免残留关键字干扰就绪检测
 need_source
 
@@ -263,7 +266,7 @@ fi
 if [ "$USE_RVIZ" = "1" ]; then
     # 走 VNC: 让窗口显示在设备物理桌面上，Mac 通过 VNC 观看
     export DISPLAY=:0
-    export XAUTHORITY=/home/sunrise/.Xauthority
+    export XAUTHORITY=$HOME/.Xauthority
     echo "[+] 启动 rviz2 (显示在设备桌面，请用 VNC 查看)..."
     nohup rviz2 -d "$RVIZ_CFG" > "$LOG_DIR/rviz.log" 2>&1 &
     if wait_node /rviz2 30; then

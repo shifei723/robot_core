@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """verify_json_parse.py — 用实机观测到的真实模型输出验证 JSON 解析容错"""
 import sys
+import os
 
-sys.path.insert(0, "/data/sf_code/agent_ws/src/omni_node/scripts")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tool_agent import extract_json  # noqa: E402
 
 CASES = [

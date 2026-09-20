@@ -1,0 +1,1 @@
+# ROS1(catkin)变体，ROS2 工作区忽略，避免与根 rslidar_msg 重名冲突。

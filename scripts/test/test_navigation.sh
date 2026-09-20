@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
 # test_navigation.sh — 本地验证「发布目标 → 规划路径」链路(不依赖 Foxglove/rviz)
 #
 # 做的事:
@@ -20,9 +22,9 @@
 #   ./test_navigation.sh --yes 1.0    # 跳过 5 秒倒计时确认
 set -u
 
-source /opt/ros/humble/setup.bash
-source /data/sf_code/rtabmap/install/setup.bash 2>/dev/null
-source /data/sf_code/ws_nav/install/setup.bash 2>/dev/null
+source "$ROBOT_CORE/setup.sh"
+true 2>/dev/null
+true 2>/dev/null
 
 # ── 解析参数 ──
 SKIP_CONFIRM=0

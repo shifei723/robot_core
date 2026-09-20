@@ -14,7 +14,7 @@ num_of_cam: 1
 
 imu_topic: "/camera/camera/imu"
 image0_topic: "/camera/camera/color/image_raw"
-output_path: "/data/sf_code/vins_output/"
+output_path: "/data/robot_core/data/vins_output/"   # NOTE: C++直读不支持环境变量; 若仓库换目录请同步改此前缀
 
 cam0_calib: "d435i_color.yaml"
 image_width: 640
@@ -67,5 +67,5 @@ td: 0.0                             # initial value of time offset. unit: s
 
 #loop closure parameters（单独测试里程计时不启用回环）
 load_previous_pose_graph: 0
-pose_graph_save_path: "/data/sf_code/vins_output/pose_graph/"
+pose_graph_save_path: "/data/robot_core/data/vins_output/pose_graph/"
 save_image: 0

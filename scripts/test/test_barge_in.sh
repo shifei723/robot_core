@@ -1,9 +1,11 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
 # test_barge_in.sh — 端到端唤醒打断验证（在完整链路上跑）
 # 模拟: 让机器人开始长篇回答 → 中途发唤醒打断 → 验证 TTS 队列被真正清空
 set +u
-source /opt/ros/humble/setup.bash
-source /data/sf_code/agent_ws/install/setup.bash
+source "$ROBOT_CORE/setup.sh"
+true
 export PYTHONUNBUFFERED=1
 
 echo "=== 前置检查 ==="
@@ -13,8 +15,8 @@ grep -E "Interrupt topic" /tmp/pipeline_logs/hobot_tts.log 2>/dev/null \
 
 echo ""
 echo "=== 注入杭州提问（会产生 8 句长回答）==="
-CMD_DIR=/data/sf_code/kws/sherpa-onnx-kws-cpp/commands
-cp /data/sf_code/agent_ws/src/omni_node/scripts/hangzhou.wav "$CMD_DIR/latest_command.wav"
+CMD_DIR=$ROBOT_CORE/voice/kws/sherpa-onnx-kws-cpp/commands
+cp $ROBOT_CORE/voice/agent/src/omni_node/scripts/hangzhou.wav "$CMD_DIR/latest_command.wav"
 echo 1 > "$CMD_DIR/kws_status"; sleep 0.5; echo 0 > "$CMD_DIR/kws_status"
 
 echo "=== 等 12 秒让它开始播报 ==="

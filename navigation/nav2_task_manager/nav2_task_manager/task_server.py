@@ -31,7 +31,9 @@ class ZoneTaskServer(Node):
         # 注意：RViz 的 ZonePanel 是用 __FILE__ 把 locations.yaml 写到源码目录的，
         # 所以这里必须读同一个源码路径，否则会找不到文件。
         # 可通过 ROS 参数 yaml_path 覆盖默认值。
-        default_yaml = '/data/sf_code/ros_ws/nav/rviz2_zone_plugin/locations.yaml'
+        # 基于 $ROBOT_CORE 环境变量推导默认地点文件（可移植），可通过 yaml_path 参数覆盖
+        _robot_core = os.environ.get('ROBOT_CORE', '/data/robot_core')
+        default_yaml = os.path.join(_robot_core, 'navigation', 'rviz2_zone_plugin', 'locations.yaml')
         self.declare_parameter('yaml_path', default_yaml)
         self.yaml_path = self.get_parameter('yaml_path').get_parameter_value().string_value
         

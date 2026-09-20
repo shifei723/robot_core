@@ -11,8 +11,10 @@ lidar:
 
         use_ptc_connected: true                       # Set to false when ptc connection is not used
         host_ptc_port: 0                              # PTC source port, 0 means auto
-        correction_file_path: "/data/sf_code/ros_ws/src/HesaiLidar_ROS_2.0/src/driver/HesaiLidar_SDK_2.0/correction/angle_correction/Pandar40P_Angle Correction File.csv"   # The path of correction file
-        firetimes_path: "/data/sf_code/ros_ws/src/HesaiLidar_ROS_2.0/src/driver/HesaiLidar_SDK_2.0/correction/firetime_correction/Pandar40P_Firetime Correction File.csv"           # The path of firetimes file
+        # NOTE: 下列两个路径由驱动(C++)直接读取, 不支持环境变量展开。
+        #       默认指向 /data/robot_core; 若将仓库 clone 到其他目录, 请同步修改此处前缀。
+        correction_file_path: "/data/robot_core/sensors/lidar/HesaiLidar_ROS_2.0/src/driver/HesaiLidar_SDK_2.0/correction/angle_correction/Pandar40P_Angle Correction File.csv"   # The path of correction file
+        firetimes_path: "/data/robot_core/sensors/lidar/HesaiLidar_ROS_2.0/src/driver/HesaiLidar_SDK_2.0/correction/firetime_correction/Pandar40P_Firetime Correction File.csv"           # The path of firetimes file
 
         recv_point_cloud_timeout: -1                  # The timeout of receiving point cloud
         ptc_connect_timeout: -1                       # The timeout of ptc connection

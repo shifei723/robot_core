@@ -14,7 +14,7 @@ num_of_cam: 2
 imu_topic: "/camera/camera/imu"
 image0_topic: "/camera/camera/infra1/image_rect_raw"
 image1_topic: "/camera/camera/infra2/image_rect_raw"
-output_path: "/data/sf_code/vins_output/"
+output_path: "/data/robot_core/data/vins_output/"   # NOTE: C++直读不支持环境变量; 若仓库换目录请同步改此前缀
 
 cam0_calib: "d435i_infra1.yaml"
 cam1_calib: "d435i_infra2.yaml"
@@ -85,5 +85,5 @@ td: 0.0118              # 用上次收敛值做初值，加快收敛
 
 #loop closure parameters
 load_previous_pose_graph: 0
-pose_graph_save_path: "/data/sf_code/vins_output/pose_graph/"
+pose_graph_save_path: "/data/robot_core/data/vins_output/pose_graph/"
 save_image: 0

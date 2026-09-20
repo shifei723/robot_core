@@ -1,0 +1,2 @@
+# 冗余的嵌套工作区副本：其中的 hobot_tts 与顶层 voice/tts/hobot_tts 重名，
+# 会导致 colcon “Duplicate package names” 报错。保留顶层 voice/tts/hobot_tts，忽略此副本。

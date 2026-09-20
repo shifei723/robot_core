@@ -1,4 +1,6 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
 # ============================================================
 # 建图一键启动脚本（SSH 启动 + VNC 远程可视化）
 #
@@ -17,19 +19,19 @@
 #   ./run_mapping.sh save        # 保存当前地图为 pcd
 #
 # L2 噪声控制: 平时雷达保持停转静音，本脚本启动时自动启转、停止时自动停转。
-#   手动控制: /data/sf_code/setup_l2_lidar.sh quiet  (停转)
-#             /data/sf_code/setup_l2_lidar.sh spin   (启转)
+#   手动控制: $ROBOT_CORE/scripts/run/setup_l2_lidar.sh quiet  (停转)
+#             $ROBOT_CORE/scripts/run/setup_l2_lidar.sh spin   (启转)
 #
 # 日志: /tmp/mapping_logs/*.log
 # ============================================================
 # 注意: 不能用 set -u，ROS setup.bash 内部有未定义变量引用
 
-ROS_WS=/data/sf_code/ros_ws
+ROS_WS="$ROBOT_CORE/install/ros_ws"
 LOG_DIR=/tmp/mapping_logs
 PIDFILE=$LOG_DIR/mapping.pids
 # rviz2 显示到本机 X 桌面，Mac 通过 VNC 观看
 export DISPLAY=${DISPLAY:-:0}
-export XAUTHORITY=${XAUTHORITY:-/home/sunrise/.Xauthority}
+export XAUTHORITY=${XAUTHORITY:-$HOME/.Xauthority}
 # Livox/Unitree SDK 依赖，缺失会导致雷达驱动起不来
 export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libusb-1.0.so.0
 
@@ -57,7 +59,7 @@ stop_all() {
        { [ -e /dev/unilidar ] || ls /dev/ttyACM* >/dev/null 2>&1; }; then
         sleep 2
         echo "  [停转] 让 L2 安静下来..."
-        /data/sf_code/setup_l2_lidar.sh quiet >/dev/null 2>&1 \
+        $ROBOT_CORE/scripts/run/setup_l2_lidar.sh quiet >/dev/null 2>&1 \
             && echo "  [停转] 已完成" \
             || echo "  [停转] 未成功（雷达可能未连接）"
     fi
@@ -75,7 +77,7 @@ show_status() {
     echo ""
     echo "=== 关键话题频率 (3秒采样) ==="
     source /opt/ros/humble/setup.bash 2>/dev/null
-    source "$ROS_WS/install/setup.bash" 2>/dev/null
+    true 2>/dev/null
     # 雷达原始数据 + 建图输出。注: Point-LIO 发布 /path 而非 /Odometry
     # 每个 ros2 topic hz 都是独立进程，各自要重做 DDS 发现，
     # 列表里第一个话题还要承担 CLI 首次加载开销，单次 4s 容易误报无数据，
@@ -91,7 +93,7 @@ show_status() {
 
 save_map() {
     source /opt/ros/humble/setup.bash
-    source "$ROS_WS/install/setup.bash"
+    true
     OUT=${1:-$ROS_WS/map_$(date +%m%d_%H%M).pcd}
     echo "正在保存点云地图到: $OUT"
     # 从建图输出的累积点云话题抓取一帧完整地图
@@ -118,8 +120,8 @@ stop_all no-quiet >/dev/null 2>&1
 mkdir -p "$LOG_DIR"
 : > "$PIDFILE"
 
-source /opt/ros/humble/setup.bash
-source "$ROS_WS/install/setup.bash"
+source "$ROBOT_CORE/setup.sh"
+true
 
 echo "============================================"
 echo " 启动建图: $MODE   $(date '+%F %T')"
@@ -133,7 +135,7 @@ case "$MODE" in
         # 上电后雷达可能处于 UDP 模式，先自动确保切到串口模式
         echo "[0/2] 检查 L2 工作模式..."
         # 注意用 PIPESTATUS 取配置脚本的退出码，而非管道末端 sed 的
-        /data/sf_code/setup_l2_lidar.sh auto 2>&1 | grep -vE "WARNING|^$" | sed 's/^/      /'
+        $ROBOT_CORE/scripts/run/setup_l2_lidar.sh auto 2>&1 | grep -vE "WARNING|^$" | sed 's/^/      /'
         if [ "${PIPESTATUS[0]}" -ne 0 ]; then
             echo "      [警告] L2 模式配置未成功，仍尝试启动驱动"
         fi

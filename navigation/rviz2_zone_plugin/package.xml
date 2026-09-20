@@ -16,6 +16,7 @@
   <depend>qt5</depend>
   <depend>pluginlib</depend>
   <depend>visualization_msgs</depend>
+  <depend>zone_interfaces</depend>
 
 
   

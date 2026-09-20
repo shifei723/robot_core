@@ -1,0 +1,2 @@
+# 该目录是 RealSense 原生 SDK 源码(非 ament 包)，通过其自身 CMake 单独构建，
+# 不参与 colcon 工作区编译。realsense2_camera 依赖其安装后的系统库。

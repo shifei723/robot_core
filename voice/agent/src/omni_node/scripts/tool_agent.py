@@ -36,6 +36,7 @@ Tool-Call 执行节点：把 Omni 模型输出的工具调用 JSON 拆解成任�
 
 import json
 import math
+import os
 import re
 import threading
 import time
@@ -137,7 +138,8 @@ class ToolAgentNode(Node):
         self.declare_parameter("zone_service", "/go_to_zone")
         self.declare_parameter(
             "locations_yaml",
-            "/data/sf_code/ros_ws/nav/rviz2_zone_plugin/locations.yaml")
+            os.path.join(os.environ.get("ROBOT_CORE", "/data/robot_core"),
+                         "navigation", "rviz2_zone_plugin", "locations.yaml"))
         # 动作幅度与节奏（单位：度，与 /cmd_posture 一致）
         self.declare_parameter("nod_pitch_deg", 15.0)    # 点头俯仰幅度，限幅 ±35
         self.declare_parameter("shake_roll_deg", 8.0)    # 摇头横滚幅度，限幅 ±15

@@ -1,9 +1,11 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
 # test_tts_stop.sh — 验证改造后的 hobot_tts 真正取消（而非只是静音）
 # 关键验证点：打断后再发新内容，念的必须是新内容，不能接着念旧的
 set +u
-source /opt/ros/humble/setup.bash
-source /data/sf_code/tts/hobot_ws/install/setup.bash
+source "$ROBOT_CORE/setup.sh"
+true
 export TROS_DISTRO=humble
 export GLOG_minloglevel=1
 export PYTHONUNBUFFERED=1
@@ -23,7 +25,7 @@ grep -E "Interrupt topic|Sample rate|Max seconds" /tmp/newtts.log
 
 echo ""
 echo "=== 执行打断测试 (用 Python 发布器，避免 topic pub --once 丢消息) ==="
-timeout 60 python3 /data/sf_code/agent_ws/src/omni_node/scripts/probe_tts_stop.py 2>&1
+timeout 60 python3 $ROBOT_CORE/voice/agent/src/omni_node/scripts/probe_tts_stop.py 2>&1
 
 echo ""
 echo "--- 打断日志 ---"

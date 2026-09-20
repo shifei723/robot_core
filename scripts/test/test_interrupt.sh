@@ -1,11 +1,13 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
 # test_interrupt.sh — 唤醒打断联调测试
 # 用法: bash test_interrupt.sh
 set +u
-SCRIPTS=/data/sf_code/agent_ws/src/omni_node/scripts
+SCRIPTS=$ROBOT_CORE/voice/agent/src/omni_node/scripts
 
-source /opt/ros/humble/setup.bash
-source /data/sf_code/ros_ws/install/setup.bash
+source "$ROBOT_CORE/setup.sh"
+true
 export PYTHONUNBUFFERED=1
 
 echo "=== 清理旧实例 ==="

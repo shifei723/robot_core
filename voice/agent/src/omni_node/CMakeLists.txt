@@ -11,9 +11,17 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
-# 地平线 LLM SDK 路径
-set(OELLM_SDK_LIB "/data/sf_code/agent_pipeline/D-Robotics_LLM_S100_1.0.0_SDK/oellm_runtime/lib")
-set(OELLM_SDK_INC "/data/sf_code/agent_pipeline/D-Robotics_LLM_S100_1.0.0_SDK/oellm_runtime/include")
+# 地平线 LLM SDK 路径（可移植：优先 $ROBOT_CORE 环境变量，其次相对源码目录推导，
+# 也可通过 -DOELLM_SDK_ROOT=... 覆盖）
+if(NOT DEFINED OELLM_SDK_ROOT OR OELLM_SDK_ROOT STREQUAL "")
+  if(DEFINED ENV{ROBOT_CORE})
+    set(OELLM_SDK_ROOT "$ENV{ROBOT_CORE}/voice/llm_sdk/D-Robotics_LLM_S100_1.0.0_SDK/oellm_runtime")
+  else()
+    set(OELLM_SDK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../llm_sdk/D-Robotics_LLM_S100_1.0.0_SDK/oellm_runtime")
+  endif()
+endif()
+set(OELLM_SDK_LIB "${OELLM_SDK_ROOT}/lib")
+set(OELLM_SDK_INC "${OELLM_SDK_ROOT}/include")
 
 add_executable(${PROJECT_NAME}
   src/omni_node.cpp

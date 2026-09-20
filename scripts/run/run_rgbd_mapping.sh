@@ -1,4 +1,7 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
+source "$ROBOT_CORE/setup.sh"
 # run_rgbd_mapping.sh — RealSense D435i + rtabmap RGB-D 建图
 #
 # 链路: realsense2_camera → rgbd_odometry(视觉里程计) → rtabmap(SLAM)
@@ -12,7 +15,7 @@
 #     "No HID info provided, IMU is disabled" 就是这个原因）。
 #     链路对齐官方 rtabmap_examples/realsense_d435i_color.launch.py:
 #     /camera/camera/imu → imu_filter_madgwick → /imu/data → 里程计+SLAM
-#  4. rtabmap 与 realsense2_camera 均为自编译，同在工作空间 /data/sf_code/rtabmap
+#  4. rtabmap 与 realsense2_camera 均为自编译，同在工作空间 $ROBOT_CORE
 #     （realsense-ros 4.58.3 + librealsense 2.58.3，apt 版已卸载）
 #
 # 用法:
@@ -29,9 +32,9 @@ set +u
 
 LOG_DIR=/tmp/rgbd_mapping_logs
 # 地图保存目录，可用环境变量覆盖: MAP_DIR=/xxx ./run_rgbd_mapping.sh
-MAP_DIR=${MAP_DIR:-/data/sf_code/rtabmap_maps}
+MAP_DIR=${MAP_DIR:-$ROBOT_CORE/data/rtabmap_maps}
 DB=${DB:-$MAP_DIR/rtabmap_d435i.db}
-RTABMAP_WS=/data/sf_code/rtabmap
+RTABMAP_WS="$ROBOT_CORE/install/rtabmap"
 export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libusb-1.0.so.0
 
 CAM_NS=/camera/camera
@@ -47,7 +50,7 @@ need_source() {
     source /opt/ros/humble/setup.bash
     # overlay 自编译的 rtabmap 工作空间（后 source 覆盖 apt 同名包）
     if [ -f "$RTABMAP_WS/install/setup.bash" ]; then
-        source "$RTABMAP_WS/install/setup.bash"
+        true
     else
         echo "[警告] $RTABMAP_WS/install/setup.bash 不存在，将回退到 apt 版 rtabmap!"
     fi
@@ -314,8 +317,8 @@ echo "      SLAM 已启动"
 if [ "$USE_RVIZ" = "1" ]; then
     # 走 VNC: 让窗口显示在设备物理桌面上，Mac 通过 VNC 观看
     export DISPLAY=:0
-    export XAUTHORITY=/home/sunrise/.Xauthority
-    RVIZ_CFG=${RVIZ_CFG:-/data/sf_code/rtabmap_maps/rgbd_nav.rviz}
+    export XAUTHORITY=$HOME/.Xauthority
+    RVIZ_CFG=${RVIZ_CFG:-$ROBOT_CORE/data/rtabmap_maps/rgbd_nav.rviz}
     echo "[+] 启动 rviz2 (显示在设备桌面，请用 VNC 查看)..."
     nohup rviz2 -d "$RVIZ_CFG" > "$LOG_DIR/rviz.log" 2>&1 &
     if wait_node /rviz2 30; then

@@ -2,10 +2,37 @@
 
 本目录是 `/data/sf_code` 的**源码重组版**：按功能类别整理，剥离了各自的 git 仓、构建产物（`build/ install/ log/`）、虚拟环境与大二进制（模型 `*.hbm/*.gguf`、地图 `*.db/*.ply/*.pcd`、库 `*.so/*.whl/*.tar.*`、演示媒体 `*.gif/*.mp4` 等），作为**纯代码**统一管理。
 
-> ⚠️ 说明
-> - 原 `/data/sf_code` **原样保留**，仍是当前可运行系统；本目录目前只追求**清晰的分类组织**，尚未改写硬编码路径、也未重新编译。
-> - 各包内散落的 `/data/sf_code/...` 绝对路径尚未适配到新根目录；若要在此编译运行，需统一改路径并重建各 ROS2 工作区。
+> ℹ️ 现状
+> - 原 `/data/sf_code` 仍保留；本目录在其基础上做了**可移植化改造**，可作为新机器上的编译/运行源。
+> - **绝对路径已适配**：硬编码 `/data/sf_code/...` 改为基于环境变量 `ROBOT_CORE`（clone 到任意目录即可用）；
+>   少数由 C++ 直读、不支持环境变量展开的 yaml（Hesai 校正、VINS 输出）默认指向 `/data/robot_core`，换目录时需同步改前缀。
+> - **构建/运行入口**：`build.sh`（分多工作区构建）、`setup.sh`（加载环境）、`assets/`（依赖与资产清单）。
+> - 大二进制（模型 `*.hbm/*.gguf/*.onnx`、地图 `*.db/*.ply/*.pcd`、预编译库）不进库，见 `assets/ASSETS.md`。
 > - 规模：约 620M，70 个 ROS2 源码包。
+
+## 新机器：构建与运行
+
+```bash
+# 0) 装系统依赖（详见 assets/PREREQUISITES.md）
+source /opt/ros/humble/setup.bash
+
+# 1) 构建（按 ros_ws→rtabmap→ws_nav→agent_ws→tts 分组建到 install/<组>）
+./build.sh            # 或单组: ./build.sh ros_ws
+
+# 2) 加载环境（自动定位仓库根、导出 ROBOT_CORE、source 各组 install）
+source setup.sh
+
+# 3) 运行资产体检（模型/地图/KWS 等，详见 assets/ASSETS.md）
+bash assets/verify_assets.sh
+
+# 4) 启动功能脚本（已改为基于 ROBOT_CORE，无需再改路径）
+bash scripts/run/run_mapping.sh l2
+bash scripts/run/run_pipeline.sh
+```
+
+- 每次**新开终端**都要先 `source setup.sh`（或在 `~/.bashrc` 里 source 它）。
+- `build.sh` / `setup.sh` 均按脚本自身位置推导 `ROBOT_CORE`，因此整仓可放在任意路径。
+- `scripts/run/`、`scripts/test/` 顶部已内置 `ROBOT_CORE` 自定位并 source `setup.sh`。
 
 ## 目录分类
 

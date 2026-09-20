@@ -1,0 +1,1 @@
+# rslidar_msg 的 ROS2 子变体；根目录 rslidar_msg 已是完整 ament 包，忽略此副本避免重名冲突。

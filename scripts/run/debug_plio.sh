@@ -1,8 +1,10 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
 # 单独重启 point_lio（保持雷达驱动运行），验证 lose lidar 是否为启动竞态
 set +u
-source /opt/ros/humble/setup.bash
-source /data/sf_code/ros_ws/install/setup.bash
+source "$ROBOT_CORE/setup.sh"
+true
 export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libusb-1.0.so.0
 export PYTHONUNBUFFERED=1
 

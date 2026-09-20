@@ -1,4 +1,7 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
+source "$ROBOT_CORE/setup.sh"
 # run_vins_navigation.sh — VINS+rtabmap 定位 之上叠加 SCAN-Planner 局部导航
 #
 # 关系:  run_vins_mapping.sh   → 建图(写库)
@@ -29,9 +32,9 @@
 set +u
 
 LOG_DIR=/tmp/vins_navigation_logs
-LOC=/data/sf_code/run_vins_localization.sh
-WS_NAV=/data/sf_code/ws_nav
-MAP_DIR=/data/sf_code/rtabmap_maps
+LOC="$ROBOT_CORE/scripts/run/run_vins_localization.sh"
+WS_NAV="$ROBOT_CORE/install/ws_nav"
+MAP_DIR=$ROBOT_CORE/data/rtabmap_maps
 # 导航专用 rviz(只放导航相关: 位姿/2D地图/障碍点云/规划轨迹/目标点 + 2D Goal Pose 工具)
 RVIZ_CFG=${RVIZ_CFG:-$MAP_DIR/vins_nav.rviz}
 # 规划器真机参数(可用环境变量覆盖)。默认取历史验证值。
@@ -54,7 +57,7 @@ export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libusb-1.0.so.0
 need_source() {
     source /opt/ros/humble/setup.bash
     if [ -f "$WS_NAV/install/setup.bash" ]; then
-        source "$WS_NAV/install/setup.bash"
+        true
     else
         echo "[错误] $WS_NAV/install/setup.bash 不存在，请先编译 ws_nav 工作空间!"
         echo "       cd $WS_NAV && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release"
@@ -248,7 +251,7 @@ fi
 
 # ── 3. 导航专用可视化(--no-rviz 可关; 用主机 Foxglove 时建议关掉本地 rviz) ──
 if [ "$USE_RVIZ" = "1" ]; then
-    export XAUTHORITY=${XAUTHORITY:-/home/sunrise/.Xauthority}
+    export XAUTHORITY=${XAUTHORITY:-$HOME/.Xauthority}
     # 设备重启后桌面 X 显示号不固定(实测会跑到 :1001)，从 /tmp/.X11-unix 探测能连上的
     _disp=""
     for _sock in /tmp/.X11-unix/X*; do

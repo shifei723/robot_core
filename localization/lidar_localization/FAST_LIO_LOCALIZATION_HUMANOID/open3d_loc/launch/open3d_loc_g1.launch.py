@@ -1,4 +1,5 @@
 from launch import LaunchDescription
+import os
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node, SetParameter
@@ -23,8 +24,11 @@ def generate_launch_description():
         'loc_param_g1.yaml'
     ])
 
-    # 地图文件路径 - 使用绝对路径指向源码目录中的地图文件
-    map_file = '/data/sf_code/ros_ws/src/FAST_LIO_LOCALIZATION_HUMANOID/data/map.pcd'
+    # 地图文件路径 - 基于 $ROBOT_CORE 环境变量推导（可移植），默认 /data/robot_core
+    _robot_core = os.environ.get('ROBOT_CORE', '/data/robot_core')
+    map_file = os.path.join(
+        _robot_core, 'localization', 'lidar_localization',
+        'FAST_LIO_LOCALIZATION_HUMANOID', 'data', 'map.pcd')
 
     # 静态TF发布节点 - camera_init to odom
     static_tf_camera_init2odom = Node(

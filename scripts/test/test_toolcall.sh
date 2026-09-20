@@ -1,12 +1,14 @@
 #!/bin/bash
+# --- robot_core 可移植自定位 ---
+ROBOT_CORE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../.." && pwd)"; export ROBOT_CORE
 # test_toolcall.sh — Tool-Call 链路联调测试
 # 用假导航服务 + mock 底盘（复刻 wl_base_node 的接收校验逻辑），不需真实 Nav2/硬件
 # 用法: bash test_toolcall.sh
 set +u
-SCRIPTS=/data/sf_code/agent_ws/src/omni_node/scripts
+SCRIPTS=$ROBOT_CORE/voice/agent/src/omni_node/scripts
 
-source /opt/ros/humble/setup.bash
-source /data/sf_code/ros_ws/install/setup.bash
+source "$ROBOT_CORE/setup.sh"
+true
 export PYTHONUNBUFFERED=1
 
 echo "=== 清理旧实例 ==="
