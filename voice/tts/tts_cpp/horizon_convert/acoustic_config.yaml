@@ -1,0 +1,29 @@
+# 声学模型 (Matcha-TTS) 地平线 BPU 编译配置
+# 模型: model-steps-3.onnx (72MB)
+# 功能: token IDs → mel spectrogram (80 mel bins)
+# 注意: 输入 x 为 int64 token IDs，BPU 可能需要特殊处理
+
+model_parameters:
+  onnx_model: '/workspace/output/onnx/model-steps-3.onnx'
+  march: "nash-m"
+  working_dir: '/workspace/output/acoustic_quantized_nash_m'
+  output_model_file_prefix: 'matcha_acoustic'
+
+input_parameters:
+  # 4 个输入，用分号分隔
+  input_name: "x; x_length; noise_scale; length_scale"
+  input_type_rt: "featuremap; featuremap; featuremap; featuremap"
+  input_type_train: "featuremap; featuremap; featuremap; featuremap"
+  input_layout_train: "NHWC; NHWC; NHWC; NHWC"
+  # x: (1, 50) token IDs; x_length: (1,) = 50; noise_scale: (1,) = 0.667; length_scale: (1,) = 1.0
+  input_shape: "1x50; 1; 1; 1"
+  norm_type: "no_preprocess"
+
+calibration_parameters:
+  # 每个输入的校准数据分目录存放，用分号分隔
+  cal_data_dir: "/workspace/calibration_data/acoustic_cal/x; /workspace/calibration_data/acoustic_cal/x_length; /workspace/calibration_data/acoustic_cal/noise_scale; /workspace/calibration_data/acoustic_cal/length_scale"
+  calibration_type: "default"
+
+compiler_parameters:
+  optimize_level: "O2"
+  jobs: 2

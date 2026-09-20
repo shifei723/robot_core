@@ -1,0 +1,10 @@
+{
+    "hbm_path": "../../model/DeepSeek_R1_Distill_Qwen_1.5B_4096.hbm",
+    "tokenizer_dir": "../../config/DeepSeek_R1_Distill_Qwen_1.5B_config/",
+    "model_type": 1,
+    "ppl_testcase": "test-00000-of-00001.bin",
+    "load_ckpt": false,
+    "text_data_num": 0,
+    "max_length": 256,
+    "stride": 100
+}

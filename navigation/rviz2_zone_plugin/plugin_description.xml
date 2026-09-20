@@ -1,0 +1,17 @@
+<library path="rviz2_zone_plugin">
+  <class name="rviz2_zone_plugin/ZonePanel"
+         type="rviz2_zone_plugin::ZonePanel"
+         base_class_type="rviz_common::Panel">
+    <description>
+      RViz2 panel to record map zones and export to YAML
+    </description>
+  </class>
+
+  <class name="rviz2_zone_plugin/NavPanel"
+         type="rviz2_zone_plugin::NavPanel"
+         base_class_type="rviz_common::Panel">
+    <description>
+      导航任务面板：通过中文名称匹配发送导航指令。
+    </description>
+  </class>
+</library>

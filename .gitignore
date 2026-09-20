@@ -1,0 +1,98 @@
+# ============================================================
+# robot_core .gitignore  —— 纯代码版本
+# 目标：只跟踪源码与必要配置，排除构建产物 / 运行输出 / 大二进制。
+# 注意：不使用裸 output/、data/ 规则，避免误伤源码目录
+#       (如 nlohmann/detail/output 等第三方头文件)。
+# ============================================================
+
+# ---------- ROS2 / colcon 构建产物 ----------
+build/
+install/
+log/
+devel/
+.catkin_tools/
+logs/
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+
+# ---------- C/C++ 构建中间产物 ----------
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.dylib
+*.out
+*.lib
+*.exe
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+compile_commands.json
+
+# ---------- SLAM / LIO 运行输出 ----------
+Log/
+PCD/
+*.pcd
+*.ply
+*.pcap
+*.bag
+*.db3
+FAST-Calib-ROS2/output/
+FAST-Calib-ROS2/calib_data/
+
+# ---------- 地图 / 模型 / 大二进制 ----------
+*.db
+*.hbm
+*.gguf
+*.onnx
+*.safetensors
+*.pt
+*.pth
+*.engine
+*.tflite
+*.bin
+*.pb
+
+# ---------- 压缩包 / 分发件 ----------
+*.zip
+*.tar
+*.tar.*
+*.tgz
+*.whl
+*.deb
+*.7z
+
+# ---------- 音视频 / 演示媒体 ----------
+*.mp4
+*.mov
+*.avi
+*.webm
+*.gif
+*.wav
+*.mp3
+
+# ---------- 文档大文件 ----------
+*.pdf
+
+# ---------- IDE / 编辑器 / 系统 ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ---------- 其他运行时 ----------
+*.log
+core

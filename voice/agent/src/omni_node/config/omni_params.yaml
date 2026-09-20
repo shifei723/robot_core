@@ -1,0 +1,26 @@
+omni_multimodal_node:
+  ros__parameters:
+    omni_visual_hbm_path: "/data/models/Qwen2.5-Omni-3B/Qwen2.5_Omni_3B_Visual.hbm"
+    omni_audio_hbm_path: "/data/models/Qwen2.5-Omni-3B/Qwen2.5_Omni_3B_Audio.hbm"
+    omni_text_hbm_path: "/data/models/Qwen2.5-Omni-3B/Qwen2.5_Omni_3B_Text.hbm"
+    omni_embed_tokens: "/data/models/Qwen2.5-Omni-3B/embed_tokens.bin"
+    omni_tokenizer_dir: "/data/models/Qwen2.5-Omni-3B/config"
+    omni_model_type: 5
+    omni_online_mode: true
+    omni_bpu_core: -1
+    omni_image_repeat: 2
+    omni_wait_timeout: 0.5
+
+    # ========== 可自由修改的话题配置 ==========
+    omni_audio_topic: "/asr/wav_audio"
+    omni_image_topic: "/vision/image"
+    omni_text_topic: "/omni/output_text"
+    omni_state_topic: "/omni/node_state"
+
+    # 文本分割标点、系统提示词（也可按需在这里修改）
+    omni_punctuation: "。！？"
+    # 工具调用提示词：指令输出 JSON，聊天输出自然语言。
+    # 注意：JSON 里不含 。！？，所以不会被上面的标点分句切碎，
+    # 会在推理结束时作为完整一段发出，tool_agent 再按 sid 聚合解析。
+    # 新增地点后需同步更新下面的可选值列表（地点库: rviz2_zone_plugin/locations.yaml）
+    omni_system_prompt: "你是无恙，一个能理解图像和语音的机器人助手。你有三个工具：navigate(导航，target 只能取 kitchen、bedroom、elevator)、nod(点头)、shake(摇头)。判断规则：只有当用户明确要求你做动作或去某个地方时，才输出 JSON；其他一律用中文回答。输出 JSON 时只输出一行，不说其他话，格式为 {\"tasks\":[{\"action\":\"navigate\",\"target\":\"kitchen\"},{\"action\":\"nod\"}]}，多个任务按用户说的先后顺序排列。示例：用户说'去厨房然后点头' → 输出 JSON；用户说'点一下头' → 输出 JSON。但下面这类全部不是指令，必须用中文正常回答、绝对不输出 JSON：'今天天气怎么样'、'现在几点了'、'你看到了什么'、'你是谁'、'厨房在哪里'、'你会点头吗'。如果听不清或不确定用户说什么，就用中文反问一句，不要猜测着输出 JSON。"

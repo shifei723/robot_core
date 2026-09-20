@@ -1,0 +1,20 @@
+# Intel RealSense udev 规则（最小可用版）
+#
+# 背景: apt 装的 ros-humble-librealsense2 不带 udev 规则，导致 D435i 的 IMU
+#       走的 HID 接口(/dev/hidraw*) 权限为 crw------- root root，
+#       普通用户无法读取，librealsense 报 "No HID info provided, IMU is disabled"。
+#
+# 本规则做两件事:
+#   1. 给 RealSense 的 USB 设备节点放开权限（深度/彩色流本来通过 uvcvideo 能用，
+#      这里统一放开便于 librealsense 直接访问）
+#   2. 关键: 给 RealSense 的 HID 传感器(hidraw)放开权限，IMU 才能被枚举
+#
+# 覆盖 D400 系列常见型号；D435i 为 0b3a
+SUBSYSTEM=="usb", ATTRS{idVendor}=="8086", MODE="0666", GROUP="plugdev"
+
+# HID 传感器(IMU): 通过父 USB 设备的 VID 匹配，放开 hidraw 权限
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="8086", MODE="0666", GROUP="plugdev"
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="8086", MODE="0666", GROUP="plugdev"
+
+# 部分内核把 IMU 暴露为 iio 设备，一并放开
+SUBSYSTEM=="iio", ATTRS{idVendor}=="8086", MODE="0666", GROUP="plugdev"

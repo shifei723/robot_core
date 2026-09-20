@@ -1,0 +1,40 @@
+md5
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/md5sum.txt
+
+DeepSeek-R1-Distill-Qwen-1.5B
+context size 1024 q8量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/DeepSeek_R1_Distill_Qwen_1.5B_1024.hbm
+context size 1024 q4量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/DeepSeek_R1_Distill_Qwen_1.5B_1024_q4.hbm
+context size 4096 q8量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/DeepSeek_R1_Distill_Qwen_1.5B_4096.hbm
+context size 4096 q4量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/DeepSeek_R1_Distill_Qwen_1.5B_4096_q4.hbm
+
+DeepSeek-R1-Distill-Qwen-7B
+context size 1024 q8量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/DeepSeek_R1_Distill_Qwen_7B_1024.hbm
+
+Qwen-2.5-1.5B
+context size 1024 q8量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/Qwen2.5_1.5B_1024.hbm
+Qwen-2.5-7B
+context size 1024 q8量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/Qwen2.5_7B_1024.hbm
+Qwen-2.5-1.5B-Instruct
+context size 1024 q8量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/Qwen2.5_1.5B_Instruct_1024.hbm
+Qwen-2.5-7B-Instruct
+context size 1024 q8量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/Qwen2.5_7B_Instruct_1024.hbm
+
+InternLM2-1.8B
+context size 1024 q8量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/InternLM2_1.8B_1024.hbm
+
+Qwen2.5-Omni-3B
+context size 2048 q8量化
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/Qwen2.5_Omni_3B_Audio.hbm
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/Qwen2.5_Omni_3B_Visual.hbm
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/Qwen2.5_Omni_3B_Text.hbm
+wget https://d-robotics-aitoolchain.oss-cn-beijing.aliyuncs.com/llm_s100/1.0.0/models/embed_tokens.bin

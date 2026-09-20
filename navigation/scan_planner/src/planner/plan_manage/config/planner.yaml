@@ -1,0 +1,106 @@
+scan_planner_node:
+  ros__parameters:
+    use_sim_time: false
+
+    fsm.navi_mode: 1
+    fsm.thresh_replan: 1.0
+    fsm.thresh_no_replan: 0.1
+    fsm.planning_horizon: 7.5
+    fsm.emergency_time: 1.0
+    fsm.fail_safe: true
+    fsm.max_replan_fail_count: 1000
+
+    grid_map.resolution: 0.05
+    grid_map.sliding_map_size_x: 10.0
+    grid_map.sliding_map_size_y: 10.0
+    grid_map.sliding_map_size_z: 5.0
+    grid_map.local_update_range_x: 5.0
+    grid_map.local_update_range_y: 5.0
+    grid_map.local_update_range_z: 2.5
+    grid_map.map_sliding_en: true
+    grid_map.map_sliding_thresh: 0.2
+    grid_map.double_cylinder_radius: 0.25
+    grid_map.double_cylinder_offset: 0.18
+    grid_map.body_height: 0.4
+    grid_map.obstacles_inflation_z_up: 0.1
+    grid_map.obstacles_inflation_z_down: 0.4
+    grid_map.frame_id: world
+    grid_map.sliding_map_frame_id: sliding_map
+    grid_map.ground_height: 0.0
+    grid_map.sensor_type: lidar
+    grid_map.cloud_is_world: true
+    grid_map.need_extrinsic: false
+
+    # 传感器安装外参 (base_link -> sensor), xyz 单位米, rpy 单位度。
+    # depth 的 rpy 叠加在"光学系 -> 机体系"之上, 全零即水平前视;
+    # 现场校验时对着 grid_map/depth_cloud 调: 地面不平调 pitch/roll, 整体偏移调 xyz。
+    grid_map.depth_extrinsic_xyz: [-0.1517, 0.0, 0.0751]
+    grid_map.depth_extrinsic_rpy: [0.0, 0.0, 0.0]
+    grid_map.lidar_extrinsic_xyz: [-0.011, -0.02329, 0.04412]
+    grid_map.lidar_extrinsic_rpy: [0.0, 0.0, 0.0]
+
+    grid_map.cx: 321.04638671875
+    grid_map.cy: 243.44969177246094
+    grid_map.fx: 387.229248046875
+    grid_map.fy: 387.229248046875
+    grid_map.depth_filter_maxdist: 3.0
+    grid_map.depth_filter_mindist: 0.3
+    grid_map.depth_filter_margin: 1
+    grid_map.k_depth_scaling_factor: 1000.0
+    grid_map.skip_pixel: 2
+
+    grid_map.p_hit: 0.85
+    grid_map.p_miss: 0.30
+    grid_map.p_min: 0.12
+    grid_map.p_max: 0.98
+    grid_map.p_occ: 0.80
+    grid_map.max_ray_length: 5.0
+    # 遮挡阴影区衰减: 本帧观测不到的占位 cell 每帧递减的 log-odds
+    # 用于消除动态障碍物掠过后遗留的占位拖影。0 为关闭
+    # 0.85 -> 未观测约 3 帧清除；被射线穿过的旧占位约 2 帧清除
+    grid_map.decay_log: 0.85
+    # 点云可视化高度上限 (相对传感器): 需大于机器人顶部+头顶障碍物高度,
+    # 否则桌面/门梁等低矮天花板会被滤掉, RViz 里看不到
+    grid_map.vis_height: 1.2
+    grid_map.show_occ_time: false
+
+    # 高度自适应 (HAVEN): z = base_link 世界高度 = 腿高 + 0.0322
+    # body_top_offset: base_link -> 机器人顶部(雷达顶) = 0.328
+    grid_map.height_min: 0.17
+    grid_map.height_max: 0.40
+    grid_map.ceiling_margin: 0.03
+    grid_map.body_top_offset: 0.328
+    # 真机默认保守：天花板下方未知时不允许下蹲穿越；仿真由 launch 单独开启。
+    grid_map.allow_unverified_ceiling_clearance: false
+
+    # 世界边界: 边界外一律视为占据 (由 run.launch.py 按 map_size 覆盖)
+    grid_map.world_bound_enable: true
+    grid_map.world_size_x: 20.0
+    grid_map.world_size_y: 20.0
+
+    manager.max_vel: 0.75
+    manager.max_acc: 0.5
+    manager.max_jerk: 4.0
+    manager.control_points_distance: 0.2
+    manager.feasibility_tolerance: 0.5
+    manager.planning_horizon: 7.5
+
+    optimization.lambda_smooth: 1.0
+    optimization.lambda_collision: 1.0
+    optimization.lambda_feasibility: 0.1
+    optimization.lambda_fitness: 1.0
+    optimization.dist0: 0.2
+    optimization.max_vel: 0.75
+    optimization.max_acc: 0.5
+    optimization.order: 3
+
+    # 高度自适应代价 (HAVEN): 轨迹 z = base_link 世界高度
+    # 机器人顶部 = z + body_top_offset; 腿高 = z - 0.0322
+    optimization.height_min: 0.17
+    optimization.height_max: 0.40
+    optimization.height_nominal: 0.28
+    optimization.ceiling_margin: 0.03
+    optimization.body_top_offset: 0.328
+    optimization.lambda_ceiling: 100.0
+    optimization.lambda_height_reg: 0.5
+    optimization.lambda_height_lim: 200.0

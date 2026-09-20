@@ -1,0 +1,19 @@
+%YAML:1.0
+---
+# D435i 左红外相机(Infrared 1)内参，由本机 rs-enumerate-devices 读取的出厂标定
+# infra 流是硬件已矫正的(Coeffs 全 0)，直接按 PINHOLE 无畸变使用
+# 分辨率必须与 depth_module.infra_profile 一致(640x360@30)
+model_type: PINHOLE
+camera_name: infra1
+image_width: 640
+image_height: 360
+distortion_parameters:
+   k1: 0.0
+   k2: 0.0
+   p1: 0.0
+   p2: 0.0
+projection_parameters:
+   fx: 320.96728515625
+   fy: 320.96728515625
+   cx: 320.244934082031
+   cy: 175.675048828125

@@ -1,0 +1,23 @@
+
+
+colcon build --symlink-install --packages-select fast_calib
+
+
+
+#监听话题名称，录制为ros2bag文件
+ros2 bag record /livox/lidar  /left_camera/image -o /home/sunrise/Code/Localization_project/src/FAST-Calib-ROS2/calib_data/test1
+
+
+#从ros2 bag中提取图像，用作外参标定
+python3 /home/sunrise/Code/Localization_project/src/FAST-Calib-ROS2/scripts/get_png.py \
+    /home/sunrise/Code/Localization_project/src/FAST-Calib-ROS2/calib_data/test1/test1_0.db3 \
+    /left_camera/image \
+    /home/sunrise/Code/Localization_project/src/FAST-Calib-ROS2/calib_data/test1 \
+    --skip 15
+
+#修改config文件夹中的 qr_params.yaml
+
+
+#启动标定
+export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libusb-1.0.so.0
+ros2 launch fast_calib calib.launch.py

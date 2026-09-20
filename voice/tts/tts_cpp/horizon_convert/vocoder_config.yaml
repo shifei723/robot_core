@@ -1,0 +1,27 @@
+# 声码器 (Vocos) 地平线 BPU 编译配置
+# 模型: vocos-22khz-univ.onnx (51MB)
+# 功能: mel spectrogram (80 bins) → ISTFT 分量 (mag, cos, sin)
+# 注意: 输出为 3 个张量，需要在 CPU 上做 ISTFT 重建波形
+
+model_parameters:
+  onnx_model: '/workspace/output/onnx/vocos-22khz-univ.onnx'
+  march: "nash-m"
+  working_dir: '/workspace/output/vocoder_quantized_nash_m'
+  output_model_file_prefix: 'vocos_vocoder'
+
+input_parameters:
+  input_name: "mels"
+  input_type_rt: "featuremap"
+  input_type_train: "featuremap"
+  input_layout_train: "NHWC"
+  # (1, 80, 500): 80 mel bins, 500 帧 ≈ 500 * 256/22050 ≈ 5.8s 音频
+  # 与 max_len=50 的声学模型输出匹配 (mel 帧范围 416~491, pad 到 500)
+  input_shape: "1x80x500"
+  norm_type: "no_preprocess"
+
+calibration_parameters:
+  cal_data_dir: "/workspace/calibration_data/vocoder_cal"
+  calibration_type: "default"
+
+compiler_parameters:
+  optimize_level: "O2"

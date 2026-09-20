@@ -1,0 +1,18 @@
+%YAML:1.0
+---
+# D435i Color 相机内参（由本机 rs-enumerate-devices 读取的出厂标定）
+# 分辨率必须与实际运行的 640x360@30 一致
+model_type: PINHOLE
+camera_name: camera
+image_width: 640
+image_height: 360
+distortion_parameters:
+   k1: 0.0
+   k2: 0.0
+   p1: 0.0
+   p2: 0.0
+projection_parameters:
+   fx: 455.744598388672
+   fy: 455.591918945312
+   cx: 320.937377929688
+   cy: 190.828170776367

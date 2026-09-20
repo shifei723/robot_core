@@ -1,0 +1,71 @@
+%YAML:1.0
+
+# ============================================================
+# D435i 单目彩色 + IMU 配置（本机定制）
+# 话题来自 realsense2_camera (namespace: /camera/camera)
+# 内参: d435i_color.yaml（本机出厂标定，640x360@30）
+# 外参: rs-enumerate-devices 读出的 Depth↔Color、Depth↔Gyro 换算
+# ============================================================
+
+#common parameters
+#support: 1 imu 1 cam; 1 imu 2 cam: 2 cam;
+imu: 1
+num_of_cam: 1
+
+imu_topic: "/camera/camera/imu"
+image0_topic: "/camera/camera/color/image_raw"
+output_path: "/data/sf_code/vins_output/"
+
+cam0_calib: "d435i_color.yaml"
+image_width: 640
+image_height: 360
+
+# GPU acceleration (本机 ARM 无 GPU 加速)
+use_gpu         : 0
+use_gpu_acc_flow: 0
+use_gpu_ceres   : 0
+
+# Extrinsic parameter between IMU and Camera.
+estimate_extrinsic: 1   # 1 给初值并在线优化（推荐，可吸收外参换算误差）
+
+body_T_cam0: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [ 9.999710e-01, -6.707250e-03, -3.542320e-03, -2.036200e-02,
+           6.704300e-03, 9.999770e-01, -8.437510e-04, 4.950462e-03,
+           3.547890e-03, 8.199780e-04, 9.999930e-01, 1.137393e-02,
+           0., 0., 0., 1. ]
+
+#Multiple thread support
+multiple_thread: 1
+
+#feature traker paprameters
+max_cnt: 150            # max feature number in feature tracking
+min_dist: 30            # min distance between two features
+freq: 10                # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image
+F_threshold: 1.0        # ransac threshold (pixel)
+show_track: 1           # publish tracking image as topic
+flow_back: 1            # perform forward and backward optical flow to improve feature tracking accuracy
+
+#optimization parameters
+max_solver_time: 0.04  # max solver itration time (ms), to guarantee real time
+max_num_iterations: 8   # max solver itrations, to guarantee real time
+keyframe_parallax: 10.0 # keyframe selection threshold (pixel)
+
+#imu parameters       The more accurate parameters you provide, the better performance
+# D435i (BMI085) 无出厂噪声标定，用经验值；初始化后影响不大
+acc_n: 0.1          # accelerometer measurement noise standard deviation.
+gyr_n: 0.01         # gyroscope measurement noise standard deviation.
+acc_w: 0.001        # accelerometer bias random work noise standard deviation.
+gyr_w: 0.0001       # gyroscope bias random work noise standard deviation.
+g_norm: 9.805       # gravity magnitude
+
+#unsynchronization parameters
+estimate_td: 1                      # online estimate time offset between camera and imu
+td: 0.0                             # initial value of time offset. unit: s
+
+#loop closure parameters（单独测试里程计时不启用回环）
+load_previous_pose_graph: 0
+pose_graph_save_path: "/data/sf_code/vins_output/pose_graph/"
+save_image: 0

@@ -1,0 +1,37 @@
+imu_topic: /imu/data_raw
+lidar_topic: /livox/lidar
+body_frame: body
+world_frame: lidar
+print_time_cost: false
+
+lidar_filter_num: 2
+lidar_min_range: 0.5
+lidar_max_range: 30.0
+scan_resolution: 0.15
+map_resolution: 0.02
+
+cube_len: 300
+det_range: 60
+move_thresh: 1.5
+
+na: 0.01
+ng: 0.01
+nba: 0.0001
+nbg: 0.0001
+
+imu_init_num: 20
+near_search_num: 5
+ieskf_max_iter: 5
+
+gravity_align: true
+esti_il: false
+
+# r_il: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+# t_il: [-0.011, -0.02329, 0.04412]
+
+# r_il: [0.998819, -0.020981, 0.043763,0.021820, 0.999625, 0.017448,-0.043365, -0.018365, 0.998876]
+r_il: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+t_il: [-0.061343, 0.022618, 0.038319]
+
+
+lidar_cov_inv: 1000.0

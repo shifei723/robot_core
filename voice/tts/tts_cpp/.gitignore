@@ -1,0 +1,4 @@
+build/
+sherpa-onnx-sdk/
+*.wav
+*.tar.bz2

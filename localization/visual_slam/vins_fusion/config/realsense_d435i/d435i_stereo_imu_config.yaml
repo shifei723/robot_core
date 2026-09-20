@@ -1,0 +1,89 @@
+%YAML:1.0
+
+# ============================================================
+# D435i 双目红外 + IMU (VINS-Fusion stereo-VIO)
+# 本机专用：内参/外参均来自 rs-enumerate-devices 出厂标定
+# 相比单目版(d435i_mono_imu_config.yaml)的优势：
+#   - 尺度由 50mm 硬件基线直接给出，初始化不需要强平移激励
+#   - 红外为全局快门(color 是卷帘快门)，快速运动不产生行错位
+# ============================================================
+
+imu: 1
+num_of_cam: 2
+
+imu_topic: "/camera/camera/imu"
+image0_topic: "/camera/camera/infra1/image_rect_raw"
+image1_topic: "/camera/camera/infra2/image_rect_raw"
+output_path: "/data/sf_code/vins_output/"
+
+cam0_calib: "d435i_infra1.yaml"
+cam1_calib: "d435i_infra2.yaml"
+image_width: 640
+image_height: 360
+
+# GPU acceleration (S100 无 CUDA)
+use_gpu         : 0
+use_gpu_acc_flow: 0
+use_gpu_ceres   : 0
+
+# ── 外参: IMU(body) <- camera ──
+# 出厂标定 Depth->Infrared1 = 单位阵零平移(IR1 系即 Depth 系)
+#          Depth->Infrared2 = 单位阵, t=(-0.0499851, 0, 0)  → 基线 50mm
+#          Depth->Gyro      = 单位阵, t=(-0.00552, 0.00510, 0.01174)
+# body_T_cam0 = t_dg
+# body_T_cam1 = t_dg - t_d_ir2 = (0.0444651, 0.00510, 0.01174)
+#
+# estimate_extrinsic: 0 → 信任上面的出厂值，不在线优化。
+#   单目那次用 1，外参被优化跑偏到 3.78°/55mm(见 extrinsic_parameter.csv)，
+#   反过来污染位姿。双目虽然约束更强，但出厂外参已足够准，锁死更稳。
+estimate_extrinsic: 0
+
+body_T_cam0: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [ 1., 0., 0., -0.00552000012248755,
+           0., 1., 0.,  0.00510000018402934,
+           0., 0., 1.,  0.01173999998718500,
+           0., 0., 0.,  1. ]
+
+body_T_cam1: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [ 1., 0., 0.,  0.04446512935870405,
+           0., 1., 0.,  0.00510000018402934,
+           0., 0., 1.,  0.01173999998718500,
+           0., 0., 0.,  1. ]
+
+#Multiple thread support
+multiple_thread: 1
+
+#feature traker paprameters
+max_cnt: 120            # max feature number in feature tracking (ARM 上降至 120 减轻跟踪+优化开销，缓解优化队列积压)
+min_dist: 20            # min distance between two features (640x360 下 30 太稀，改 20)
+freq: 10                # frequence (Hz) of publish tracking result
+F_threshold: 1.0        # ransac threshold (pixel)
+show_track: 0           # 不发跟踪图像(/image_track): 纯可视化开销, 关闭对 VIO 精度零影响, 省 CPU
+flow_back: 1            # forward-backward optical flow, 提升跟踪精度
+
+#optimization parameters
+max_solver_time: 0.06   # 双目开销约为单目两倍，ARM 上放宽(单目实测 median 12.7ms / max 46ms)
+max_num_iterations: 8
+keyframe_parallax: 10.0
+
+# ── IMU 噪声 (BMI055) ──
+acc_n: 0.1
+gyr_n: 0.01
+acc_w: 0.001
+gyr_w: 0.0001
+g_norm: 9.805
+
+#unsynchronization parameters
+estimate_td: 1          # 单目实测收敛到 11.8ms，确实存在时延，必须在线估计
+td: 0.0118              # 用上次收敛值做初值，加快收敛
+
+#loop closure parameters
+load_previous_pose_graph: 0
+pose_graph_save_path: "/data/sf_code/vins_output/pose_graph/"
+save_image: 0

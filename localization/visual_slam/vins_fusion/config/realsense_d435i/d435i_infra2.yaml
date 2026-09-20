@@ -1,0 +1,18 @@
+%YAML:1.0
+---
+# D435i 右红外相机(Infrared 2)内参，由本机 rs-enumerate-devices 读取的出厂标定
+# 出厂标定中 Infrared 2 与 Infrared 1 内参完全相同(左右已共面矫正)
+model_type: PINHOLE
+camera_name: infra2
+image_width: 640
+image_height: 360
+distortion_parameters:
+   k1: 0.0
+   k2: 0.0
+   p1: 0.0
+   p2: 0.0
+projection_parameters:
+   fx: 320.96728515625
+   fy: 320.96728515625
+   cx: 320.244934082031
+   cy: 175.675048828125

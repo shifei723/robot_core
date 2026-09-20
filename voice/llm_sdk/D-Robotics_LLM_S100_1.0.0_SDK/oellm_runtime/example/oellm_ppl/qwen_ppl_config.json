@@ -1,0 +1,10 @@
+{
+    "hbm_path": "../../model/Qwen2.5_1.5B_1024.hbm",
+    "tokenizer_dir": "../../config/Qwen2.5_1.5B_config/",
+    "model_type": 7,
+    "ppl_testcase": "test-00000-of-00001.bin",
+    "load_ckpt": false,
+    "text_data_num": 0,
+    "max_length": 256,
+    "stride": 100
+}

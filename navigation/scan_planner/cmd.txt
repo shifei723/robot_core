@@ -1,0 +1,62 @@
+# SLASH 室内仿真启动命令
+
+# 1) 编译（首次或改动源码后）
+cd ~/Project/Local_Planner
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+# 2) 终端 A：启动 slash 室内仿真 + 规划器
+#    室内场景由 simulator.yaml 的 mockamap type=5 提供（20x20 房间，墙高 2.5m）
+source ~/Project/Local_Planner/install/setup.bash
+ros2 launch scan_planner run.launch.py \
+  robot_model:=slash \
+  is_real_world:=false \
+  navi_mode:=1 \
+  sensor_type:=lidar \
+  controller_mode:=closed_loop \
+  use_gpu:=false \
+  map_size_x:=20.0 map_size_y:=20.0 map_size_z:=3.0 \
+  init_x:=-8.0 init_y:=-8.0 init_z:=0.28
+
+# 3) 终端 B：启动 RViz2（slash 专用配置 slash.rviz）
+source ~/Project/Local_Planner/install/setup.bash
+ros2 launch scan_planner rviz.launch.py robot_model:=slash
+
+# 4) 在 RViz2 中用 "2D Goal Pose" 工具点选目标点即可开始导航（navi_mode:=1）
+
+
+# ---------------- 低矮横梁 (下蹲钻过) 场景 ----------------
+# 室内场景默认已在隔墙门洞上方生成低矮横梁: 净空 0.62m (规划器量化后 0.60m)
+# -> 需 base_z <= 0.242m (腿高 0.21m), 标称 0.28m 过不去, 必须下蹲
+# 起点 (-8,-8) 在南半区, 目标点选在北半区 (y>0) 即可触发穿越
+ros2 launch scan_planner run.launch.py robot_model:=slash
+
+# 调整横梁净空 (启动日志会打印所需 base_z, 过高/过低会 WARN)
+#   >= 0.638 -> 无需下蹲;  0.55~0.60 -> 必须下蹲;  < 0.528 -> 完全过不去
+ros2 launch scan_planner run.launch.py robot_model:=slash \
+  beam_clearance:=0.58
+# 或直接改 src/planner/plan_manage/config/simulator.yaml 的 indoor.beam_* 参数
+# 关掉横梁回到普通门洞: indoor.beam_enable: false
+
+# ---------------- 可选变体 ----------------
+
+# 深度相机代替激光雷达
+ros2 launch scan_planner run.launch.py robot_model:=slash sensor_type:=depth
+
+# 预设路径点导航（navi_mode=2 必须提供 keypoints 参数文件）
+ros2 launch scan_planner run.launch.py robot_model:=slash navi_mode:=2 \
+  keypoints_file:=$(ros2 pkg prefix --share scan_planner)/config/keypoints.example.yaml
+
+# 开环控制器（不启动 slash_kinematic_sim）
+ros2 launch scan_planner run.launch.py robot_model:=slash controller_mode:=open_loop
+
+# 使用已有 PCD 点云地图代替 mockamap 室内场景
+ros2 launch scan_planner run.launch.py robot_model:=slash \
+  use_pcd_map:=true pcd_map_file:=/absolute/path/to/map.pcd
+
+# GPU (OpenGL) 感知后端：需先用 -DUSE_GPU=ON 重新编译
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DUSE_GPU=ON
+ros2 launch scan_planner run.launch.py robot_model:=slash use_gpu:=true
+
+# 腿高调节 GUI（slash 蹲伏/抬升，需 run.launch.py 已在运行）
+ros2 run scan_planner leg_height_gui.py

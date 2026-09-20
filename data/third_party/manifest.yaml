@@ -1,0 +1,133 @@
+# ══════════════════════════════════════════════════════════════════
+#  第三方依赖清单 (manifest)
+#
+#  本仓只存"我们写的代码 + 配置 + 补丁"。以下第三方源码/二进制
+#  均不进仓（见 .gitignore），新环境按本文件重建。
+#
+#  重建步骤:
+#    1. 对每个有 repo 的条目: git clone <repo> <path> && git checkout <pin>
+#    2. 若有 patch: git apply <patch>
+#    3. 二进制资产见 deploy/models.manifest.yaml
+#
+#  注意: pin 是当前设备上实测可用的 commit，不要随意升级到最新版。
+#  这些版本组合是花了很多天才调通的（尤其 rtabmap 自编译 + libusb 规避）。
+# ══════════════════════════════════════════════════════════════════
+
+# ── SLAM / 视觉里程计 ──────────────────────────────────────────────
+rtabmap:
+  path: rtabmap/src/rtabmap
+  repo: https://github.com/introlab/rtabmap.git
+  pin: bcdb4b454683
+  local_changes: none          # 实测仅文件权限位差异，无代码改动
+  build_note: |
+    ARM(aarch64) 平台需自编译。运行时若报 libusb_set_option undefined 符号错误，
+    需 LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libusb-1.0.so.0 并设置
+    LD_LIBRARY_PATH 指向本仓 install 目录（详见 scripts/ 内各启动脚本头部注释）。
+
+rtabmap_ros:
+  path: rtabmap/src/rtabmap_ros
+  repo: https://github.com/introlab/rtabmap_ros.git
+  pin: c25a091c2a68
+  local_changes: none
+  note: 设备上 remote 走的是 ghproxy.net 代理，直连不通时沿用该前缀。
+
+VINS-Fusion-ROS2:
+  path: rtabmap/src/VINS-Fusion-ROS2-main
+  repo: TODO                      # ⚠ 见下方 local_changes 说明
+  pin: TODO
+  distribution: zip               # 当前为 zip 解包，目录内无 .git
+  local_changes: |
+    有实质性代码改动 —— 这是本仓唯一的第三方 patch，内容分两部分:
+
+    (1) Ceres 2.0 API 适配（原版仅兼容 Ceres 1.x，在本机环境下编不过）:
+        vins/src/estimator/estimator.cpp
+        vins/src/factor/pose_local_parameterization.{h,cpp}
+        vins/src/initial/initial_sfm.cpp
+        vins/src/utility/{utility,visualization}.{h,cpp}
+        vins/src/utility/tic_toc.h
+        camera_models/include/camodocal/gpl/EigenQuaternionParameterization.h
+        camera_models/include/camodocal/camera_models/CataCamera.h
+
+    (2) 为 RealSense D435i 双目红外+IMU 编写的配置（从零调通）:
+        config/realsense_d435i/*.yaml
+
+    ⚠ 待办: 上述 (1) 的文件清单是按文件修改时间(2026-08-29 22:35~22:53 一批)
+       推断的，尚未与上游原版逐文件 diff 核实，可能包含"碰过但未改"的噪音，
+       也可能漏掉改动时间异常的少数文件。建议按下方 TODO 补齐精确 patch。
+
+    TODO(补齐可复现的 patch):
+        git clone <VINS-Fusion-ROS2 repo> /tmp/vins-orig
+        cd /tmp/vins-orig && git checkout <pin>
+        diff -ru /tmp/vins-orig <本目录> > third_party/patches/vins-ceres2.0.patch
+
+# ── 相机驱动 ───────────────────────────────────────────────────────
+librealsense:
+  path: tools/librealsense
+  repo: https://github.com/realsenseai/librealsense.git
+  pin: 7c3ee3fb7c64
+  local_changes: none
+  build_note: |
+    源码构建，使用 RSUSB 后端（不依赖 Intel 内核补丁）。
+    需配套 udev 规则: tools/99-realsense-libusb.rules。
+
+realsense-ros:
+  path: rtabmap/src/realsense-ros
+  repo: https://github.com/realsenseai/realsense-ros.git
+  pin: 60c850958d65            # tag 4.58.3
+  local_changes: none
+  note: |
+    git status 显示 9 项"改动"，已用 git diff --summary 核实全部为
+    mode change 100755 => 100644，零行代码变更。本仓已设
+    core.fileMode=false 以消除该类噪音。
+
+# ── 激光雷达 ───────────────────────────────────────────────────────
+unilidar_sdk2:
+  path: unilidar_sdk2
+  repo: https://github.com/unitreerobotics/unilidar_sdk2.git
+  pin: 0e3c51f512e6            # v2.0.10
+  managed_as: separate_repo    # ⚠ 保留独立 git 仓，未并入本 monorepo
+  local_changes: |
+    有真实本地改动且未提交: 23 项修改 + 10 项删除。
+    删除的是 unitree_lidar_ros/（ROS1 版），已确认文件确实不在磁盘上。
+    建议: 单独在该仓提交，或把改动迁到本仓后将其降级为纯上游 clone。
+  note: |
+    未并入本仓的原因: 它有活跃上游、独立 remote，且本地已有成体系的
+    未提交改动。强行并仓会把上游历史混进来。
+
+# ── 其他感知 ───────────────────────────────────────────────────────
+FAST_LIO_LOCALIZATION_HUMANOID:
+  path: ros_ws/src/FAST_LIO_LOCALIZATION_HUMANOID
+  repo: TODO                    # 无 .git，来源待补
+  pin: TODO
+  distribution: copy
+  size: 429M
+  action_required: |
+    请补上来源仓库与 commit。若确实含本地修改，按 VINS 的方式处理
+    （.gitignore 排除 + git add -f 白名单纳入改动文件）。
+
+# ── 语音链路预编译依赖（非源码仓，仅记录来源）──────────────────────
+sherpa_onnx:
+  path: kws/sherpa-onnx-kws-cpp/sherpa-onnx-v1.13.3-linux-aarch64-shared-cpu
+  version: v1.13.3
+  distribution: prebuilt        # 上游 release 的 aarch64 shared 包，不进仓
+  source: https://github.com/k2-fsa/sherpa-onnx/releases
+
+tts_models:
+  path: tts/tts_cpp/matcha-icefall-zh-baker
+  distribution: prebuilt
+  files: [model-steps-3.onnx(73M), vocos-22khz-univ.onnx(52M)]
+  source: https://huggingface.co/csukuangfj/vits-zh-hf-theresa 等 csukuangfj 系列
+
+hobot_llm_sdk:
+  path: agent_pipeline/D-Robotics_LLM_S100_1.0.0_SDK
+  version: 1.0.0
+  distribution: vendor_archive   # 地平线官方 SDK 包，947M，不进仓
+  contents:
+    - oellm_build/hbdk4_compiler-4.4.8a2...whl   (577M)
+    - oellm_build/leap_llm-1.0.0-py310-none-any.whl
+    - arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz (119M)
+    - oellm_runtime/{include,config,set_performance_mode.sh}   # 后者进仓
+  kept_in_repo:
+    - agent_pipeline/D-Robotics_LLM_S100_1.0.0_SDK/oellm_runtime/config/**
+    - agent_pipeline/D-Robotics_LLM_S100_1.0.0_SDK/oellm_runtime/set_performance_mode.sh
+    - agent_pipeline/D-Robotics_LLM_S100_1.0.0_SDK/oellm_build/requirements.txt

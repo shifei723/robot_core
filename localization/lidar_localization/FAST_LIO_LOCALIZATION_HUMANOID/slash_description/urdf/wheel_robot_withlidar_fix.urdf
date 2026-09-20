@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Regenerated from slash.xml (MuJoCo MJCF): link/joint parameters and
+     inertials come from the MJCF; base_footprint is ROS-specific. -->
+<robot name="wheel_robot_withlidar">
+  <!-- ====================== base_footprint ====================== -->
+  <link name="base_footprint">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.0001" />
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <origin xyz="0 0 0.5" rpy="0 0 0"/>
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0.15" rpy="0 0 0" />
+      <mass value="4.80555" />
+      <inertia ixx="0.0270021" ixy="0" ixz="0" iyy="0.0254651" iyz="0" izz="0.0207886" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/base_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="lf_link1">
+    <inertial>
+      <origin xyz="0.0515145 -8.07809e-10 -0.0204019" rpy="0 0 0" />
+      <mass value="0.192042" />
+      <inertia ixx="6.15845838381e-05" ixy="0" ixz="2.07538480508e-05" iyy="0.000593442" iyz="0" izz="0.000638459316162" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lf_link1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lf_link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lf_joint1" type="revolute">
+    <origin xyz="-0.1395 0.0436361 0.06" rpy="0 1.57079630572 0" />
+    <parent link="base_link" />
+    <child link="lf_link1" />
+    <axis xyz="0 0 1" />
+    <limit lower="0" upper="1.54" effort="100" velocity="5" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="lf_link2">
+    <inertial>
+      <origin xyz="-0.12 0 0.0075" rpy="0 0 0" />
+      <mass value="0.177913" />
+      <inertia ixx="3.34802e-05" ixy="0" ixz="2.5044637475e-19" iyy="0.00106756" iyz="0" izz="0.00109443" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lf_link2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lf_link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lf_joint2" type="revolute">
+    <origin xyz="0.15 0 0" rpy="3.14159265359 0 2.96357044647" />
+    <parent link="lf_link1" />
+    <child link="lf_link2" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="5" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="lb_link1">
+    <inertial>
+      <origin xyz="0.0601741 0 -0.00749392" rpy="0 0 0" />
+      <mass value="0.162669" />
+      <inertia ixx="5.07121072786e-05" ixy="0" ixz="5.984559187e-08" iyy="0.000498125" iyz="0" izz="0.000542772992721" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lb_link1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lb_link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lb_joint1" type="revolute">
+    <origin xyz="-0.1395 -0.0413639 0.06" rpy="0 1.57079630572 0" />
+    <parent link="base_link" />
+    <child link="lb_link1" />
+    <axis xyz="0 0 -1" />
+    <limit lower="0" upper="1.54" effort="100" velocity="5" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="lb_link2">
+    <inertial>
+      <origin xyz="-0.183607 7.48841e-05 0.0189316" rpy="0 0 0" />
+      <mass value="0.365755" />
+      <inertia ixx="0.000145046869392" ixy="-1.48295475499e-08" ixz="3.74981023334e-05" iyy="0.00200627006089" iyz="8.37112528413e-08" izz="0.00211956806972" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lb_link2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lb_link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lb_joint2" type="revolute">
+    <origin xyz="0.15 0 -0.015" rpy="3.14159265359 0 -2.96357044647" />
+    <parent link="lb_link1" />
+    <child link="lb_link2" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="5" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="l_wheel_link">
+    <inertial>
+      <origin xyz="0.0272291 -7.60454e-08 -2.23596e-07" rpy="0 0 0" />
+      <mass value="0.813353" />
+      <inertia ixx="0.00452269" ixy="0" ixz="0" iyy="0.0023881189296" iyz="4.58532274688e-08" izz="0.0023882110704" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/l_wheel_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/l_wheel_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="l_wheel_joint" type="continuous">
+    <origin xyz="-0.24 0 0.02455" rpy="2.48976976789 -1.57079631189 0" />
+    <parent link="lb_link2" />
+    <child link="l_wheel_link" />
+    <axis xyz="-1 0 0" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="rf_link1">
+    <inertial>
+      <origin xyz="0.0515145 -8.07818e-10 -0.0204019" rpy="0 0 0" />
+      <mass value="0.192042" />
+      <inertia ixx="6.15845838381e-05" ixy="0" ixz="2.07538480508e-05" iyy="0.000593442" iyz="0" izz="0.000638459316162" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/rf_link1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/rf_link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rf_joint1" type="revolute">
+    <origin xyz="0.1395 0.0436361 0.06" rpy="3.14159265359 1.57079630572 0" />
+    <parent link="base_link" />
+    <child link="rf_link1" />
+    <axis xyz="0 0 -1" />
+    <limit lower="0" upper="1.54" effort="100" velocity="5" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="rf_link2">
+    <inertial>
+      <origin xyz="0.12 0 -0.0075" rpy="0 0 0" />
+      <mass value="0.177913" />
+      <inertia ixx="3.34802e-05" ixy="0" ixz="2.5044637475e-19" iyy="0.00106756" iyz="0" izz="0.00109443" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/rf_link2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/rf_link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rf_joint2" type="revolute">
+    <origin xyz="0.15 0 0" rpy="0 0 0.178022207117" />
+    <parent link="rf_link1" />
+    <child link="rf_link2" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="5" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="rb_link1">
+    <inertial>
+      <origin xyz="0.0601741 0 -0.00749392" rpy="0 0 0" />
+      <mass value="0.162669" />
+      <inertia ixx="5.07121072786e-05" ixy="0" ixz="5.984559187e-08" iyy="0.000498125" iyz="0" izz="0.000542772992721" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/rb_link1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/rb_link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rb_joint1" type="revolute">
+    <origin xyz="0.1395 -0.0413639 0.06" rpy="3.14159265359 1.57079630572 0" />
+    <parent link="base_link" />
+    <child link="rb_link1" />
+    <axis xyz="0 0 1" />
+    <limit lower="0" upper="1.54" effort="100" velocity="5" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="rb_link2">
+    <inertial>
+      <origin xyz="-0.183607 7.48838e-05 0.0189316" rpy="0 0 0" />
+      <mass value="0.365755" />
+      <inertia ixx="0.000145046869392" ixy="-1.48287622452e-08" ixz="3.74981023334e-05" iyy="0.00200627006089" iyz="8.37157531028e-08" izz="0.00211956806972" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/rb_link2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/rb_link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rb_joint2" type="revolute">
+    <origin xyz="0.15 0 -0.015" rpy="3.14159265359 0 2.96357044647" />
+    <parent link="rb_link1" />
+    <child link="rb_link2" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="5" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="r_wheel_lilnk">
+    <inertial>
+      <origin xyz="0.0272291 1.61372e-07 -1.72445e-07" rpy="0 0 0" />
+      <mass value="0.813353" />
+      <inertia ixx="0.00452269" ixy="0" ixz="0" iyy="0.00238815248844" iyz="-6.37844876253e-08" izz="0.00238817751156" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/r_wheel_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/r_wheel_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="r_wheel_joint" type="continuous">
+    <origin xyz="-0.24 0 0.02455" rpy="1.39519479784 -1.57079630572 0" />
+    <parent link="rb_link2" />
+    <child link="r_wheel_lilnk" />
+    <axis xyz="1 0 0" />
+    <dynamics damping="0.02" friction="0.0" />
+  </joint>
+  <link name="lidar_link">
+    <inertial>
+      <origin xyz="0.000833804 -0.000785559 0.0431386" rpy="0 0 0" />
+      <mass value="0.21408" />
+      <inertia ixx="6.696096096e-05" ixy="-1.34406698801e-06" ixz="-1.82176508899e-07" iyy="6.85509030096e-05" iyz="-1.06370206068e-07" izz="0.00011236003603" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lidar_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://wheel_robot_withlidar/meshes/lidar_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lidar_joint_fix" type="fixed">
+    <origin xyz="0 0.065 0.24" rpy="0 0 -2.09439469861" />
+    <parent link="base_link" />
+    <child link="lidar_link" />
+    <axis xyz="0 0 0" />
+  </joint>
+</robot>

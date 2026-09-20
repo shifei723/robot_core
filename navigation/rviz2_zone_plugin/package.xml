@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>rviz2_zone_plugin</name>
+  <version>1.0.0</version>
+  <description>RViz plugin for recording map zones and exporting to YAML</description>
+  <maintainer email="1609032563@qq.com">sunrise</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rviz_common</depend>
+  <depend>rviz_rendering</depend>
+  <depend>geometry_msgs</depend>
+  <depend>yaml-cpp</depend>
+  <depend>qt5</depend>
+  <depend>pluginlib</depend>
+  <depend>visualization_msgs</depend>
+
+
+  
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <rviz_common plugin="${prefix}/plugin_description.xml"/>
+  </export>
+</package>

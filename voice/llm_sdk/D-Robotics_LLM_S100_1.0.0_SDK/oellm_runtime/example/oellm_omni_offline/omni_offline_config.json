@@ -1,0 +1,9 @@
+{
+    "visual_hbm_path": "/data/models/Qwen2.5-Omni-3B/Qwen2.5_Omni_3B_Visual.hbm",
+    "audio_hbm_path": "/data/models/Qwen2.5-Omni-3B/Qwen2.5_Omni_3B_Audio.hbm",
+    "text_hbm_path": "/data/models/Qwen2.5-Omni-3B/Qwen2.5_Omni_3B_Text.hbm",
+    "embed_tokens": "/data/models/Qwen2.5-Omni-3B/embed_tokens.bin",
+    "tokenizer_dir": "/data/models/Qwen2.5-Omni-3B/config/",
+    "model_type": 5,
+    "online_mode": false
+}

@@ -1,0 +1,10 @@
+
+#这个仓库版本使用的是系统的sophus，需要安装到系统路径下面去
+
+git clone https://github.com/strasdat/Sophus.git
+cd Sophus
+git checkout 1.22.10
+mkdir build && cd build
+cmake .. -DSOPHUS_USE_BASIC_LOGGING=ON
+make
+sudo make install
