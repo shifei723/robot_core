@@ -96,3 +96,8 @@ Thumbs.db
 # ---------- 其他运行时 ----------
 *.log
 core
+
+# ---------- 构建必需、随仓库携带的第三方预编译库(显式白名单, 覆盖上面的 *.a/*.so) ----------
+# 这些是 unitree_lidar 等包链接所需的预编译库, 缺失则新机器 clone 后编译失败。
+!sensors/lidar/unitree_lidar/unitree_lidar_sdk/lib/aarch64/libunilidar_sdk2.a
+!sensors/lidar/unitree_lidar/unitree_lidar_sdk/lib/x86_64/libunilidar_sdk2.a
