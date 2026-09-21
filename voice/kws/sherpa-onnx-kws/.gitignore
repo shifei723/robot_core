@@ -1,3 +1,2 @@
 .venv/
-model/
-vad_model/
+# 注：model/ 与 vad_model/ 不再忽略，改由根目录 .gitattributes 交给 Git LFS 跟踪

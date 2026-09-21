@@ -45,11 +45,11 @@ env/
 !third/lapacke/lib/*.so
 !third/lapacke/lib/*.so.*
 !third/lapacke/lib/*.a
+!voice/kws/**/lib/*.so
+!voice/kws/**/lib/*.so.*
 
-# 体积较大的运行期资源不入库（模型 / SDK 命令行工具），需要时按 README 获取
-voice/tts/tts_cpp/sherpa-onnx-sdk/bin/
-voice/tts/tts_cpp/matcha-icefall-zh-baker/
-voice/tts/tts_cpp/horizon_convert/
+# 体积较大的运行期资源（模型 / SDK 命令行工具）已改为 Git LFS 跟踪，
+# 见 .gitattributes：随仓库统一拉取，clone 后执行 git lfs pull 取回真实文件。
 CMakeCache.txt
 CMakeFiles/
 cmake-build-*/
@@ -78,6 +78,18 @@ FAST-Calib-ROS2/calib_data/
 *.tflite
 *.bin
 *.pb
+
+# 例外：语音 / 多模态模型交给 Git LFS 入库（见 .gitattributes），不再忽略
+!voice/**/*.onnx
+!voice/**/*.bin
+!voice/**/*.hbm
+!voice/**/*.gguf
+!voice/**/*.pt
+!voice/**/*.pth
+!data/models/**/*.bin
+!data/models/**/*.hbm
+!data/models/**/*.gguf
+!data/models/**/*.onnx
 
 # ---------- 压缩包 / 分发件 ----------
 *.zip

@@ -1,0 +1,28 @@
+# ============================================================
+# Git LFS —— 大二进制资产（语音模型 / 多模态模型 / SDK 运行库）
+#
+# 用途：让 KWS / TTS 的模型与预编译库随仓库统一拉取，
+#       git 对象里只存指针（约 130 字节），真实文件走 LFS 存储。
+#
+# 使用前提（clone 端）：
+#   1) 安装 git-lfs（apt install git-lfs，或官方二进制放入 PATH）
+#   2) git lfs install          # 只需执行一次，写入全局 filter
+#   3) git lfs pull             # 取回本仓库 LFS 对象的真实内容
+# 未安装 git-lfs 直接 clone，模型文件会是文本指针，运行时会报模型加载失败。
+# ============================================================
+
+# ---------- 模型权重 ----------
+*.onnx        filter=lfs diff=lfs merge=lfs -text
+*.hbm         filter=lfs diff=lfs merge=lfs -text
+*.gguf        filter=lfs diff=lfs merge=lfs -text
+*.bin         filter=lfs diff=lfs merge=lfs -text
+*.safetensors filter=lfs diff=lfs merge=lfs -text
+*.pt          filter=lfs diff=lfs merge=lfs -text
+*.pth         filter=lfs diff=lfs merge=lfs -text
+
+# ---------- 语音目录内的预编译运行库 ----------
+voice/kws/**/*.so   filter=lfs diff=lfs merge=lfs -text
+voice/kws/**/*.so.* filter=lfs diff=lfs merge=lfs -text
+
+# ---------- sherpa-onnx SDK 命令行工具 ----------
+voice/tts/tts_cpp/sherpa-onnx-sdk/bin/** filter=lfs diff=lfs merge=lfs -text

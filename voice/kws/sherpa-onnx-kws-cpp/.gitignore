@@ -1,10 +1,10 @@
 build/
 commands/
 *.wav
-*.onnx
 .DS_Store
 *.o
 *.a
-*.so
 *.dylib
 compile_commands.json
+# 注：*.onnx（模型）与 *.so（sherpa SDK 运行库）不再忽略，
+#     改由根目录 .gitattributes 交给 Git LFS 跟踪。
