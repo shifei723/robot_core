@@ -7,7 +7,10 @@
 > - **绝对路径已适配**：硬编码 `/data/sf_code/...` 改为基于环境变量 `ROBOT_CORE`（clone 到任意目录即可用）；
 >   少数由 C++ 直读、不支持环境变量展开的 yaml（Hesai 校正、VINS 输出）默认指向 `/data/robot_core`，换目录时需同步改前缀。
 > - **构建/运行入口**：`build.sh`（分多工作区构建）、`setup.sh`（加载环境）、`assets/`（依赖与资产清单）。
-> - 大二进制（模型 `*.hbm/*.gguf/*.onnx`、地图 `*.db/*.ply/*.pcd`、预编译库）不进库，见 `assets/ASSETS.md`；
+> - **语音模型与运行库已随仓库统一拉取（Git LFS）**：`*.onnx/*.hbm/*.gguf/*.bin`、KWS/TTS 的 sherpa SDK
+>   运行库与命令行工具，见 `.gitattributes`。克隆端需 `git lfs install` + `git lfs pull`，
+>   否则模型只是文本指针（约 130 字节），运行时会失败。
+> - 仍不进库：地图 `*.db/*.ply/*.pcd`、演示媒体、实机建图产物，见 `assets/ASSETS.md`；
 >   其中**编译必需的闭源预编译库**已在 `.gitignore` 中单独放行并随仓库携带（见下方「内置二进制依赖」）。
 > - 规模：约 620M，70 个 ROS2 源码包。
 > - **当前版本已验证可编译**：aarch64 / Ubuntu 22.04 / ROS 2 Humble 下 `./build.sh all` 五组全部通过（详见「构建状态」）。
@@ -90,7 +93,7 @@ sudo apt install -y \
 | `sensors/camera/mvs_ros2_pkg` | 需海康 MVS SDK（`/opt/MVS/include/MvCameraControl.h` + `/opt/MVS/lib/aarch64/libMvCameraControl.so`） | 装好 SDK 后删除该目录下的 `COLCON_IGNORE` |
 | `voice/agent/src/omni_node` | 需地平线 `voice/llm_sdk/D-Robotics_LLM_S100_1.0.0_SDK/oellm_runtime/lib`（`libxlm.so` 等，仓库里只有 config/include/model） | 补齐 `lib/` 后删除该目录下的 `COLCON_IGNORE` |
 | Open3D 1.4.1 | 体积 576M，不入库。`open3d_loc` 需要它 | 放到 `third/open3d141/`（本机为指向外部备份的软链接），或用 `OPEN3D_DIR` / `-DOpen3D_DIR=...` 指定 |
-| TTS 运行模型 | `tts_cpp/matcha-icefall-zh-baker/`、`tts_cpp/horizon_convert/`（编译不需要，运行 TTS 才用） | 从原机器备份拷贝，或按 `voice/tts/tts_cpp/README.md` 获取 |
+| TTS 运行模型 | `tts_cpp/matcha-icefall-zh-baker/`、`tts_cpp/horizon_convert/`、`tts_py/matcha-icefall-zh-baker/`（编译不需要，运行 TTS 才用） | 已随仓库以 Git LFS 入库，`git lfs pull` 取回；或按 `voice/tts/tts_cpp/README.md` 重新下载 |
 
 > `COLCON_IGNORE` 是本仓库的既有惯例（`sensors/camera/librealsense`、`rslidar_msg/ros1|ros2` 同样处理）：加了这个文件的包会被 colcon 跳过，不影响其它包构建。
 

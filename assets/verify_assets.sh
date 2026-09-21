@@ -44,12 +44,12 @@ ck MISS "tokenizer/config 目录"    "$ROBOT_MODELS/Qwen2.5-Omni-3B/config"
 ck OPT  "oellm_runtime 预编译库"   "$ROBOT_CORE/voice/llm_sdk/D-Robotics_LLM_S100_1.0.0_SDK/oellm_runtime/lib"
 
 echo
-echo "## 唤醒 KWS (voice/kws，*.onnx 被排除)"
+echo "## 唤醒 KWS (voice/kws，模型走 Git LFS，需 git lfs pull)"
 ck MISS "KWS 模型目录"             "$ROBOT_CORE/voice/kws/sherpa-onnx-kws/model"
 ck OPT  "sherpa-onnx 运行库(cpp)"  "$ROBOT_CORE/voice/kws/sherpa-onnx-kws-cpp/sherpa-onnx-v1.13.3-linux-aarch64-shared-cpu"
 
 echo
-echo "## 语音合成 TTS (voice/tts，模型目录被排除)"
+echo "## 语音合成 TTS (voice/tts，模型走 Git LFS，需 git lfs pull)"
 ck OPT  "matcha 中文声学模型"      "$ROBOT_CORE/voice/tts/tts_py/matcha-icefall-zh-baker"
 
 echo

@@ -1,8 +1,13 @@
-# ASSETS —— 未进版本库的运行资产清单
+# ASSETS —— 运行资产清单（Git LFS 携带 / 未进库）
 
-本仓库是**纯代码**版本：`.gitignore` 排除了所有大二进制（模型 `*.hbm/*.gguf/*.onnx/*.bin`、
-地图 `*.db/*.ply/*.pcd`、预编译库 `*.so/*.whl/*.tar.*`）。在**新机器**上编译可运行 ROS 包，
-但运行特定功能需按下表补齐资产。用 `bash assets/verify_assets.sh` 一键体检。
+本仓库源码可直接在**新机器**上编译。资产分两类：
+
+- **已随仓库携带（Git LFS）**：语音模型与运行库（`*.onnx/*.hbm/*.gguf/*.bin`、`voice/` 下预编译库、
+  sherpa SDK 命令行工具），见 `.gitattributes`。clone 后须 `git lfs install && git lfs pull`
+  才能取到真实文件，否则只是指针文件。
+- **仍未进库**（按下表补齐）：地图 `*.db/*.ply/*.pcd`、演示媒体、实机建图产物、仓库外的多模态模型。
+
+用 `bash assets/verify_assets.sh` 一键体检。
 
 ## 1. 模型资产（放在仓库外，默认 `/data/models`，可用 `ROBOT_MODELS` 覆盖）
 
@@ -17,10 +22,14 @@
 > 内以 `/data/models/...` 绝对路径引用。若模型不放 `/data/models`，
 > 改这两个配置文件里的前缀（C++/SDK 直读，不支持环境变量展开）。
 
-## 2. KWS 唤醒模型（在 `voice/kws/` 内，但 `*.onnx` 被排除）
+## 2. KWS 唤醒模型（在 `voice/kws/` 内，已随仓库 LFS 入库）
 
-- `voice/kws/sherpa-onnx-kws/model/`：`encoder/decoder/joiner.onnx`、`tokens.txt`、`*_keyword_streaming.onnx`
-- 缺失时从旧机拷贝，或从 sherpa-onnx 官方下载 `zipformer-wenetspeech-3.3M` 重新生成关键词。
+- `voice/kws/sherpa-onnx-kws/model/`、`voice/kws/sherpa-onnx-kws-cpp/model/`：
+  `encoder/decoder/joiner.onnx`（含 int8）、`tokens.txt`、`keywords.txt`
+- `*/vad_model/silero_vad.onnx`、sherpa SDK 运行库
+  `lib/{libonnxruntime,libsherpa-onnx-c-api,libsherpa-onnx-cxx-api}.so`
+- 均随仓库携带，`git lfs pull` 后即可运行；缺失时可从旧机备份拷贝，
+  或从 sherpa-onnx 官方下载 `zipformer-wenetspeech-3.3M` 重新生成关键词。
 
 ## 3. 地图 / 定位资产（运行时产物，需在新环境**重新建图**或从旧机拷贝）
 
