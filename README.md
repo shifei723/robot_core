@@ -92,10 +92,38 @@ sudo apt install -y \
 |---|---|---|
 | `sensors/camera/mvs_ros2_pkg` | 需海康 MVS SDK（`/opt/MVS/include/MvCameraControl.h` + `/opt/MVS/lib/aarch64/libMvCameraControl.so`） | 装好 SDK 后删除该目录下的 `COLCON_IGNORE` |
 | `voice/agent/src/omni_node` | 需地平线 `voice/llm_sdk/D-Robotics_LLM_S100_1.0.0_SDK/oellm_runtime/lib`（`libxlm.so` 等，仓库里只有 config/include/model） | 补齐 `lib/` 后删除该目录下的 `COLCON_IGNORE` |
-| Open3D 1.4.1 | 体积 576M，不入库。`open3d_loc` 需要它 | 放到 `third/open3d141/`（本机为指向外部备份的软链接），或用 `OPEN3D_DIR` / `-DOpen3D_DIR=...` 指定 |
+| Open3D 1.4.1 预编译版（静态库） | aarch64 576M / x86_64 1.6G，**不入库**（超出 Git LFS 免费额度 1GB）。`open3d_loc`、`rtabmap(WITH_OPEN3D)` 需要它 | `bash assets/fetch_open3d.sh`（本地副本 → 网盘 → Release 自动择一）；详见下方「Open3D 预编译版」 |
 | TTS 运行模型 | `tts_cpp/matcha-icefall-zh-baker/`、`tts_cpp/horizon_convert/`、`tts_py/matcha-icefall-zh-baker/`（编译不需要，运行 TTS 才用） | 已随仓库以 Git LFS 入库，`git lfs pull` 取回；或按 `voice/tts/tts_cpp/README.md` 重新下载 |
 
 > `COLCON_IGNORE` 是本仓库的既有惯例（`sensors/camera/librealsense`、`rslidar_msg/ros1|ros2` 同样处理）：加了这个文件的包会被 colcon 跳过，不影响其它包构建。
+
+### Open3D 预编译版（按需获取，不入库）
+
+`open3d_loc`（FAST-LIO 重定位）与 `rtabmap(WITH_OPEN3D)` 需要 Open3D 1.4.1。现有两版都是**静态库版**，体积过大（超出 GitHub 免费 LFS 的 1GB 额度），因此**不进版本库**，改为脚本按需获取：
+
+| 架构 | 目标目录 | 体积 |
+|---|---|---|
+| aarch64（机器人端） | `third/open3d141/` | 576M |
+| x86_64（开发机） | `third/open3d141_x86/` | 1.6G |
+
+一键获取（自动按 `uname -m` 选版本，本地副本 → 本地压缩包 → 直链 依次尝试）：
+
+```bash
+bash assets/fetch_open3d.sh          # 当前架构
+bash assets/fetch_open3d.sh all      # 两版都要（约 2.2G）
+```
+
+**百度网盘**（离线分发，提取码 `1234`）：<https://pan.baidu.com/s/1gz-cIzgdKCIciffBTP4ejQ?pwd=1234>
+
+下载后按下面任一方式放置即可被自动识别：
+
+- 压缩包放到仓库同级的 `third/open3d141-aarch64.tar.gz`（或 `open3d141-x86_64.tar.gz`），再跑一次上面的脚本自动解压；
+- 或直接解压成 `third/open3d141/`（ARM）、`third/open3d141_x86/`（x86）。
+
+其它可选方式：设 `OPEN3D_LOCAL_*_DIR` 指向本地已有副本，或把直链填进 `assets/open3d_sources.env`（GitHub Release / 内网均可）。
+已有副本可用 `bash assets/pack_open3d.sh` 打包上传，供新机器下载。
+
+> 目录缺失时，`open3d_loc` 的 CMake 会直接给出上述指引并中止，不会静默出错。
 
 ### 并行度控制（`build.sh`）
 

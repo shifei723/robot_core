@@ -47,6 +47,11 @@ for _g in ros_ws rtabmap ws_nav agent_ws tts; do
   [ -f "$_s" ] && source "$_s"
 done
 
+# Open3D 预编译版（不入库）：缺失时提示获取方式
+if [ ! -d "$ROBOT_CORE/third/open3d141" ] && [ ! -d "$ROBOT_CORE/third/open3d141_x86" ]; then
+  echo "[setup.sh] 提示: Open3D 未就位，构建 open3d_loc 前请先运行: bash assets/fetch_open3d.sh"
+fi
+
 echo "[setup.sh] ROBOT_CORE  = $ROBOT_CORE"
 echo "[setup.sh] ROBOT_MODELS= $ROBOT_MODELS"
 echo "[setup.sh] 已加载的工作区 install: $(ls "$ROBOT_CORE/install" 2>/dev/null | tr '\n' ' ')"

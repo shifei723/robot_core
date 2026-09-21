@@ -50,6 +50,12 @@ env/
 
 # 体积较大的运行期资源（模型 / SDK 命令行工具）已改为 Git LFS 跟踪，
 # 见 .gitattributes：随仓库统一拉取，clone 后执行 git lfs pull 取回真实文件。
+
+# ---------- Open3D 预编译版（不入库）----------
+# aarch64 576M / x86_64 1.6G，静态库版，超出 Git LFS 免费额度；
+# 用 assets/fetch_open3d.sh 从本地副本 / 网盘 / Release 获取。
+third/open3d141/
+third/open3d141_x86/
 CMakeCache.txt
 CMakeFiles/
 cmake-build-*/

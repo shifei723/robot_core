@@ -45,12 +45,26 @@ else()
   get_filename_component(_RC_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
 endif()
 
-# Open3D 路径：优先 -DOpen3D_DIR=... / 环境变量，其次仓库内 third/open3d141
+# Open3D 路径：优先 -DOpen3D_DIR=... / 环境变量；否则按架构选仓库内目录
+#   aarch64 -> third/open3d141       （ARM / 机器人端，约 576M）
+#   其它     -> third/open3d141_x86  （x86_64 开发机，约 1.6G）
+# 这两个目录不入库（体积超 Git LFS 免费额度），用 assets/fetch_open3d.sh 获取。
 if(NOT Open3D_DIR AND DEFINED ENV{OPEN3D_DIR})
   set(Open3D_DIR "$ENV{OPEN3D_DIR}")
 endif()
 if(NOT Open3D_DIR)
-  set(Open3D_DIR "${_RC_ROOT}/third/open3d141/lib/cmake/Open3D")
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+    set(_OPEN3D_ROOT "${_RC_ROOT}/third/open3d141")
+  else()
+    set(_OPEN3D_ROOT "${_RC_ROOT}/third/open3d141_x86")
+  endif()
+  if(NOT EXISTS "${_OPEN3D_ROOT}/lib/cmake/Open3D/Open3DConfig.cmake")
+    message(FATAL_ERROR
+      "未找到 Open3D 预编译版：${_OPEN3D_ROOT}\n"
+      "请先执行: bash ${_RC_ROOT}/assets/fetch_open3d.sh\n"
+      "（本地副本 / 百度网盘 / Release 三选一，见 assets/ASSETS.md）")
+  endif()
+  set(Open3D_DIR "${_OPEN3D_ROOT}/lib/cmake/Open3D")
 endif()
 find_package(Open3D REQUIRED)
 

@@ -53,6 +53,14 @@ echo "## 语音合成 TTS (voice/tts，模型走 Git LFS，需 git lfs pull)"
 ck OPT  "matcha 中文声学模型"      "$ROBOT_CORE/voice/tts/tts_py/matcha-icefall-zh-baker"
 
 echo
+case "$(uname -m)" in
+  aarch64|arm64) _O3D="$ROBOT_CORE/third/open3d141" ;;
+  *)             _O3D="$ROBOT_CORE/third/open3d141_x86" ;;
+esac
+echo "## Open3D 预编译版（不入库，$(uname -m)，bash assets/fetch_open3d.sh）"
+ck OPT "Open3D 1.4.1" "$_O3D"
+
+echo
 echo "## 地图 / 定位资产 (*.db/*.ply/*.pcd 被排除，需实机建图生成)"
 ck OPT  "FAST_LIO 重定位地图 pcd"  "$ROBOT_CORE/localization/lidar_localization/FAST_LIO_LOCALIZATION_HUMANOID/data/map.pcd"
 ck OPT  "rtabmap 视觉地图 db"      "$ROBOT_CORE/data/rtabmap_maps/rtabmap_vins.db"

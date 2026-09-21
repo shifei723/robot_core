@@ -59,6 +59,27 @@
 - `oellm_runtime/include`（LLM SDK 头文件）
 - `unitree_lidar/unitree_lidar_sdk/bin/*`（⚠️ **aarch64 预编译 ELF**，内含旧机绝对路径字符串；换架构需重编）
 
-## 6. 系统级依赖（非本仓库，需在新机安装）
+## 6. Open3D 预编译版（不入库，按架构获取）
+
+两版都是**静态库版**，体积超出 Git LFS 免费额度（1GB），因此**不进版本库**：
+
+| 架构 | 目录 | 体积 | 谁需要 |
+|---|---|---|---|
+| aarch64 | `third/open3d141/` | 576M | `open3d_loc`、`rtabmap(WITH_OPEN3D)` |
+| x86_64 | `third/open3d141_x86/` | 1.6G | 同上（开发机） |
+
+```bash
+bash assets/fetch_open3d.sh        # 按 uname -m 自动选版本
+bash assets/fetch_open3d.sh all    # 两版都要（约 2.2G）
+```
+
+- **百度网盘**：<https://pan.baidu.com/s/1gz-cIzgdKCIciffBTP4ejQ?pwd=1234>（提取码 `1234`）
+  下载后把压缩包放到仓库同级的 `third/open3d141-aarch64.tar.gz`（或 `open3d141-x86_64.tar.gz`），脚本会自动解压就位。
+- 直链方式：把地址填进 `assets/open3d_sources.env` 的 `OPEN3D_ARM_URL` / `OPEN3D_X86_URL`（GitHub Release / 内网 HTTP 均可）。
+- 已有副本要分发：`bash assets/pack_open3d.sh` 打包成 tarball 再上传。
+
+CMake 已按 `uname -m` 选择对应目录，缺失时直接打印上述指引并中止，不会静默出错。
+
+## 7. 系统级依赖（非本仓库，需在新机安装）
 
 见 `assets/PREREQUISITES.md`。
