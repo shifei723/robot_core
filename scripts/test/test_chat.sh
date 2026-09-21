@@ -13,7 +13,7 @@ WAV=${1:-$ROBOT_CORE/voice/agent/src/omni_node/scripts/hangzhou.wav}
 CMD_DIR=$ROBOT_CORE/voice/kws/sherpa-onnx-kws-cpp/commands
 
 echo "=== 启动 watch_omni 观察原始输出 ==="
-python3 $ROBOT_CORE/install/agent_ws/omni_node/lib/omni_node/watch_omni.py \
+python3 $ROBOT_CORE/install/agent_ws/lib/omni_node/watch_omni.py \
     > /tmp/chat_watch.log 2>&1 &
 PID_W=$!
 sleep 6

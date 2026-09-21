@@ -38,11 +38,32 @@ find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system)
 
-# Set Open3D path - modify this to your installation path
-set(Open3D_DIR "/home/sunrise/Downloads/open3d141/lib/cmake/Open3D")
+# 仓库根：优先 ROBOT_CORE 环境变量，其次按源码位置推导（不再硬编码某台机器的路径）
+if(DEFINED ENV{ROBOT_CORE} AND NOT "$ENV{ROBOT_CORE}" STREQUAL "")
+  set(_RC_ROOT "$ENV{ROBOT_CORE}")
+else()
+  get_filename_component(_RC_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
+endif()
 
-# set(Open3D_DIR "/home/unitree/open3d141_arm/open3d141/lib/cmake/Open3D")
+# Open3D 路径：优先 -DOpen3D_DIR=... / 环境变量，其次仓库内 third/open3d141
+if(NOT Open3D_DIR AND DEFINED ENV{OPEN3D_DIR})
+  set(Open3D_DIR "$ENV{OPEN3D_DIR}")
+endif()
+if(NOT Open3D_DIR)
+  set(Open3D_DIR "${_RC_ROOT}/third/open3d141/lib/cmake/Open3D")
+endif()
 find_package(Open3D REQUIRED)
+
+# LAPACKE：Open3D 的 CMake 配置里写死了 /usr/lib/<arch>/liblapacke.so。
+# 若系统未装 liblapacke-dev（例如没有 sudo 的环境），改用仓库自带的
+# third/lapacke/lib/liblapacke.so，保证免 root 也能链接通过。
+set(_LAPACKE_FALLBACK "")
+if(NOT EXISTS "/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}/liblapacke.so")
+  if(EXISTS "${_RC_ROOT}/third/lapacke/lib/liblapacke.so")
+    set(_LAPACKE_FALLBACK "${_RC_ROOT}/third/lapacke/lib/liblapacke.so")
+    message(STATUS "lapacke: 系统库缺失，使用仓库自带 ${_LAPACKE_FALLBACK}")
+  endif()
+endif()
 
 # Fix Open3D libraries - remove problematic .so files
 # In Ubuntu 22.04+, some libraries (librt, libc++) have different paths or are merged
@@ -59,8 +80,11 @@ foreach(target Open3D::Open3D Open3D::3rdparty_filament Open3D::3rdparty_glfw Op
                         set(FILTERED_LIBS "")
 
                         foreach(lib ${LINK_LIBS})
+                                # 系统缺 liblapacke 时替换成仓库自带副本
+                                if(_LAPACKE_FALLBACK AND "${lib}" MATCHES "liblapacke\\.so")
+                                        list(APPEND FILTERED_LIBS "${_LAPACKE_FALLBACK}")
                                 # Skip problematic libraries
-                                if(NOT "${lib}" MATCHES ".*librt\\.so.*" AND
+                                elseif(NOT "${lib}" MATCHES ".*librt\\.so.*" AND
                                         NOT "${lib}" MATCHES ".*libc\\+\\+\\.so.*" AND
                                         NOT "${lib}" MATCHES ".*libc\\+\\+abi\\.so.*")
                                         list(APPEND FILTERED_LIBS ${lib})
@@ -78,7 +102,9 @@ if(Open3D_LIBRARIES)
         set(FILTERED_O3D_LIBS "")
 
         foreach(lib ${Open3D_LIBRARIES})
-                if(NOT "${lib}" MATCHES ".*librt\\.so.*" AND
+                if(_LAPACKE_FALLBACK AND "${lib}" MATCHES "liblapacke\\.so")
+                        list(APPEND FILTERED_O3D_LIBS "${_LAPACKE_FALLBACK}")
+                elseif(NOT "${lib}" MATCHES ".*librt\\.so.*" AND
                         NOT "${lib}" MATCHES ".*libc\\+\\+\\.so.*" AND
                         NOT "${lib}" MATCHES ".*libc\\+\\+abi\\.so.*")
                         list(APPEND FILTERED_O3D_LIBS ${lib})
@@ -122,6 +148,14 @@ ament_target_dependencies(open3d_conversions
 
 # Build global_localization_node
 add_executable(global_localization_node src/global_localization.cpp)
+# 使用仓库自带 lapacke 时，把它的目录写进 RPATH，保证运行时能加载
+if(_LAPACKE_FALLBACK)
+  get_filename_component(_LAPACKE_DIR "${_LAPACKE_FALLBACK}" DIRECTORY)
+  set_target_properties(global_localization_node PROPERTIES
+    BUILD_RPATH "${_LAPACKE_DIR}"
+    INSTALL_RPATH "${_LAPACKE_DIR}"
+  )
+endif()
 target_link_libraries(global_localization_node
         ${Open3D_LIBRARIES}
         open3d_registration

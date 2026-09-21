@@ -79,7 +79,13 @@ mkdir -p "$LOG_DIR"
 source "$ROBOT_CORE/setup.sh"
 true
 # tool_agent 需要 ros_ws 里的 zone_interfaces（导航服务接口）
-[ -f "$ROS_WS/install/setup.bash" ] && true
+# install base 就是 install/ros_ws，setup.bash 在其根目录（无第二层 install/）
+[ -f "$ROS_WS/setup.bash" ] && source "$ROS_WS/setup.bash"
+if [ ! -d "$AGENT_WS/lib/omni_node" ]; then
+    echo "[错误] $AGENT_WS/lib/omni_node 不存在，请先编译 agent_ws 工作区!"
+    echo "       cd $ROBOT_CORE && ./build.sh agent_ws"
+    exit 1
+fi
 
 echo "============================================"
 echo " 启动语音交互全链路  $(date '+%F %T')"
@@ -122,27 +128,27 @@ else
 fi
 
 # ── 3. TTS 桥接（ROS话题 -> 对应后端）──
-python3 "$AGENT_WS/omni_node/lib/omni_node/tts_bridge.py" \
+python3 "$AGENT_WS/lib/omni_node/tts_bridge.py" \
     --ros-args -p backend:="$TTS_BACKEND" \
     > "$LOG_DIR/tts_bridge.log" 2>&1 &
 echo "tts_bridge $!" >> "$PIDFILE"
 echo "[3/6] tts_bridge 已启动 (backend=$TTS_BACKEND)"
 
 # ── 4. 相机发布节点 ──
-python3 "$AGENT_WS/omni_node/lib/omni_node/camera_pub.py" \
+python3 "$AGENT_WS/lib/omni_node/camera_pub.py" \
     > "$LOG_DIR/camera.log" 2>&1 &
 echo "camera $!" >> "$PIDFILE"
 echo "[4/6] camera_pub 已启动"
 
 # ── 5. KWS 桥接（监听状态文件下降沿，注意传入正确的 commands 路径）──
-python3 "$AGENT_WS/omni_node/lib/omni_node/transformVL.py" \
+python3 "$AGENT_WS/lib/omni_node/transformVL.py" \
     --ros-args -p commands_dir:="$KWS_DIR/commands" \
     > "$LOG_DIR/transformVL.log" 2>&1 &
 echo "transformVL $!" >> "$PIDFILE"
 echo "[5/6] transformVL 已启动 (commands_dir=$KWS_DIR/commands)"
 
 # ── 5.5 Tool-Call 执行器（解析模型输出的 JSON → 导航/点头/摇头）──
-python3 "$AGENT_WS/omni_node/lib/omni_node/tool_agent.py" \
+python3 "$AGENT_WS/lib/omni_node/tool_agent.py" \
     > "$LOG_DIR/tool_agent.log" 2>&1 &
 echo "tool_agent $!" >> "$PIDFILE"
 echo "[5.5] tool_agent 已启动 (工具调用: navigate/nod/shake)"
@@ -172,6 +178,6 @@ echo "   $0 status                          # 组件状态"
 echo "   tail -f $LOG_DIR/kws.log           # 唤醒日志"
 echo "   tail -f $LOG_DIR/omni.log          # 推理日志"
 echo "   tail -f $LOG_DIR/tts_bridge.log    # 播报文本"
-echo "   python3 $AGENT_WS/omni_node/lib/omni_node/watch_omni.py   # 推理结果实时查看"
+echo "   python3 $AGENT_WS/lib/omni_node/watch_omni.py   # 推理结果实时查看"
 echo "   $0 stop                            # 停止全部"
 echo "============================================"

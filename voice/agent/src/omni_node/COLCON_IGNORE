@@ -1,0 +1,2 @@
+# 临时跳过: 缺地平线 oellm_runtime/lib/libxlm.so (S100 SDK 的闭源库)
+# 补齐 oellm_runtime/lib 后删除本文件即可恢复构建

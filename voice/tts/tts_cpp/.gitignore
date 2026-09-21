@@ -1,4 +1,6 @@
 build/
-sherpa-onnx-sdk/
+# sherpa-onnx SDK 中体积大的命令行工具不入库；但 lib/ 下的 .so 是链接必需的，随仓库携带
+sherpa-onnx-sdk/bin/
+!sherpa-onnx-sdk/lib/*.so
 *.wav
 *.tar.bz2

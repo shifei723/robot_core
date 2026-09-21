@@ -34,6 +34,22 @@ env/
 *.out
 *.lib
 *.exe
+
+# ---------- 例外：构建必需的第三方预编译库 ----------
+# 这些是厂商/上游只提供二进制的闭源依赖，无法现场编译，
+# 随仓库携带以保证 clone 下来即可编译（详见 README「内置二进制依赖」）。
+!voice/tts/hobot_tts/wetts/lib/*.so
+!voice/tts/hobot_tts/wetts/lib/*.so.*
+!voice/tts/tts_cpp/sherpa-onnx-sdk/lib/*.so
+!voice/tts/tts_cpp/sherpa-onnx-sdk/lib/*.so.*
+!third/lapacke/lib/*.so
+!third/lapacke/lib/*.so.*
+!third/lapacke/lib/*.a
+
+# 体积较大的运行期资源不入库（模型 / SDK 命令行工具），需要时按 README 获取
+voice/tts/tts_cpp/sherpa-onnx-sdk/bin/
+voice/tts/tts_cpp/matcha-icefall-zh-baker/
+voice/tts/tts_cpp/horizon_convert/
 CMakeCache.txt
 CMakeFiles/
 cmake-build-*/
@@ -95,7 +111,11 @@ Thumbs.db
 
 # ---------- 其他运行时 ----------
 *.log
-core
+# 注意：不要用裸 "core"，它会把同名源码目录一起忽略掉，
+# 例如 localization/visual_slam/rtabmap/corelib/include/rtabmap/core/
+# （当时就是这样把 rtabmap 全部公共头文件排除出版本库的）。
+/core
+*.core
 
 # ---------- 构建必需、随仓库携带的第三方预编译库(显式白名单, 覆盖上面的 *.a/*.so) ----------
 # 这些是 unitree_lidar 等包链接所需的预编译库, 缺失则新机器 clone 后编译失败。

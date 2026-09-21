@@ -26,8 +26,13 @@ cd "$ROBOT_CORE"
 : "${ROS_DISTRO:=humble}"
 [ -f "/opt/ros/$ROS_DISTRO/setup.bash" ] && source "/opt/ros/$ROS_DISTRO/setup.bash"
 
-# 包内编译并行度（单个包 make -jN）；嵌入式板内存有限，默认 4。
-MAKE_JOBS="${MAKE_JOBS:-4}"
+# 包内编译并行度（单个包 make -jN）。
+# 本机 4 核 / 8G 内存，rtabmap、PCL、Open3D 这类重型包单个编译单元就要 1~2G，
+# 默认 2：只用一半 CPU，给系统和桌面留余量，避免拉满 CPU / OOM 卡死。
+# 想手动调整: MAKE_JOBS=1 ./build.sh rtabmap （最稳） / MAKE_JOBS=3（更快但更吃内存）
+MAKE_JOBS="${MAKE_JOBS:-2}"
+# 包级并发（同时编译几个包），默认 1 = 一次只编一个包。
+PKG_WORKERS="${PKG_WORKERS:-1}"
 # 是否包间串行（sequential）以避免多个重型包(PCL/Open3D/OpenCV)同时编译爆内存。
 # 嵌入式/小内存机器保持 1（默认）；大内存机器可设 PKG_SERIAL=0 改回并行。
 PKG_SERIAL="${PKG_SERIAL:-1}"
@@ -60,6 +65,7 @@ build_group() {
   done
   # shellcheck disable=SC2086
   export MAKEFLAGS="-j${MAKE_JOBS}"
+  echo "  包内并行: make -j${MAKE_JOBS} | 包级并发: ${PKG_WORKERS} | 包间串行: ${PKG_SERIAL}"
   _exec_arg=""
   [ "${PKG_SERIAL:-1}" = "1" ] && _exec_arg="--executor sequential"
   colcon --log-base "log/$g" build \
@@ -67,6 +73,7 @@ build_group() {
     --build-base   "build/$g" \
     --install-base "install/$g" \
     --continue-on-error \
+    --parallel-workers "${PKG_WORKERS}" \
     $_exec_arg \
     --event-handlers console_direct+
 }
@@ -76,11 +83,22 @@ case "$GROUP" in
     build_group "$GROUP"
     ;;
   all)
-    build_group ros_ws
-    build_group rtabmap
-    build_group ws_nav
-    build_group agent_ws
-    build_group tts
+    # 注意: colcon 带 --continue-on-error 时，只要有包失败仍返回非 0。
+    # 配合文件开头的 set -e，会导致某组失败后后面的组全部被跳过（历史上
+    # ros_ws 一失败，rtabmap/ws_nav/agent_ws/tts 就再也没编过）。
+    # 这里显式吞掉失败并继续，最后统一汇总。
+    _FAILED=""
+    for _g in ros_ws rtabmap ws_nav agent_ws tts; do
+      build_group "$_g" || _FAILED="$_FAILED $_g"
+    done
+    if [ -n "$_FAILED" ]; then
+      echo ""
+      echo "[警告] 以下工作区构建失败:$_FAILED"
+      echo "       修复后可单独重编: $0 <组名>"
+      unset _FAILED _g
+      exit 1
+    fi
+    unset _FAILED _g
     ;;
   *)
     echo "用法: $0 [ros_ws|rtabmap|ws_nav|agent_ws|tts|all]" >&2

@@ -71,6 +71,9 @@ LOG_DIR=/tmp/vins_mapping_logs
 MAP_DIR=${MAP_DIR:-$ROBOT_CORE/data/rtabmap_maps}
 DB=${DB:-$MAP_DIR/rtabmap_vins.db}
 WS="$ROBOT_CORE/localization/visual_slam"
+# 构建产物统一落在 $ROBOT_CORE/install/<组>（见 build.sh）；visual_slam 属于 rtabmap 组。
+# $WS 只是源码目录（VINS 配置文件所在），它下面不会有 install/
+RTABMAP_WS="$ROBOT_CORE/install/rtabmap"
 VINS_SRC=$WS/vins_fusion
 VINS_CONFIG=${VINS_CONFIG:-$VINS_SRC/config/realsense_d435i/d435i_stereo_imu_config.yaml}
 RVIZ_CFG=${RVIZ_CFG:-$MAP_DIR/vins_map.rviz}
@@ -109,10 +112,11 @@ PROBE_PY=$ROBOT_CORE/tools/ground_anchor.py
 
 need_source() {
     source /opt/ros/humble/setup.bash
-    if [ -f "$WS/install/setup.bash" ]; then
-        true
+    if [ -f "$RTABMAP_WS/setup.bash" ]; then
+        source "$RTABMAP_WS/setup.bash"
     else
-        echo "[错误] $WS/install/setup.bash 不存在，请先编译工作空间!"
+        echo "[错误] $RTABMAP_WS/setup.bash 不存在，请先编译 rtabmap 工作区!"
+        echo "       cd $ROBOT_CORE && ./build.sh rtabmap"
         exit 1
     fi
 }

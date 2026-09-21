@@ -1,0 +1,2 @@
+# 临时跳过: 缺海康 MVS SDK (需 /opt/MVS/include/MvCameraControl.h + lib/aarch64/libMvCameraControl.so)
+# 装好 MVS SDK 后删除本文件即可恢复构建

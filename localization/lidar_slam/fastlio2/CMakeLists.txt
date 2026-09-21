@@ -55,6 +55,7 @@ ament_target_dependencies(lio_node rclcpp std_msgs tf2 tf2_ros nav_msgs sensor_m
 target_link_libraries(lio_node
   yaml-cpp
   ${PCL_LIBRARIES}
+  Sophus::Sophus
 )
 
 

@@ -40,8 +40,9 @@ if [ ! -f "$DB" ]; then
 fi
 
 source "$ROBOT_CORE/setup.sh"
-if [ -f "$RTABMAP_WS/install/setup.bash" ]; then
-    true
+# install base 就是 install/rtabmap，setup.bash 在其根目录（无第二层 install/）
+if [ -f "$RTABMAP_WS/setup.bash" ]; then
+    source "$RTABMAP_WS/setup.bash"
 fi
 export LD_LIBRARY_PATH=$RTABMAP_WS/rtabmap/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:$LD_LIBRARY_PATH
 

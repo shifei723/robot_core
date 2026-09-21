@@ -49,10 +49,13 @@ IMU_TOPIC=/imu/data
 need_source() {
     source /opt/ros/humble/setup.bash
     # overlay 自编译的 rtabmap 工作空间（后 source 覆盖 apt 同名包）
-    if [ -f "$RTABMAP_WS/install/setup.bash" ]; then
-        true
+    # 注意: install base 就是 install/rtabmap，setup.bash 直接在其根目录，
+    # 不再是 install/rtabmap/install/setup.bash
+    if [ -f "$RTABMAP_WS/setup.bash" ]; then
+        source "$RTABMAP_WS/setup.bash"
     else
-        echo "[警告] $RTABMAP_WS/install/setup.bash 不存在，将回退到 apt 版 rtabmap!"
+        echo "[警告] $RTABMAP_WS/setup.bash 不存在，将回退到 apt 版 rtabmap!"
+        echo "       如需自编译版: cd $ROBOT_CORE && ./build.sh rtabmap"
     fi
 }
 

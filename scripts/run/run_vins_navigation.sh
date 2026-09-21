@@ -56,11 +56,11 @@ export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libusb-1.0.so.0
 
 need_source() {
     source /opt/ros/humble/setup.bash
-    if [ -f "$WS_NAV/install/setup.bash" ]; then
-        true
+    if [ -f "$WS_NAV/setup.bash" ]; then
+        source "$WS_NAV/setup.bash"
     else
-        echo "[错误] $WS_NAV/install/setup.bash 不存在，请先编译 ws_nav 工作空间!"
-        echo "       cd $WS_NAV && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release"
+        echo "[错误] $WS_NAV/setup.bash 不存在，请先编译 ws_nav 工作区!"
+        echo "       cd $ROBOT_CORE && ./build.sh ws_nav"
         exit 1
     fi
 }
