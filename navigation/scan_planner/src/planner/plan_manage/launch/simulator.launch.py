@@ -130,6 +130,7 @@ def _setup(context):
                         "map.x_size": map_x,
                         "map.y_size": map_y,
                         "map.z_size": map_z,
+                        "dynamic.enable": int(_as_bool(LaunchConfiguration("dynamic_obstacles").perform(context))),
                         "use_global_map_topic": True,
                         "pcd_map_file": pcd_map_file,
                     },
@@ -180,6 +181,7 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 "beam_clearance", default_value="",
                 description="室内场景门洞横梁底面高度(净空), 留空则用 simulator.yaml 的值"),
+            DeclareLaunchArgument("dynamic_obstacles", default_value="false"),
             DeclareLaunchArgument("use_sim_time", default_value="false"),
             OpaqueFunction(function=_setup),
         ]

@@ -6,8 +6,9 @@
 #include <Eigen/Eigen>
 #include <plan_env/grid_map.h>
 #include <queue>
+#include <limits>
 
-constexpr double inf = 1 >> 20;
+constexpr double inf = std::numeric_limits<double>::infinity();
 struct GridNode;
 typedef GridNode *GridNodePtr;
 
@@ -38,13 +39,12 @@ struct GridNode
 	GridNodePtr cameFrom{NULL};
 };
 
-class NodeComparator
-{
-public:
-	bool operator()(GridNodePtr node1, GridNodePtr node2)
-	{
-		return node1->fScore > node2->fScore;
-	}
+struct OpenEntry {
+  GridNodePtr node;
+  double g, f;
+};
+struct NodeComparator {
+  bool operator()(const OpenEntry &a, const OpenEntry &b) const { return a.f > b.f; }
 };
 
 class AStar
@@ -79,7 +79,7 @@ private:
 	std::vector<GridNodePtr> gridPath_;
 
 	GridNodePtr ***GridNodeMap_;
-	std::priority_queue<GridNodePtr, std::vector<GridNodePtr>, NodeComparator> openSet_;
+	std::priority_queue<OpenEntry, std::vector<OpenEntry>, NodeComparator> openSet_;
 
 	int rounds_{0};
 
@@ -91,7 +91,7 @@ public:
 
 	void initGridMap(GridMap::Ptr occ_map, const Eigen::Vector3i pool_size);
 
-	ASTAR_RET AstarSearch(const double step_size, Eigen::Vector3d start_pt, Eigen::Vector3d end_pt);
+	ASTAR_RET AstarSearch(const double step_size, Eigen::Vector3d start_pt, Eigen::Vector3d end_pt, double timeout_s = 0.2);
 
 	std::vector<Eigen::Vector3d> getPath();
 };
@@ -108,7 +108,7 @@ inline Eigen::Vector3d AStar::Index2Coord(const Eigen::Vector3i &index) const
 
 inline bool AStar::Coord2Index(const Eigen::Vector3d &pt, Eigen::Vector3i &idx) const
 {
-	idx = ((pt - center_) * inv_step_size_ + Eigen::Vector3d(0.5, 0.5, 0.5)).cast<int>() + CENTER_IDX_;
+	idx = ((pt - center_) * inv_step_size_ + Eigen::Vector3d(0.5, 0.5, 0.5)).array().floor().cast<int>().matrix() + CENTER_IDX_;
 
 	if (idx(0) < 0 || idx(0) >= POOL_SIZE_(0) || idx(1) < 0 || idx(1) >= POOL_SIZE_(1) || idx(2) < 0 || idx(2) >= POOL_SIZE_(2))
 	{

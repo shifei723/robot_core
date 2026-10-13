@@ -11,6 +11,11 @@
 #include <scan_planner_msgs/msg/bspline.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float32.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <sensor_msgs/point_cloud2_iterator.hpp>
+#include "plan_manage/height_safety.hpp"
+#include "plan_manage/heading_tracker.hpp"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/utils.hpp>
 
@@ -37,6 +42,35 @@ public:
     // base_link 世界高度 = 腿高 + 偏置 (轮半径 0.0922 - 高电机高 0.06)
     base_z_offset_ = declare_parameter<double>("base_z_offset", 0.0322);
 
+    height_safety_enabled_ = declare_parameter<bool>("height_safety_enabled", false);
+    stable_heading_ = declare_parameter<bool>("stable_heading", true);
+    height_rate_ = declare_parameter<double>("height_command_rate", 0.08);
+    height_tolerance_ = declare_parameter<double>("height_tolerance", 0.008);
+    data_timeout_ = declare_parameter<double>("data_timeout", 0.8);
+    state_pub_ = create_publisher<std_msgs::msg::String>("height_control/state", 10);
+    if (height_safety_enabled_) {
+      planner_status_sub_ = create_subscription<std_msgs::msg::String>("planning/status", 10,
+          [this](std_msgs::msg::String::ConstSharedPtr msg) {
+            if (msg->data=="NO_PATH") no_path_=true;
+            else if (msg->data=="GEN_NEW_TRAJ" || msg->data=="EXEC_TRAJ") no_path_=false;
+          });
+      map_sub_ = create_subscription<sensor_msgs::msg::PointCloud2>("grid_map/occupancy",
+          rclcpp::SensorDataQoS(), [this](sensor_msgs::msg::PointCloud2::ConstSharedPtr msg) {
+            if (msg->header.frame_id != "world") return;
+            std::vector<Eigen::Vector3d> occupied;
+            try {
+              sensor_msgs::PointCloud2ConstIterator<float> x(*msg,"x"), y(*msg,"y"), z(*msg,"z");
+              for (;x!=x.end();++x,++y,++z)
+                if (std::isfinite(*x)&&std::isfinite(*y)&&std::isfinite(*z))
+                  occupied.emplace_back(*x,*y,*z);
+            } catch (const std::runtime_error &) { return; }
+            safety_.occupied=std::move(occupied); map_time_=now(); have_map_=true;
+          });
+      cloud_sub_ = create_subscription<sensor_msgs::msg::PointCloud2>("cloud",
+          rclcpp::SensorDataQoS(), [this](sensor_msgs::msg::PointCloud2::ConstSharedPtr) {
+            cloud_time_=now(); have_cloud_=true;
+          });
+    }
     bspline_sub_ = create_subscription<scan_planner_msgs::msg::Bspline>(
         "planning/bspline", 10,
         std::bind(&ClosedLoopController::bsplineCallback, this, std::placeholders::_1));
@@ -92,6 +126,7 @@ private:
     msg.data = static_cast<float>(
         std::clamp(base_z - base_z_offset_, leg_height_min_, leg_height_max_));
     leg_height_pub_->publish(msg);
+    last_height_cmd_=msg.data;
   }
 
   void publishExecutionFrozen(bool frozen)
@@ -103,7 +138,13 @@ private:
 
   void bsplineCallback(const scan_planner_msgs::msg::Bspline::ConstSharedPtr msg)
   {
-    if (msg->pos_pts.empty() || msg->knots.empty() || msg->order <= 0)
+    if (msg->order != 3 || msg->pos_pts.size() < 6 ||
+        msg->knots.size() != msg->pos_pts.size() + msg->order + 1 ||
+        !std::all_of(msg->pos_pts.begin(),msg->pos_pts.end(),[](const auto &p) {
+          return std::isfinite(p.x)&&std::isfinite(p.y)&&std::isfinite(p.z); }) ||
+        !std::all_of(msg->knots.begin(),msg->knots.end(),[](double t){return std::isfinite(t);}) ||
+        !std::is_sorted(msg->knots.begin(),msg->knots.end()) ||
+        msg->knots[msg->pos_pts.size()]<=msg->knots[msg->order])
     {
       RCLCPP_WARN(get_logger(), "Ignoring invalid B-spline");
       return;
@@ -130,10 +171,13 @@ private:
   {
     odom_pos_ << msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z;
     odom_yaw_ = tf2::getYaw(msg->pose.pose.orientation);
+    if (!odom_pos_.allFinite() || !std::isfinite(odom_yaw_)) { have_odom_=false; return; }
+    if (!have_odom_) last_height_cmd_=std::clamp(odom_pos_.z()-base_z_offset_,leg_height_min_,leg_height_max_);
     have_odom_ = true;
+    odom_time_=now();
   }
 
-  void cmdCallback()
+  void legacyCmdCallback()
   {
     if (!receive_traj_ || !have_odom_)
     {
@@ -179,12 +223,125 @@ private:
     publishLegHeightFromBaseZ(pos_des.z());
   }
 
+  void reportState(const std::string &state) {
+    std_msgs::msg::String msg; msg.data=state; state_pub_->publish(msg);
+  }
+
+  void cmdCallback()
+  {
+    if (!height_safety_enabled_) { legacyCmdCallback(); return; }
+    const auto current=now();
+    double dt=(current-last_update_time_).seconds();
+    last_update_time_=current;
+    dt=std::clamp(dt,0.0,0.05);
+    auto hold = [&](const std::string &state) {
+      publishStop(); publishExecutionFrozen(true);
+      // Hold the last commanded posture: never stand up blindly on a timeout.
+      publishLegHeightFromBaseZ(last_height_cmd_+base_z_offset_); reportState(state);
+    };
+    if (!have_odom_ || (current-odom_time_).seconds()>data_timeout_) { hold("WAIT_ODOM"); return; }
+    if (height_safety_enabled_ && (!have_map_ || !have_cloud_ ||
+        (current-map_time_).seconds()>data_timeout_ || (current-cloud_time_).seconds()>data_timeout_)) {
+      hold("WAIT_MAP"); return;
+    }
+    if (no_path_) { hold("NO_PATH"); return; }
+    if (!receive_traj_) { hold("IDLE"); return; }
+
+    const double t=std::min(exec_time_,traj_duration_);
+    const Eigen::Vector3d desired=traj_[0].evaluateDeBoorT(t);
+    const Eigen::Vector3d feedforward=traj_[1].evaluateDeBoorT(t);
+    const Eigen::Vector2d error=desired.head<2>()-odom_pos_.head<2>();
+    // Steer towards tracking correction as well as the tangent: a differential
+    // drive cannot execute the lateral velocity discarded by max_vy=0.
+    const Eigen::Vector2d velocity=feedforward.head<2>()+kp_pos_*error;
+    double yaw_error=normalizeAngle(estimateDesiredYaw(t,desired)-odom_yaw_);
+    if (velocity.norm()>0.02) yaw_error=normalizeAngle(std::atan2(velocity.y(),velocity.x())-odom_yaw_);
+    double w=std::clamp(kp_yaw_*yaw_error,-max_vyaw_,max_vyaw_);
+    double v=std::clamp(velocity.norm()*std::max(0.0,std::cos(yaw_error)),0.0,max_vx_);
+    if (stable_heading_) {
+      // A spatially meaningful forward secant survives vertical-only spline
+      // segments and near-zero derivatives at replan boundaries.
+      Eigen::Vector2d tangent=Eigen::Vector2d::Zero();
+      for (double ahead=0.1;ahead<=4.0;ahead+=0.1) {
+        tangent=(traj_[0].evaluateDeBoorT(std::min(t+ahead,traj_duration_))-desired).head<2>();
+        if (tangent.norm()>=0.08) break;
+      }
+      if (tangent.norm()<0.005) {
+        tangent=feedforward.head<2>();
+        if (tangent.norm()<0.005) tangent=Eigen::Vector2d(std::cos(odom_yaw_),std::sin(odom_yaw_));
+      }
+      const auto tracking=forwardHeadingCommand(tangent,error,feedforward.head<2>().norm(),
+                                                kp_pos_,max_vx_,odom_yaw_);
+      yaw_error=normalizeAngle(tracking.yaw-odom_yaw_);
+      w=std::clamp(kp_yaw_*yaw_error,-max_vyaw_,max_vyaw_);
+      v=tracking.speed*std::max(0.0,std::cos(yaw_error));
+    }
+    bool frozen=false;
+    if (std::abs(yaw_error)>heading_error_threshold_) { v=0; frozen=true; }
+    if (error.norm()>0.12) frozen=true;
+
+    double target_z=desired.z();
+    // Lower before the leading body edge reaches the lintel. Do not restore
+    // height until the *trailing* edge has left it (current footprint cap).
+    for(double ahead=0.1;ahead<=1.0;ahead+=0.1)
+      target_z=std::min(target_z,traj_[0].evaluateDeBoorT(std::min(t+ahead,traj_duration_)).z());
+    if (height_safety_enabled_) {
+      double cap=safety_.sweptMaxBaseHeight(odom_pos_,odom_yaw_,v,w,0.6);
+      if (cap<leg_height_min_+base_z_offset_) {
+        v=0; frozen=true;
+        cap=safety_.sweptMaxBaseHeight(odom_pos_,odom_yaw_,0,w,0.6);
+        if (cap<odom_pos_.z()) { hold("BLOCKED"); return; }
+      }
+      target_z=std::min(target_z,cap-0.005);
+    }
+    target_z=std::clamp(target_z,leg_height_min_+base_z_offset_,leg_height_max_+base_z_offset_);
+    const double target_h=target_z-base_z_offset_;
+    const double h=last_height_cmd_+std::clamp(target_h-last_height_cmd_,-height_rate_*dt,height_rate_*dt);
+    publishLegHeightFromBaseZ(h+base_z_offset_);
+    std::string state=frozen ? "ALIGNING" : "TRACKING";
+    if (stable_heading_) {
+      if (odom_pos_.z()>target_z+height_tolerance_) lowering_=true;
+      if (odom_pos_.z()<=target_z+0.003) lowering_=false;
+    }
+    if (odom_pos_.z()>target_z+height_tolerance_ || (stable_heading_ && lowering_)) {
+      v=0; w=0; frozen=true; state="LOWERING";
+    }
+    if (height_safety_enabled_) {
+      // Final check at measured height; lowering the command is not proof that
+      // the physical body has reached that height yet.
+      if (safety_.sweptMaxBaseHeight(odom_pos_,odom_yaw_,v,w,0.3)<odom_pos_.z()) {
+        v=0; w=0; frozen=true; state="LOWERING";
+      }
+    }
+    const Eigen::Vector2d endpoint=traj_[0].evaluateDeBoorT(traj_duration_).head<2>();
+    const bool terminal_capture=stable_heading_ &&
+        (endpoint-odom_pos_.head<2>()).norm()<std::min(0.01,finish_dist_) &&
+        (endpoint-desired.head<2>()).norm()<0.03;
+    if ((t>=traj_duration_ && error.norm()<finish_dist_) || terminal_capture) {
+      v=0;w=0;state="GOAL_REACHED";
+      if (terminal_capture) { exec_time_=traj_duration_; frozen=false; }
+    }
+    geometry_msgs::msg::Twist command;
+    command.linear.x=v; command.angular.z=w;
+    cmd_vel_pub_->publish(command);
+    publishExecutionFrozen(frozen); reportState(state);
+    if(!frozen) exec_time_=std::min(traj_duration_,exec_time_+dt);
+  }
+
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
   rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr execution_frozen_pub_;
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr leg_height_pub_;
   rclcpp::Subscription<scan_planner_msgs::msg::Bspline>::SharedPtr bspline_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
   rclcpp::TimerBase::SharedPtr cmd_timer_;
+  HeightSafety safety_;
+  bool no_path_{false},stable_heading_{true},lowering_{false};
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr planner_status_sub_;
+  bool height_safety_enabled_{false}, have_map_{false}, have_cloud_{false};
+  double height_rate_{0.08},height_tolerance_{0.008},data_timeout_{0.8},last_height_cmd_{0.25};
+  rclcpp::Time odom_time_{0,0,RCL_ROS_TIME},map_time_{0,0,RCL_ROS_TIME},cloud_time_{0,0,RCL_ROS_TIME};
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr map_sub_,cloud_sub_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub_;
   bool receive_traj_{false};
   bool have_odom_{false};
   std::vector<UniformBspline> traj_;

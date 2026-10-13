@@ -68,6 +68,10 @@ build_group() {
   echo "  包内并行: make -j${MAKE_JOBS} | 包级并发: ${PKG_WORKERS} | 包间串行: ${PKG_SERIAL}"
   _exec_arg=""
   [ "${PKG_SERIAL:-1}" = "1" ] && _exec_arg="--executor sequential"
+  local cmake_args=()
+  if [ "$g" = "ws_nav" ]; then
+    cmake_args=(--cmake-args "-DCMAKE_BUILD_TYPE=${NAV_BUILD_TYPE:-Release}" "-DPython3_EXECUTABLE=${ROS_PYTHON_EXECUTABLE:-/usr/bin/python3}")
+  fi
   colcon --log-base "log/$g" build \
     --base-paths $paths \
     --build-base   "build/$g" \
@@ -75,7 +79,7 @@ build_group() {
     --continue-on-error \
     --parallel-workers "${PKG_WORKERS}" \
     $_exec_arg \
-    --event-handlers console_direct+
+    --event-handlers console_direct+ "${cmake_args[@]}"
 }
 
 case "$GROUP" in

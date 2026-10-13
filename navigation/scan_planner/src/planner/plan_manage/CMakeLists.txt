@@ -54,10 +54,14 @@ install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME} OPTIONAL)
 install(FILES launch/default.rviz launch/slash.rviz DESTINATION share/${PROJECT_NAME}/rviz OPTIONAL)
 install(PROGRAMS scripts/keypoint_recorder.py scripts/slash_leg_controller.py scripts/leg_height_control.py scripts/ground_plane_publisher.py scripts/leg_height_gui.py
-  scripts/leg_height_to_posture.py scripts/goal_frame_bridge.py
+  scripts/leg_height_to_posture.py scripts/goal_frame_bridge.py scripts/height_experiment_goal.py
   DESTINATION lib/${PROJECT_NAME} OPTIONAL)
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_height_safety test/test_height_safety.cpp)
+  target_include_directories(test_height_safety PRIVATE include)
+  target_link_libraries(test_height_safety Eigen3::Eigen)
   find_package(launch_testing_ament_cmake REQUIRED)
   add_launch_test(test/test_planner_startup.py TIMEOUT 30)
   add_launch_test(test/test_waypoint_parameters.py TIMEOUT 30)

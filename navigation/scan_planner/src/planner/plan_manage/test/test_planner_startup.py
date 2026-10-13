@@ -1,6 +1,7 @@
 """Smoke-test that the migrated planner accepts its ROS 2 parameter file."""
 
 import os
+import unittest
 
 import launch
 import launch_ros.actions
@@ -27,6 +28,6 @@ def generate_test_description():
     )
 
 
-class TestPlannerStartup:
+class TestPlannerStartup(unittest.TestCase):
     def test_process_starts(self, proc_info, planner):
         proc_info.assertWaitForStartup(process=planner, timeout=15)

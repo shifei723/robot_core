@@ -4,7 +4,11 @@
 #include <Eigen/Eigen>
 #include <Eigen/StdVector>
 #include <algorithm>
+#if __has_include(<cv_bridge/cv_bridge.hpp>)
+#include <cv_bridge/cv_bridge.hpp>
+#else
 #include <cv_bridge/cv_bridge.h>
+#endif
 #include <cmath>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <iostream>
@@ -150,7 +154,7 @@ struct MappingData {
   char raycast_num_;
   queue<Eigen::Vector3i> cache_voxel_;
 
-  // 占位 cell 地址表 (供阴影区衰减遍历, 避开全图扫描), 惰性删除
+  // 占位 cell 地址表 (供自由空间证据衰减遍历, 避开全图扫描), 惰性删除
 
   vector<int> occ_cells_;
   vector<char> in_occ_list_;
@@ -205,7 +209,8 @@ public:
    *     “天花板就在地面”而让机器人全程下蹲。
    */
   double queryCeilingHeight(const Eigen::Vector3d& pos, double yaw,
-                            bool* clearance_verified = nullptr);
+                            bool* clearance_verified = nullptr,
+                            double radius = -1.0, double offset = -1.0);
 
   inline void boundIndex(Eigen::Vector3i& id);
   inline bool isUnknown(const Eigen::Vector3i& id);

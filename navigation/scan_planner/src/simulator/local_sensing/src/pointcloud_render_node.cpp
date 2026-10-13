@@ -1,6 +1,7 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <nav_msgs/msg/path.hpp>
 #include <cstdint>
+#include <limits>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/point_cloud.h>
@@ -30,7 +31,11 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <pcl/common/transforms.h>
+#if __has_include(<cv_bridge/cv_bridge.hpp>)
+#include <cv_bridge/cv_bridge.hpp>
+#else
 #include <cv_bridge/cv_bridge.h>
+#endif
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -116,6 +121,7 @@ double cam_cx = 321.04638671875;
 double cam_cy = 243.44969177246094;
 
 int plane_interline = 1;
+bool surface_render = false;
 
 // multi uav variables
 int drone_id = 0;
@@ -1109,6 +1115,48 @@ double duration8 = 0.0;
 double duration_interline = 0.0;
 int comp_time_count = 0;
 
+
+// Deterministic angular z-buffer. Return actual surface samples, never an
+// extrapolated plane or a sphere around an edge (which shrinks low clearances).
+// This remains a sampled lidar with finite FOV/occlusion, not a planner map feed.
+void renderSurfaceSamples(const Eigen::Vector3d &pos, const Eigen::Matrix3d &rot)
+{
+  const double step = polar_resolution * M_PI / 180.0;
+  const double hfov = (is_360lidar ? 360.0 : yaw_fov) * M_PI / 180.0;
+  const double vfov = vertical_fov * M_PI / 180.0;
+  const int width = std::max(1, static_cast<int>(std::ceil(hfov / step)));
+  const int height = std::max(1, static_cast<int>(std::ceil(vfov / step)));
+  std::vector<double> ranges(width * height, std::numeric_limits<double>::infinity());
+  std::vector<PointType> hits(width * height);
+  auto insert = [&](const PointType &pt) {
+    const Eigen::Vector3d d = rot.transpose() * (Eigen::Vector3d(pt.x, pt.y, pt.z) - pos);
+    const double range = d.norm();
+    if (!std::isfinite(range) || range < min_raylength || range > sensing_horizon) return;
+    const double az = std::atan2(d.y(), d.x());
+    const double el = std::atan2(d.z(), d.head<2>().norm());
+    if (std::abs(az) >= hfov * 0.5 || std::abs(el) >= vfov * 0.5) return;
+    const int u = std::clamp(static_cast<int>((az + hfov * 0.5) / step), 0, width - 1);
+    const int v = std::clamp(static_cast<int>((el + vfov * 0.5) / step), 0, height - 1);
+    const int idx = v * width + u;
+    if (range < ranges[idx]) { ranges[idx] = range; hits[idx] = pt; }
+  };
+  for (const auto &pt : cloud_all_map.points) insert(pt);
+  if (dynobj_enable) for (const auto &pt : dynobj_points) insert(pt);
+  pcl::PointCloud<PointType> world, sensor;
+  for (size_t i = 0; i < ranges.size(); ++i) {
+    if (!std::isfinite(ranges[i])) continue;
+    world.push_back(hits[i]);
+    PointType pt = hits[i];
+    const Eigen::Vector3d d = rot.transpose() * (Eigen::Vector3d(pt.x, pt.y, pt.z) - pos);
+    pt.x = d.x(); pt.y = d.y(); pt.z = d.z(); sensor.push_back(pt);
+  }
+  sensor_msgs::msg::PointCloud2 msg;
+  pcl::toROSMsg(world, msg); msg.header = odom_.header; msg.header.frame_id = "world";
+  pub_cloud->publish(msg);
+  pcl::toROSMsg(sensor, msg); msg.header = odom_.header; msg.header.frame_id = "lidar";
+  pub_intercloud->publish(msg);
+}
+
 void renderSensedPoints()
 {
 
@@ -1158,6 +1206,7 @@ void renderSensedPoints()
   // rotate lidar end
 
   const Eigen::Matrix3d rot(q.toRotationMatrix() * rot_body2lidar);
+  if (surface_render) { renderSurfaceSamples(pos, rot); return; }
 
   // rot = q.toRotationMatrix();
   const Eigen::Vector3d yaw_x(1, 0, 0);
@@ -2188,6 +2237,7 @@ int main(int argc, char **argv)
   drone_num = ros_node->declare_parameter<int>("uav_num", 1);
   drone_id = ros_node->declare_parameter<int>("drone_id", 0);
   lidar_pitch = ros_node->declare_parameter<double>("lidar_pitch", 45.0);
+  surface_render = ros_node->declare_parameter<bool>("surface_render", false);
   other_uav_pos.resize(drone_num);
   other_uav_rcv_time.resize(drone_num);
   otheruav_points.resize(drone_num);

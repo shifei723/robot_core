@@ -1,3 +1,4 @@
+#include <std_msgs/msg/string.hpp>
 #ifndef _SCAN_REPLAN_FSM_H_
 #define _SCAN_REPLAN_FSM_H_
 
@@ -94,6 +95,7 @@ namespace scan_planner
     rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr path_sub_;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr go2_execution_frozen_sub_;
     rclcpp::Publisher<scan_planner_msgs::msg::Bspline>::SharedPtr bspline_pub_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr status_pub_;
     rclcpp::Publisher<scan_planner_msgs::msg::DataDisp>::SharedPtr data_disp_pub_;
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr self_inflation_pub_;
 

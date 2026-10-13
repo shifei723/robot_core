@@ -71,6 +71,7 @@ namespace scan_planner
       if (!node->has_parameter(name)) node->declare_parameter<double>(name, default_value);
       return node->get_parameter(name).as_double();
     };
+    wheel_grid_trajectory_ = node_->declare_parameter<bool>("manager.wheel_grid_trajectory", false);
     pp_.max_vel_ = get_double("manager.max_vel", -1.0);
     pp_.max_acc_ = get_double("manager.max_acc", -1.0);
     pp_.max_jerk_ = get_double("manager.max_jerk", -1.0);
@@ -88,7 +89,7 @@ namespace scan_planner
     bspline_optimizer_rebound_->setParam(node_);
     bspline_optimizer_rebound_->setEnvironment(grid_map_);
     bspline_optimizer_rebound_->a_star_.reset(new AStar);
-    bspline_optimizer_rebound_->a_star_->initGridMap(grid_map_, Eigen::Vector3i(100, 100, 100));
+    bspline_optimizer_rebound_->a_star_->initGridMap(grid_map_, wheel_grid_trajectory_ ? Eigen::Vector3i(200, 200, 20) : Eigen::Vector3i(100, 100, 100));
 
     visualization_ = vis;
   }
@@ -102,6 +103,7 @@ namespace scan_planner
                                         Eigen::Vector3d local_target_vel, bool flag_polyInit, bool flag_randomPolyTraj)
   {
 
+    if (wheel_grid_trajectory_) return planWheelTrajectory(start_pt, local_target_pt);
     static int count = 0;
     std::cout << endl
               << "[rebo replan]: -------------------------------------" << count++ << std::endl;
@@ -342,6 +344,67 @@ namespace scan_planner
 
     // success. YoY
     continuous_failures_count_ = 0;
+    return true;
+  }
+
+
+  // Wheel mode uses a collision-checked grid corridor rather than an unconstrained
+  // XY optimizer whose ceiling term has no XY gradient at doorway discontinuities.
+  bool SCANPlannerManager::trajectoryCollision(const Eigen::Vector3d &p, double yaw)
+  {
+    if (!wheel_grid_trajectory_) return grid_map_->getInflateOccupancyAdaptive(p,yaw)!=0;
+    const double ceiling=grid_map_->queryCeilingHeight(p,yaw,nullptr,0.30,0.18);
+    return !grid_map_->isInMap(p) || !grid_map_->isInWorldBound(p) ||
+           p.z()<0.1722-1e-6 || p.z()>0.3922+1e-6 ||
+           (std::isfinite(ceiling) && p.z()+0.328+0.05>ceiling+1e-6);
+  }
+
+  bool SCANPlannerManager::planWheelTrajectory(const Eigen::Vector3d &start,
+                                               const Eigen::Vector3d &goal)
+  {
+    auto search = bspline_optimizer_rebound_->a_star_;
+    if (search->AstarSearch(grid_map_->getResolution(), start, goal, 1.0) != ASTAR_RET::SUCCESS)
+      return false;
+    auto path = search->getPath();
+    if (path.empty()) return false;
+    if ((path.front() - start).norm() > (path.back() - start).norm())
+      std::reverse(path.begin(), path.end());
+    path.insert(path.begin(), start);
+    path.push_back(goal);
+    const double dt = 0.20;
+    const double speed = std::min(pp_.max_vel_, 0.30);
+    const double height_rate = 0.06;
+    std::vector<Eigen::Vector3d> points(3, start);
+    for (size_t i = 1; i < path.size(); ++i) {
+      const Eigen::Vector3d delta = path[i] - path[i-1];
+      const double duration = std::max(delta.head<2>().norm() / speed,
+                                       std::abs(delta.z()) / height_rate);
+      const int steps = std::max(1, static_cast<int>(std::ceil(duration / dt)));
+      for (int k = 1; k <= steps; ++k)
+        points.push_back(path[i-1] + delta * (static_cast<double>(k) / steps));
+    }
+    points.push_back(goal); points.push_back(goal);
+    Eigen::MatrixXd controls(3, points.size());
+    for (size_t i=0; i<points.size(); ++i) controls.col(i)=points[i];
+    UniformBspline spline(controls, 3, dt);
+    spline.setPhysicalLimits(pp_.max_vel_, pp_.max_acc_, 0.0);
+    double ratio=1.0;
+    if (!spline.checkFeasibility(ratio, false)) spline.lengthenTime(ratio * 1.05);
+    const double duration=spline.getTimeSum();
+    for (double t=0; t<=duration; t+=0.02) {
+      const Eigen::Vector3d p=spline.evaluateDeBoorT(t);
+      const Eigen::Vector3d d=spline.evaluateDeBoorT(std::min(duration,t+0.05))-p;
+      const double yaw=d.head<2>().norm()>1e-6 ? std::atan2(d.y(),d.x()) : 0.0;
+      // Search uses a circumscribed turning envelope; validate the smoothed
+      // curve with the tighter execution envelope plus 5 cm geometric padding.
+      if (trajectoryCollision(p,yaw)) {
+        RCLCPP_WARN(node_->get_logger(), "Wheel corridor smoothing failed collision check");
+        return false;
+      }
+    }
+    updateTrajInfo(spline, node_->now());
+    visualization_->displayInitPathList(path, 0.08, 0);
+    continuous_failures_count_=0;
     return true;
   }
 

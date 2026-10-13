@@ -48,14 +48,15 @@ pcl_render_node:
     map.x_size: 20.0
     map.y_size: 20.0
     map.z_size: 3.0
-    sensing_horizon: 40.0
+    sensing_horizon: 6.0
     sensing_rate: 10.0
     estimation_rate: 10.0
-    polar_resolution: 0.2
+    polar_resolution: 0.4
     yaw_fov: 360.0
     vertical_fov: 90.0
-    min_raylength: 1.0
-    downsample_res: 0.1
+    surface_render: true  # exact surface returns for height-clearance experiments
+    min_raylength: 0.1
+    downsample_res: 0.05
     lidar_pitch: 25.0    # Mid-360 native [-7,+52] -> body frame [-18,+27], balanced horizontal coverage
     is_360lidar: 1
     use_minicf_pattern: 1

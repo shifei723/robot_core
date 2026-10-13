@@ -145,7 +145,7 @@ bool AStar::ConvertToIndexAndAdjustStartEndPoints(Vector3d start_pt, Vector3d en
     return true;
 }
 
-ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d end_pt)
+ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d end_pt, double timeout_s)
 {
     const auto time_1 = std::chrono::steady_clock::now();
     ++rounds_;
@@ -173,7 +173,7 @@ ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d
     GridNodePtr startPtr = GridNodeMap_[start_idx(0)][start_idx(1)][start_idx(2)];
     GridNodePtr endPtr = GridNodeMap_[end_idx(0)][end_idx(1)][end_idx(2)];
 
-    std::priority_queue<GridNodePtr, std::vector<GridNodePtr>, NodeComparator> empty;
+    std::priority_queue<OpenEntry, std::vector<OpenEntry>, NodeComparator> empty;
     openSet_.swap(empty);
 
     GridNodePtr neighborPtr = NULL;
@@ -187,7 +187,7 @@ ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d
     startPtr->fScore = getHeu(startPtr, endPtr);
     startPtr->state = GridNode::OPENSET; //put start node in open set
     startPtr->cameFrom = NULL;
-    openSet_.push(startPtr); //put start in open set
+    openSet_.push({startPtr,startPtr->gScore,startPtr->fScore}); //put start in open set
 
     double tentative_gScore;
     std::unordered_map<std::uint64_t, int> occupancy_cache;
@@ -197,7 +197,9 @@ ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d
     while (!openSet_.empty())
     {
         num_iter++;
-        current = openSet_.top();
+        const auto entry = openSet_.top();
+        current = entry.node;
+        if (entry.g != current->gScore || current->state == GridNode::CLOSEDSET) { openSet_.pop(); continue; }
         openSet_.pop();
 
         // if ( num_iter < 10000 )
@@ -243,7 +245,6 @@ ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d
                         continue; //in closed set.
                     }
 
-                    neighborPtr->rounds = rounds_;
 
                     const bool vertical_step = dx == 0 && dy == 0;
                     const double neighbor_yaw = vertical_step
@@ -272,26 +273,28 @@ ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d
 
                     if (!flag_explored)
                     {
-                        //discover a new node
+                        // Only mark visited after accepting the collision-free state.
+                        neighborPtr->rounds = rounds_;
                         neighborPtr->state = GridNode::OPENSET;
                         neighborPtr->cameFrom = current;
                         neighborPtr->gScore = tentative_gScore;
                         neighborPtr->fScore = tentative_gScore + getHeu(neighborPtr, endPtr);
-                        openSet_.push(neighborPtr); //put neighbor in open set and record it.
+                        openSet_.push({neighborPtr,neighborPtr->gScore,neighborPtr->fScore}); //put neighbor in open set and record it.
                     }
                     else if (tentative_gScore < neighborPtr->gScore)
                     { //in open set and need update
                         neighborPtr->cameFrom = current;
                         neighborPtr->gScore = tentative_gScore;
                         neighborPtr->fScore = tentative_gScore + getHeu(neighborPtr, endPtr);
+                        openSet_.push({neighborPtr,neighborPtr->gScore,neighborPtr->fScore});
                     }
                 }
         const auto time_2 = std::chrono::steady_clock::now();
-        if (std::chrono::duration<double>(time_2 - time_1).count() > 0.2)
+        if (std::chrono::duration<double>(time_2 - time_1).count() > timeout_s)
         {
             RCLCPP_WARN(rclcpp::get_logger("path_searching"),
-                        "A-star timeout after 0.2s: iter=%d, start=[%.2f %.2f %.2f], end=[%.2f %.2f %.2f]",
-                        num_iter, search_start(0), search_start(1), search_start(2),
+                        "A-star timeout after %.2fs: iter=%d, start=[%.2f %.2f %.2f], end=[%.2f %.2f %.2f]",
+                        timeout_s, num_iter, search_start(0), search_start(1), search_start(2),
                         search_end(0), search_end(1), search_end(2));
             return ASTAR_RET::SEARCH_ERR;
         }

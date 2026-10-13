@@ -78,6 +78,7 @@ namespace scan_planner
         "planning/go2_execution_frozen", 10,
         std::bind(&SCANReplanFSM::go2ExecutionFrozenCallback, this, std::placeholders::_1));
 
+    status_pub_ = node_->create_publisher<std_msgs::msg::String>("planning/status", rclcpp::QoS(1).reliable().transient_local());
     bspline_pub_ = node_->create_publisher<scan_planner_msgs::msg::Bspline>("planning/bspline", 10);
     data_disp_pub_ = node_->create_publisher<scan_planner_msgs::msg::DataDisp>("planning/data_display", 100);
     self_inflation_pub_ = node_->create_publisher<visualization_msgs::msg::Marker>(
@@ -503,6 +504,9 @@ namespace scan_planner
     static string state_str[7] = {"INIT", "WAIT_TARGET", "GEN_NEW_TRAJ", "REPLAN_TRAJ", "EXEC_TRAJ", "EMERGENCY_STOP"};
     int pre_s = int(exec_state_);
     exec_state_ = new_state;
+    std_msgs::msg::String status;
+    status.data = pos_call == "finishProcess" ? "NO_PATH" : state_str[int(new_state)];
+    status_pub_->publish(status);
     cout << "[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)] << endl;
   }
 
@@ -825,7 +829,7 @@ namespace scan_planner
 
       Eigen::Vector3d pos = info->position_traj_.evaluateDeBoorT(t);
       Eigen::Vector3d pos_next = info->position_traj_.evaluateDeBoorT(std::min(t + time_step, info->duration_));
-      if (map->getInflateOccupancyAdaptive(pos, estimateYawFromSegment(pos, pos_next)))
+      if (planner_manager_->trajectoryCollision(pos, estimateYawFromSegment(pos, pos_next)))
       {
         if (planFromCurrentTraj()) // Make a chance
         {

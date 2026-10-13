@@ -5,7 +5,8 @@ Slash 双轮足机器人 — 腿高控制 ROS2 节点 (简化版)
 仅实现腿高控制，无速度环。
 
 控制流程:
-  leg_height_cmd → leg_height_ramp → current_h (腿高)
+  body_pose 实测 base_link 高度 → current_h (腿高)
+  无反馈时才使用 leg_height_cmd → leg_height_ramp
   right_ik / left_ik (x=0) → 四髋关节角度
   five_bar_knee_angles_closed → 膝关节角度 (闭环约束)
   → joint_states (RViz 可视化)
@@ -20,6 +21,7 @@ from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import Float32
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+from nav_msgs.msg import Odometry
 
 # 添加 scripts/ 目录到 path，以便导入 leg_height_control
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -53,6 +55,8 @@ class SlashLegController(Node):
 
         # 状态
         self.current_h = DEFAULT_HEIGHT
+        self.have_feedback = False
+        self.pose_sub = self.create_subscription(Odometry, "body_pose", self._pose_callback, 10)
 
         # 腿高指令订阅 (Float32, 单位: 米)
         self.height_sub = self.create_subscription(
@@ -85,6 +89,12 @@ class SlashLegController(Node):
         self.joint_msg.header.stamp = self.get_clock().now().to_msg()
         self.joint_pub.publish(self.joint_msg)
 
+    def _pose_callback(self, msg):
+        h = float(msg.pose.pose.position.z) - 0.0322
+        if math.isfinite(h):
+            self.current_h = _clamp(h, MIN_LOW, MAX_HIGH)
+            self.have_feedback = True
+
     def _height_callback(self, msg: Float32):
         """接收腿高指令 (米)
 
@@ -102,8 +112,9 @@ class SlashLegController(Node):
         :return: ((q_lf, q_lf2, q_lb, q_lb2), (q_rf, q_rf2, q_rb, q_rb2))
         """
         # 1. 腿高斜坡插值
-        self.current_h = leg_height_ramp(
-            self.current_h, self.target_h, dt, self.ramp_rate)
+        if not self.have_feedback:
+            self.current_h = leg_height_ramp(
+                self.current_h, self.target_h, dt, self.ramp_rate)
 
         # 2. IK (x=0, 无俯仰, 纯腿高控制)
         ik_x = 0.0

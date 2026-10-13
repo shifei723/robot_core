@@ -112,6 +112,20 @@ def _setup(context):
         "grid_map.cloud_is_world": cloud_is_world,
         "grid_map.need_extrinsic": need_extrinsic,
     }
+    if robot_model == "slash" and not is_real:
+        planner_overrides.update({
+            "manager.wheel_grid_trajectory": True,
+            "grid_map.double_cylinder_radius": 0.55,  # 0.25 radius + 0.18 offset + 0.12 tracking allowance
+            "grid_map.double_cylinder_offset": 0.0,  # circumscribed disc permits in-place turns
+
+            "fsm.max_replan_fail_count": 5,
+            "grid_map.ceiling_margin": 0.05,
+            "optimization.ceiling_margin": 0.05,
+            "grid_map.height_min": 0.1722,
+            "grid_map.height_max": 0.3922,
+            "optimization.height_min": 0.1722,
+            "optimization.height_max": 0.3922,
+        })
     if not is_real:
         # 仿真世界边界与仿真地图尺寸保持一致, 边界外不可达
         planner_overrides.update({
@@ -178,6 +192,12 @@ def _setup(context):
             "max_vyaw": float(LaunchConfiguration("real_max_vyaw").perform(context)),
         }]
 
+    if robot_model == "slash" and not is_real:
+        controller_overrides.append({"height_safety_enabled": True,
+            "stable_heading": LaunchConfiguration("stable_heading").perform(context).lower() == "true",
+            "max_vx": 0.35, "max_vy": 0.0, "max_vyaw": 0.8,
+            "heading_error_threshold": 0.35,
+            "leg_height_min": 0.14, "leg_height_max": 0.36})
     if controller_mode == "open_loop":
         actions.append(
             Node(
@@ -203,6 +223,7 @@ def _setup(context):
                 remappings=[
                     ("body_pose", body_pose),
                     ("cmd_vel", "/cmd_vel" if is_real else "/quad_0/cmd_vel"),
+                    ("cloud", cloud),
                 ],
             )
         )
@@ -220,7 +241,9 @@ def _setup(context):
                             "init_x": float(LaunchConfiguration("init_x").perform(context)),
                             "init_y": float(LaunchConfiguration("init_y").perform(context)),
                             "init_z": float(LaunchConfiguration("init_z").perform(context)),
+                            "init_yaw": float(LaunchConfiguration("init_yaw").perform(context)),
                             "publish_tf": True,
+                            **({"leg_height_rate": float(LaunchConfiguration("leg_height_rate").perform(context)), "leg_height_min": 0.14, "leg_height_max": 0.36} if robot_model == "slash" else {}),
                             "child_frame_id": cfg["child_frame_id"],
                         },
                     ],
@@ -306,6 +329,7 @@ def _setup(context):
                             "map_size_y",
                             "map_size_z",
                             "beam_clearance",
+                            "dynamic_obstacles",
                             "use_sim_time",
                         )
                     },
@@ -334,6 +358,10 @@ def generate_launch_description():
             DeclareLaunchArgument("map_size_y", default_value="20.0"),
             DeclareLaunchArgument("map_size_z", default_value="3.0"),
             DeclareLaunchArgument("beam_clearance", default_value=""),
+            DeclareLaunchArgument("dynamic_obstacles", default_value="false"),
+            DeclareLaunchArgument("leg_height_rate", default_value="0.08"),
+            DeclareLaunchArgument("stable_heading", default_value="true"),
+            DeclareLaunchArgument("init_yaw", default_value="0.0"),
             DeclareLaunchArgument("init_x", default_value="-8.0"),
             DeclareLaunchArgument("init_y", default_value="-8.0"),
             DeclareLaunchArgument("init_z", default_value="0.28"),

@@ -319,9 +319,18 @@ void GridMap::rebuildInflationOffsets()
  * 在未知区域(启动时整张地图)全程被压到最低高度。
  */
 double GridMap::queryCeilingHeight(const Eigen::Vector3d& pos, double yaw,
-                                   bool* clearance_verified)
+                                   bool* clearance_verified, double radius, double offset)
 {
   bool verified = true;
+  std::vector<Eigen::Vector2d> custom_offsets;
+  if (radius >= 0.0) {
+    const int cells=static_cast<int>(std::ceil(radius/mp_.resolution_));
+    for(int x=-cells;x<=cells;++x) for(int y=-cells;y<=cells;++y)
+      if (std::hypot(x*mp_.resolution_,y*mp_.resolution_)<=radius)
+        custom_offsets.emplace_back(x*mp_.resolution_,y*mp_.resolution_);
+  }
+  const auto &footprint = radius >= 0.0 ? custom_offsets : md_.ceiling_offsets_;
+  if (offset < 0.0) offset=mp_.double_cylinder_offset_;
   const double z_limit = mp_.height_max_ + mp_.body_top_offset_ + mp_.ceiling_margin_;
   const double z_start = mp_.ground_height_ + mp_.resolution_;
   if (z_limit <= z_start)
@@ -343,10 +352,10 @@ double GridMap::queryCeilingHeight(const Eigen::Vector3d& pos, double yaw,
   for (int side = -1; side <= 1; side += 2)
   {
     // 双圆柱前后圆心 (机体坐标系偏移按 yaw 旋转)
-    const double cx = pos(0) + side * mp_.double_cylinder_offset_ * cos_yaw;
-    const double cy = pos(1) + side * mp_.double_cylinder_offset_ * sin_yaw;
+    const double cx = pos(0) + side * offset * cos_yaw;
+    const double cy = pos(1) + side * offset * sin_yaw;
 
-    for (const auto& off : md_.ceiling_offsets_)
+    for (const auto& off : footprint)
     {
       const double px = cx + off(0) * cos_yaw - off(1) * sin_yaw;
       const double py = cy + off(0) * sin_yaw + off(1) * cos_yaw;
@@ -463,7 +472,7 @@ void GridMap::applyOccupancyUpdate(const Eigen::Vector3i& id, double new_log_odd
   if (was_occ != now_occ)
     updateInflation(id, now_occ ? 1 : -1);
 
-  // 新增占位的 cell 登记到地址表, 供阴影区衰减遍历 (移除采用惰性删除)
+  // 新增占位的 cell 登记到地址表, 供自由空间证据衰减遍历 (移除采用惰性删除)
   if (now_occ && !md_.in_occ_list_[addr])
   {
     md_.in_occ_list_[addr] = 1;
@@ -884,16 +893,9 @@ void GridMap::raycastProcess()
 }
 
 /**
- * 遮挡阴影区拖影消除
- *
- * raycastProcess() 的射线从命中点走向传感器, 命中点之后的 cell
- * (障碍物背后的阴影区) 既无 hit 也无 miss, log-odds 值会永久冻结。
- * 动态障碍物往近处移动时, 它让出的旧 cell 恰好落进自身阴影,
- * 于是留下一条永不消除的占位拖影, 阻塞规划。
- *
- * 此处仅保护本帧真实 hit 的 cell；所有未命中的历史占位 cell（包括被
- * 射线穿过而获得 miss 的 cell）继续额外衰减。这样可让动态拖影快速越过
- * 占位阈值，同时持续命中的当前障碍不会被误清除。
+ * Accelerate clearing only where a current ray supplies free-space evidence.
+ * Unseen, occluded cells retain occupancy; otherwise static walls disappear
+ * behind nearer surfaces and the planner can drive through them.
  */
 void GridMap::decayUnobservedOccupied()
 {
@@ -918,8 +920,9 @@ void GridMap::decayUnobservedOccupied()
 
     // 只保护真实命中点。射线穿过的旧占位已经获得 miss，仍叠加衰减，
     // 避免饱和 log-odds 需要多帧才能跌破占位阈值。
-    if (md_.flag_hit_[addr] == md_.raycast_num_)
-      continue;
+    if (md_.flag_hit_[addr] == md_.raycast_num_ ||
+        md_.flag_traverse_[addr] != md_.raycast_num_)
+      continue;  // Occlusion is not evidence of free space.
 
     Eigen::Vector3i id_g;
     hashIdToGlobalIndex(addr, id_g);
