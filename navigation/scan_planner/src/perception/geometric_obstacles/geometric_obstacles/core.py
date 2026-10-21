@@ -35,6 +35,9 @@ class Config:
     measurement_sigma: float = .06
     accel_sigma: float = .8
     max_points: int = 15000
+    geometry_mean_distance: float = .025
+    geometry_relative_variance: float = .8
+    visibility_extent_tolerance: float = .08
 
 
     def __post_init__(self):
@@ -47,7 +50,9 @@ class Config:
         if not (0 <= self.motion_off < self.motion_on and 0 <= self.novelty_fraction <= 1):
             raise ValueError('invalid motion hysteresis')
         if min(self.measurement_sigma,self.accel_sigma,self.assoc_distance,self.lost_timeout,
-               self.motion_frames,self.static_frames,self.max_cluster_extent,self.novelty_distance) <= 0:
+               self.motion_frames,self.static_frames,self.max_cluster_extent,self.novelty_distance,
+               self.geometry_mean_distance,self.geometry_relative_variance,
+               self.visibility_extent_tolerance) <= 0:
             raise ValueError('tracking scales/counts must be positive')
 
 
@@ -57,6 +62,9 @@ class Cluster:
     radius: float
     pixels: np.ndarray
     novelty: float
+    bounds: np.ndarray | None = None
+    geometry_mean: float | None = None
+    geometry_variance: float | None = None
 
 
 @dataclass
@@ -72,6 +80,10 @@ class Track:
     stopped: int = 0
     observed: bool = True
     pixels: np.ndarray = field(default_factory=lambda: np.empty((0, 2), int))
+    support_extent: np.ndarray | None = None
+    visibility_corrected: bool = False
+    observation_history: list = field(default_factory=list)
+
 
 
 def rotation(q):
@@ -120,7 +132,8 @@ class Tracker:
         pairs = tree.query_pairs(c.cluster_distance, output_type='ndarray')
         graph = coo_matrix((np.ones(len(pairs)), (pairs[:,0],pairs[:,1])), shape=(len(v),len(v)))
         count, labels = connected_components(graph, directed=False)
-        novelty = np.ones(len(v), bool) if self.previous is None or not len(self.previous) else cKDTree(self.previous).query(v)[0] > c.novelty_distance
+        distances = None if self.previous is None or not len(self.previous) else cKDTree(self.previous).query(v)[0]
+        novelty = np.ones(len(v), bool) if distances is None else distances > c.novelty_distance
         # Oblique box surfaces can split into sparse disconnected image strips.
         # Merge overlapping projected envelopes before assigning object identities.
         # This uses measured geometry only, not semantic labels or scene truth.
@@ -172,8 +185,51 @@ class Tracker:
                 continue
             center = (lo+hi)/2
             radius = max(.10, float(np.linalg.norm((hi-lo)[:2])/2 + .08))
-            output.append(Cluster(center, radius, uv[mask[inverse]], float(novelty[mask].mean())))
+            # FAPP-inspired geometric change: mean historical NN distance and
+            # normalized variance. Newly exposed heterogeneous strips alone are
+            # weaker motion evidence than a coherently displaced surface.
+            mean = None if distances is None else float(distances[mask].mean())
+            variance = None if distances is None else float(distances[mask].var()/max(mean*mean,1e-8))
+            output.append(Cluster(center, radius, uv[mask[inverse]], float(novelty[mask].mean()),
+                                  np.array([lo,hi]), mean, variance))
         return output
+
+    def observation(self, track, cluster, stamp):
+        """Anchor a partially visible cluster to its persistent bounding faces.
+
+        No object category, known dimensions or simulator truth is used. History
+        bounds visible support, not a claim to recover an unseen physical centre.
+        When support shrinks, use the face consistent with the predicted support
+        centre instead of differentiating the shrinking AABB midpoint. Retain
+        observed support until this track is retired: a face disappearing for a
+        long time is not evidence that the object physically shrank. This is a
+        rigid-support approximation; rotation/deformation remains ambiguous.
+        """
+        z = cluster.center[:2].copy()
+        R = np.eye(2)*self.cfg.measurement_sigma**2
+        if cluster.bounds is None or track.support_extent is None:
+            return z, R, False
+        extent = track.support_extent
+        lo, hi = cluster.bounds[:,:2]
+        current = hi-lo
+        corrected = False
+        for axis in range(2):
+            loss = extent[axis]-current[axis]
+            if loss > self.cfg.visibility_extent_tolerance:
+                candidates = np.array([lo[axis]+extent[axis]/2, hi[axis]-extent[axis]/2])
+                residual = np.abs(candidates-track.x[axis])
+                z[axis] = candidates[np.argmin(residual)]
+                # Partial visibility is less informative, never more confident.
+                R[axis,axis] += (min(loss,.30)*.25)**2
+                if abs(residual[0]-residual[1]) < self.cfg.measurement_sigma:
+                    R[axis,axis] += (loss*.5)**2
+                corrected = True
+        return z, R, corrected
+
+    def remember_extent(self, track, cluster, stamp):
+        if cluster.bounds is not None:
+            extent = np.diff(cluster.bounds[:,:2],axis=0)[0]
+            track.support_extent = extent if track.support_extent is None else np.maximum(track.support_extent,extent)
 
     def step(self, stamp, clusters):
         c = self.cfg
@@ -193,22 +249,44 @@ class Tracker:
         for i, identity in enumerate(ids):
             t = self.tracks[identity]
             for j, cl in enumerate(clusters):
-                delta = cl.center[:2]-t.x[:2]
-                mahal = float(delta @ np.linalg.solve(t.P[:2,:2]+R,delta))
+                z, observation_R, _ = self.observation(t, cl, stamp)
+                delta = z-t.x[:2]
+                mahal = float(delta @ np.linalg.solve(t.P[:2,:2]+observation_R,delta))
                 if np.linalg.norm(delta) <= c.assoc_distance and mahal < 16 and abs(cl.center[2]-t.z) < .6:
                     cost[i,j] = mahal + abs(cl.radius-t.radius)
         assigned = set()
         for i,j in zip(*linear_sum_assignment(cost)):
             if cost[i,j] >= 1e6: continue
             assigned.add(j); cl = clusters[j]; t = self.tracks[ids[i]]
+            z, R, t.visibility_corrected = self.observation(t, cl, stamp)
             gain = np.linalg.solve(t.P[:2,:2]+R,t.P[:2,:]).T
-            t.x += gain @ (cl.center[:2]-t.x[:2])
+            t.x += gain @ (z-t.x[:2])
             A = np.eye(4); A[:,:2] -= gain
             t.P = A@t.P@A.T + gain@R@gain.T
             t.z = cl.center[2]; t.radius = cl.radius
+            if cl.bounds is not None:
+                # The shifted support centre must still enclose all observed points.
+                furthest = np.maximum(np.abs(cl.bounds[0,:2]-t.x[:2]),np.abs(cl.bounds[1,:2]-t.x[:2]))
+                t.radius = max(t.radius,float(np.linalg.norm(furthest)+.08))
+            self.remember_extent(t, cl, stamp)
             t.observed = True; t.last_seen = stamp; t.pixels = cl.pixels
             speed = np.linalg.norm(t.x[2:])
-            t.moving = t.moving+1 if speed > c.motion_on and cl.novelty >= c.novelty_fraction else 0
+            coherent = (cl.geometry_mean is None or
+                        (cl.geometry_mean > c.geometry_mean_distance and
+                         cl.geometry_variance < c.geometry_relative_variance))
+            t.observation_history.append((stamp,z.copy()))
+            t.observation_history = [(tt,pp) for tt,pp in t.observation_history if stamp-tt <= .6]
+            span = stamp-t.observation_history[0][0]
+            # Dense depth surfaces overlap even under real tangential motion.
+            # Therefore FAPP NN statistics are supporting evidence, not a veto.
+            # Corroborate motion using visibility-corrected positions over time.
+            displacement_velocity = (z-t.observation_history[0][1])/max(span,1e-6)
+            sustained = (span>=.3 and np.linalg.norm(displacement_velocity)>c.motion_on and
+                         np.linalg.norm(displacement_velocity-t.x[2:])<.12)
+            evidence = (cl.novelty >= c.novelty_fraction and coherent) or sustained
+            # Established motion survives an ambiguous partial face, while new
+            # motion needs geometric evidence in addition to a velocity estimate.
+            t.moving = t.moving+1 if speed > c.motion_on and (evidence or t.state == 'dynamic') else 0
             t.stopped = t.stopped+1 if speed < c.motion_off else 0
             if t.moving >= c.motion_frames: t.state = 'dynamic'
             elif t.stopped >= c.static_frames: t.state = 'static'
@@ -216,6 +294,7 @@ class Tracker:
             if j in assigned: continue
             identity = self.next_id; self.next_id += 1
             self.tracks[identity] = Track(identity,np.r_[cl.center[:2],0.,0.],np.diag([c.measurement_sigma**2]*2+[.4**2]*2),cl.center[2],cl.radius,stamp,pixels=cl.pixels)
+            self.remember_extent(self.tracks[identity], cl, stamp)
         return list(self.tracks.values())
 
     def process(self, points, pixels, stamp):

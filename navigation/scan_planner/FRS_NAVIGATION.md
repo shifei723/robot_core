@@ -463,3 +463,66 @@ source install/ws_nav_frs/setup.bash
 三张中文渲染：`data/geometric_validation/prior_continuous_final/paper_figures/process_1/2/3.png` 及同名 PDF。图中使用预建底图＋实时点云、真实 Slash 网格、在线 FRS 和实际运动拖影，最终帧速度为零。图示来自软件运动学闭环，MuJoCo 仅用于 EGL 渲染，不是实机录像或接触动力学验证。
 
 新增测试覆盖已知墙面过滤、新目标保留、不同坐标系匹配、缺失底图等待、底图不被空闲证据/重置清掉、错误坐标系拒收，以及控制器不得绕过规划底图确认；已有 FRS、跟踪和高度安全测试亦通过。
+
+## 2026-10-21：FAPP 几何判据与可见面漂移修复
+
+修改前检查点：`4f7ceb0`（只提交源码、配置与工具，原始深度与仿真输出留在本地）。
+参考本机 `temp/nav/FAPP/src/mot_mapping/src/mapping_manger.cpp` 的最近邻距离均值、
+归一化方差和已有运动轨迹保持思路，独立实现于 `geometric_obstacles/core.py`。
+没有复制 FAPP 的 ROS1 节点、固定 0.02 s 差分或仿真目标真值输入。
+
+- 保留预建静态底图、曝光时刻 TF、实际时间间隔 KF 与 Hungarian 一对一关联。
+- 每个簇计算与 0.5 s 历史点云的最近邻距离均值和归一化方差，作为几何运动证据。
+- 深度相机的平面表面可能在真实平移时大面积重叠，因此上述证据不作为必需门槛；
+  另外用最近 0.6 s 可见面补偿后的位移（跨度至少 0.3 s）与滤波速度一致性确认运动。
+- 每条轨迹保留曾经观测到的 XY 最大支撑尺寸。可见宽度缩小超过 0.08 m 时，
+  用仍可见的边界和历史尺寸构造候选中心，按预测状态选择相容边界；关联和更新使用同一观测。
+  不再直接对缩小的包围盒中心求运动。尺寸随轨迹退休清除，不能靠短时超时强制遗忘，
+  否则长期侧面遮挡又会产生一次虚假速度。
+- 部分可见时增大观测协方差；边界解释接近时进一步增加不确定性，不把补偿当作精确测量。
+  半径按补偿中心到当前观测边界的距离重算，避免平移中心后缩小实体保护范围。
+- `/dynamic_obstacles/perception_stats` 增加 `visibility_corrected_tracks` 供部署排查。
+- FRS 预测器、3-sigma 传播、代价权重和近场硬约束本次未调整。
+
+新增 ROS 参数（由 Config 自动声明）：`geometry_mean_distance=0.025` m、
+`geometry_relative_variance=0.8`、`visibility_extent_tolerance=0.08` m。
+它们针对几何一致性，不是已标定的概率阈值。
+
+### 相同输入的对照
+
+`tools/compare_perception_replay.py` 从 Git 检查点导入旧跟踪器，基于原运行记录的相机
+轨迹与传感器时间重建同一射线深度，分别交给新旧跟踪器。地图、像素和姿态输入完全相同；
+真值仅参与射线生成及误差评估，不送入跟踪器。
+`tools/evaluate_frs_replay.cpp` 直接调用生产 `IntentFrs` 头文件，用相同传播算法比较
+估计差异；离线 FRS 以观测时刻为起点，未加在线消息时延，不能与在线画面逐数等同。
+
+```bash
+g++ -std=c++17 -O2 -I/usr/include/eigen3 \
+  -Inavigation/scan_planner/src/planner/plan_manage/include \
+  navigation/scan_planner/tools/evaluate_frs_replay.cpp -o /tmp/evaluate_frs_replay
+/usr/bin/python3 navigation/scan_planner/tools/compare_perception_replay.py \
+  data/geometric_validation/prior_turn_final \
+  --frs-evaluator /tmp/evaluate_frs_replay \
+  --output data/geometric_validation/fapp_replay_final.json
+```
+
+4.0–7.9 s（折返前）纵向速度 RMSE：0.08336 → 0.01192 m/s；横穿速度 RMSE：
+0.01542 → 0.01276 m/s。该段 1.5 s 位置 FRS 平均面积：3.480 → 2.906 m²，缩小约 16.5%。
+6.519 s 的纵向速度：−0.1854 → +0.00643 m/s；1.5 s 预测中心 x：1.074 → 1.796 m，
+真实障碍物 x 为 1.8 m。相同时刻预测矩形由 2.480×1.712 m 变为 1.914×1.607 m。
+这说明主要方向漂移显著改善，但并未解决所有保守性；折返瞬间范围仍可能扩大。
+不要将上述选定匀速段的改善推广成全时域都更小或安全概率保证。
+
+### 验证和边界
+
+新增长期单面可见、静止物体可见面丢失、面重新出现、真实纵向运动、变帧率折返、
+几何抖动、重叠表面运动等回归测试。`colcon test` 的几何单元测试与 ROS 管线测试均通过。
+真实 ROS 节点的软件闭环另行记录于 `data/geometric_validation/fapp_*`，汇总见
+`results/perception_repair_20261021.json`。所有失败尝试仍在本地保留：
+`fapp_turn01` 因把几何阈值设为硬门槛而漏判动态目标，已被否决，不计为修复成功。
+`fapp_continuous_final` 虽到达，但第一条轨迹约 10 s 才产生，没有活动目标参与控制器 FRS，
+因此没有通过该场景的动态交互验收，仍需进一步调查规划启动等待。
+
+支撑尺寸补偿是刚体近似。目标大幅旋转、变形、合并/分裂、初见时仅有一个面，仍可能造成
+中心偏差或尺寸偏大；不能恢复从未观测过的真实物体中心。本次未用 D435i/VINS 实机数据、
+接触动力学或统计种子组验证，属于有回归证据的实验性修复，不能宣称零样本部署已经通过。

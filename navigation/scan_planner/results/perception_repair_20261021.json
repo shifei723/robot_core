@@ -1,0 +1,677 @@
+{
+  "baseline_commit": "4f7ceb0",
+  "paired_input_run": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/prior_turn_final",
+  "paired_replay_metrics": {
+    "baseline": {
+      "pre_turn_velocity_rmse": [
+        0.0833578306584484,
+        0.015419620469962246
+      ],
+      "pre_turn_max_abs_vx": 0.2169930221882157,
+      "at_6_5": {
+        "t": 6.519054017000599,
+        "id": 0,
+        "p": [
+          1.5637745488255397,
+          -0.1606627113980633
+        ],
+        "v": [
+          -0.18542190289254085,
+          0.19637019946172415
+        ],
+        "truth": [
+          1.8,
+          -0.17580811625986825
+        ],
+        "truth_v": [
+          0,
+          0.22
+        ],
+        "state": "dynamic",
+        "radius": 0.2575454545454546,
+        "covariance_diagonal": [
+          0.0011871386125096115,
+          0.0011871386125096115,
+          0.017414743405866264,
+          0.017414743405866264
+        ],
+        "visibility_corrected": false,
+        "frs_1_5s_center": [
+          1.07445340514,
+          0.104307662328
+        ],
+        "frs_1_5s_size": [
+          2.47973521982,
+          1.71170727659
+        ]
+      },
+      "dynamic_frames": 128,
+      "mean_frs_1_5s_area": 3.480059543460934
+    },
+    "candidate": {
+      "pre_turn_velocity_rmse": [
+        0.011920869183669018,
+        0.012762677576528238
+      ],
+      "pre_turn_max_abs_vx": 0.026487400414098104,
+      "at_6_5": {
+        "t": 6.519054017000599,
+        "id": 0,
+        "p": [
+          1.7970820114965265,
+          -0.17496770458718683
+        ],
+        "v": [
+          0.006429079607580757,
+          0.18680330390744887
+        ],
+        "truth": [
+          1.8,
+          -0.17580811625986825
+        ],
+        "truth_v": [
+          0,
+          0.22
+        ],
+        "state": "dynamic",
+        "radius": 0.37430512657045784,
+        "covariance_diagonal": [
+          0.002461111233239297,
+          0.0013716798616108827,
+          0.021911474645178956,
+          0.018689447634139798
+        ],
+        "visibility_corrected": true,
+        "frs_1_5s_center": [
+          1.79597435865,
+          0.0914756721693
+        ],
+        "frs_1_5s_size": [
+          1.91355909195,
+          1.60745517458
+        ]
+      },
+      "dynamic_frames": 133,
+      "mean_frs_1_5s_area": 2.9057452826722527
+    }
+  },
+  "replay_metrics_interval_s": [
+    4,
+    7.9
+  ],
+  "closed_loop": {
+    "scope": "Sensor-driven software integration with prebuilt STATIC PCD when enabled. Ideal pose, noiseless raycasting, planar kinematic plant. Not a D435i/VINS or physics/contact validation.",
+    "all_pass": false,
+    "runs": [
+      {
+        "case": "turnaround",
+        "reached": true,
+        "collision": false,
+        "error": null,
+        "ground_truth_input_to_tracker": false,
+        "prebuilt_static_map": true,
+        "shifted_map_frame": true,
+        "plant": "planar kinematics; ideal odometry, pinhole raycast depth; no contact physics or VINS estimator",
+        "arrival_criterion": "distance < 0.16 m AND speed < 0.01 m/s AND controller GOAL_REACHED",
+        "goal": [
+          3.0,
+          0.0
+        ],
+        "sensor_size": [
+          320,
+          180
+        ],
+        "static_boxes": [
+          [
+            [
+              -2.0,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              -1.55,
+              2.0
+            ]
+          ],
+          [
+            [
+              -2.0,
+              1.55,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ],
+          [
+            [
+              7.9,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ]
+        ],
+        "tracker_sha256": "7b2a2fa801a2e81bbd3eebd8571e8445e0830a9e8b4f2e19c5f2247af7b57f87",
+        "perception_node_sha256": "2f3d0a0c1a45b15c843168b4ea7f08ffa98c988ef23443808b135677e575defd",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "1746ff63b071bcb8df9efc931e1411f2c4ced631d7b4bcfc73feceffb85f167a",
+        "goal_sent_at": 3.0011932129855268,
+        "goal_region_time": 35.012223069003085,
+        "arrival_time": 36.243394655000884,
+        "duration": 36.24357819400029,
+        "final_pose": [
+          2.990427267441189,
+          0.0,
+          0.0
+        ],
+        "min_clearance": 0.3,
+        "plans": 4,
+        "map_messages": 723,
+        "track_messages": 463,
+        "decision_messages": 332,
+        "dynamic_ids": [
+          "obstacle_0"
+        ],
+        "unhealthy_frames": 5,
+        "frs_waits": 42,
+        "frs_slow": 41,
+        "run": "fapp_turn02",
+        "background_point_fraction": 0.34487599749085346,
+        "background_and_tracking_ms_p95": 5.315721356600989,
+        "masked_snapshots": 23,
+        "max_map_interval_s": 0.07554420598899014,
+        "final_control_state": "GOAL_REACHED",
+        "max_map_points": 18420,
+        "healthy_track_age_p95_ms": 44.470169150000004,
+        "states": {
+          "": 15,
+          "DYNAMIC_SLOW": 1640,
+          "DYNAMIC_WAIT": 1942,
+          "GOAL_REACHED": 1,
+          "IDLE": 1073,
+          "TRACKING": 11016,
+          "WAIT_MAP": 214
+        },
+        "first_dynamic_detection_s": 3.794870830985019,
+        "pipeline_evidence": true,
+        "pass": true,
+        "criterion": "all stages active; goal error <0.16 m (plus stopped/GOAL_REACHED when declared by run); no collision; dynamic scenarios additionally require detected motion, mask and FRS intervention",
+        "frs_active_decision_count": 104,
+        "trace_sha256": "fb86ec901d7cd876eed2352b7df0e3cacff5df375f31548637a00a6746db3b57"
+      },
+      {
+        "case": "crossing",
+        "reached": true,
+        "collision": false,
+        "error": null,
+        "ground_truth_input_to_tracker": false,
+        "prebuilt_static_map": true,
+        "shifted_map_frame": true,
+        "plant": "planar kinematics; ideal odometry, pinhole raycast depth; no contact physics or VINS estimator",
+        "arrival_criterion": "distance < 0.16 m AND speed < 0.01 m/s AND controller GOAL_REACHED",
+        "goal": [
+          3.0,
+          0.0
+        ],
+        "sensor_size": [
+          320,
+          180
+        ],
+        "static_boxes": [
+          [
+            [
+              -2.0,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              -1.55,
+              2.0
+            ]
+          ],
+          [
+            [
+              -2.0,
+              1.55,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ],
+          [
+            [
+              7.9,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ]
+        ],
+        "tracker_sha256": "7b2a2fa801a2e81bbd3eebd8571e8445e0830a9e8b4f2e19c5f2247af7b57f87",
+        "perception_node_sha256": "2f3d0a0c1a45b15c843168b4ea7f08ffa98c988ef23443808b135677e575defd",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "1746ff63b071bcb8df9efc931e1411f2c4ced631d7b4bcfc73feceffb85f167a",
+        "goal_sent_at": 3.0034084820072167,
+        "goal_region_time": 36.17529482001555,
+        "arrival_time": 37.57547197400709,
+        "duration": 37.57555570002296,
+        "final_pose": [
+          2.991078376275271,
+          0.0,
+          0.0
+        ],
+        "min_clearance": 0.3,
+        "plans": 4,
+        "map_messages": 750,
+        "track_messages": 477,
+        "decision_messages": 345,
+        "dynamic_ids": [
+          "obstacle_0"
+        ],
+        "unhealthy_frames": 2,
+        "frs_waits": 35,
+        "frs_slow": 28,
+        "run": "fapp_crossing_final",
+        "background_point_fraction": 0.3469650066858638,
+        "background_and_tracking_ms_p95": 5.049671078450046,
+        "masked_snapshots": 20,
+        "max_map_interval_s": 0.07382323598721996,
+        "final_control_state": "GOAL_REACHED",
+        "max_map_points": 18449,
+        "healthy_track_age_p95_ms": 45.670818100000005,
+        "states": {
+          "": 13,
+          "DYNAMIC_SLOW": 1406,
+          "DYNAMIC_WAIT": 1500,
+          "GOAL_REACHED": 1,
+          "IDLE": 1063,
+          "TRACKING": 12503,
+          "WAIT_MAP": 237,
+          "WAIT_ODOM": 4
+        },
+        "first_dynamic_detection_s": 3.794880508998176,
+        "pipeline_evidence": true,
+        "pass": true,
+        "criterion": "all stages active; goal error <0.16 m (plus stopped/GOAL_REACHED when declared by run); no collision; dynamic scenarios additionally require detected motion, mask and FRS intervention",
+        "frs_active_decision_count": 90,
+        "trace_sha256": "ae4631c2f758771dd74811733ad87f5afc94d535cf9d5ba4ee8b8332389d3fa3"
+      },
+      {
+        "case": "continuous_crossing",
+        "reached": true,
+        "collision": false,
+        "error": null,
+        "ground_truth_input_to_tracker": false,
+        "prebuilt_static_map": true,
+        "shifted_map_frame": true,
+        "plant": "planar kinematics; ideal odometry, pinhole raycast depth; no contact physics or VINS estimator",
+        "arrival_criterion": "distance < 0.16 m AND speed < 0.01 m/s AND controller GOAL_REACHED",
+        "goal": [
+          3.0,
+          0.0
+        ],
+        "sensor_size": [
+          320,
+          180
+        ],
+        "static_boxes": [
+          [
+            [
+              -2.0,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              -1.55,
+              2.0
+            ]
+          ],
+          [
+            [
+              -2.0,
+              1.55,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ],
+          [
+            [
+              7.9,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ]
+        ],
+        "tracker_sha256": "7b2a2fa801a2e81bbd3eebd8571e8445e0830a9e8b4f2e19c5f2247af7b57f87",
+        "perception_node_sha256": "2f3d0a0c1a45b15c843168b4ea7f08ffa98c988ef23443808b135677e575defd",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "1746ff63b071bcb8df9efc931e1411f2c4ced631d7b4bcfc73feceffb85f167a",
+        "goal_sent_at": 3.0036194720014464,
+        "goal_region_time": 36.72436614200706,
+        "arrival_time": 38.05989015600062,
+        "duration": 38.06007244499051,
+        "final_pose": [
+          2.990508220786442,
+          0.0,
+          0.0
+        ],
+        "min_clearance": 0.3,
+        "plans": 3,
+        "map_messages": 689,
+        "track_messages": 485,
+        "decision_messages": 281,
+        "dynamic_ids": [
+          "obstacle_0"
+        ],
+        "unhealthy_frames": 6,
+        "frs_waits": 0,
+        "frs_slow": 0,
+        "run": "fapp_continuous_final",
+        "background_point_fraction": 0.34694599095627426,
+        "background_and_tracking_ms_p95": 5.264574883040041,
+        "masked_snapshots": 20,
+        "max_map_interval_s": 0.30649256199831143,
+        "final_control_state": "GOAL_REACHED",
+        "max_map_points": 18784,
+        "healthy_track_age_p95_ms": 41.65885,
+        "states": {
+          "": 9,
+          "GOAL_REACHED": 1,
+          "IDLE": 3998,
+          "TRACKING": 12334,
+          "WAIT_MAP": 288
+        },
+        "first_dynamic_detection_s": 1.2670569730107673,
+        "pipeline_evidence": true,
+        "pass": false,
+        "criterion": "all stages active; goal error <0.16 m (plus stopped/GOAL_REACHED when declared by run); no collision; dynamic scenarios additionally require detected motion, mask and FRS intervention",
+        "frs_active_decision_count": 0,
+        "trace_sha256": "e1c736a7e22035a42a22ef45b7268d0a35f09623ebb9d868443b0de9c44b09f0"
+      },
+      {
+        "case": "static",
+        "reached": true,
+        "collision": false,
+        "error": null,
+        "ground_truth_input_to_tracker": false,
+        "prebuilt_static_map": true,
+        "shifted_map_frame": true,
+        "plant": "planar kinematics; ideal odometry, pinhole raycast depth; no contact physics or VINS estimator",
+        "arrival_criterion": "distance < 0.16 m AND speed < 0.01 m/s AND controller GOAL_REACHED",
+        "goal": [
+          3.0,
+          0.0
+        ],
+        "sensor_size": [
+          320,
+          180
+        ],
+        "static_boxes": [
+          [
+            [
+              -2.0,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              -1.55,
+              2.0
+            ]
+          ],
+          [
+            [
+              -2.0,
+              1.55,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ],
+          [
+            [
+              7.9,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ],
+          [
+            [
+              1.3,
+              0.65,
+              0.0
+            ],
+            [
+              1.7,
+              1.05,
+              0.8
+            ]
+          ]
+        ],
+        "tracker_sha256": "7b2a2fa801a2e81bbd3eebd8571e8445e0830a9e8b4f2e19c5f2247af7b57f87",
+        "perception_node_sha256": "2f3d0a0c1a45b15c843168b4ea7f08ffa98c988ef23443808b135677e575defd",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "1746ff63b071bcb8df9efc931e1411f2c4ced631d7b4bcfc73feceffb85f167a",
+        "goal_sent_at": 3.6540799280046485,
+        "goal_region_time": 31.139701339008752,
+        "arrival_time": 32.469866270024795,
+        "duration": 32.46995210502064,
+        "final_pose": [
+          2.9905051526640745,
+          0.0,
+          0.0
+        ],
+        "min_clearance": 0.22000000000000014,
+        "plans": 3,
+        "map_messages": 635,
+        "track_messages": 374,
+        "decision_messages": 280,
+        "dynamic_ids": [],
+        "unhealthy_frames": 1,
+        "frs_waits": 0,
+        "frs_slow": 0,
+        "run": "fapp_static_final",
+        "background_point_fraction": 0.36987530536870017,
+        "background_and_tracking_ms_p95": 4.026827611960462,
+        "masked_snapshots": 2,
+        "max_map_interval_s": 0.3038015810016077,
+        "final_control_state": "GOAL_REACHED",
+        "max_map_points": 18429,
+        "healthy_track_age_p95_ms": 42.2390912,
+        "states": {
+          "": 9,
+          "GOAL_REACHED": 1,
+          "IDLE": 391,
+          "TRACKING": 12448,
+          "WAIT_MAP": 1435
+        },
+        "first_dynamic_detection_s": null,
+        "pipeline_evidence": true,
+        "pass": true,
+        "criterion": "all stages active; goal error <0.16 m (plus stopped/GOAL_REACHED when declared by run); no collision; dynamic scenarios additionally require detected motion, mask and FRS intervention",
+        "frs_active_decision_count": 0,
+        "trace_sha256": "5cf452e46bcb52ef0de491c5ec2ec9010c0fb9e35893fc76481cf67a00816f70"
+      },
+      {
+        "case": "dropout",
+        "reached": false,
+        "collision": false,
+        "error": null,
+        "ground_truth_input_to_tracker": false,
+        "prebuilt_static_map": true,
+        "shifted_map_frame": true,
+        "plant": "planar kinematics; ideal odometry, pinhole raycast depth; no contact physics or VINS estimator",
+        "arrival_criterion": "distance < 0.16 m AND speed < 0.01 m/s AND controller GOAL_REACHED",
+        "goal": [
+          3.0,
+          0.0
+        ],
+        "sensor_size": [
+          320,
+          180
+        ],
+        "static_boxes": [
+          [
+            [
+              -2.0,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              -1.55,
+              2.0
+            ]
+          ],
+          [
+            [
+              -2.0,
+              1.55,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ],
+          [
+            [
+              7.9,
+              -1.65,
+              0.0
+            ],
+            [
+              8.0,
+              1.65,
+              2.0
+            ]
+          ],
+          [
+            [
+              1.3,
+              0.65,
+              0.0
+            ],
+            [
+              1.7,
+              1.05,
+              0.8
+            ]
+          ]
+        ],
+        "tracker_sha256": "7b2a2fa801a2e81bbd3eebd8571e8445e0830a9e8b4f2e19c5f2247af7b57f87",
+        "perception_node_sha256": "2f3d0a0c1a45b15c843168b4ea7f08ffa98c988ef23443808b135677e575defd",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "1746ff63b071bcb8df9efc931e1411f2c4ced631d7b4bcfc73feceffb85f167a",
+        "goal_sent_at": 3.0003262530080974,
+        "duration": 16.010095353005454,
+        "final_pose": [
+          0.46861938037458106,
+          0.0,
+          0.0
+        ],
+        "min_clearance": 0.6253168882798881,
+        "plans": 1,
+        "map_messages": 316,
+        "track_messages": 172,
+        "decision_messages": 47,
+        "dynamic_ids": [],
+        "unhealthy_frames": 89,
+        "frs_waits": 0,
+        "frs_slow": 0,
+        "run": "fapp_dropout_final",
+        "background_point_fraction": 0.2295376189565743,
+        "background_and_tracking_ms_p95": 5.203870101831853,
+        "masked_snapshots": 1,
+        "max_map_interval_s": 0.07515671700821258,
+        "final_control_state": "WAIT_MAP",
+        "max_map_points": 13209,
+        "healthy_track_age_p95_ms": 45.044752700000004,
+        "states": {
+          "": 11,
+          "IDLE": 1015,
+          "TRACKING": 1925,
+          "WAIT_MAP": 3531,
+          "WAIT_STATIC_PRIOR": 48,
+          "WAIT_TRACK": 96
+        },
+        "first_dynamic_detection_s": null,
+        "pipeline_evidence": true,
+        "dropout_at_s": 7.076813305000542,
+        "pre_dropout_max_speed": 0.11852417281991603,
+        "stop_latency_s": 0.4240702070237603,
+        "pass": true,
+        "criterion": "moving before dropout; stop within 0.7 s and remain stopped; no collision",
+        "frs_active_decision_count": 0,
+        "trace_sha256": "097eedb8dd3c05425bf25478058a5e65faa3f6b1c1c3a3c0ae823528615fd82e"
+      }
+    ],
+    "limitations": [
+      "Single deterministic run per case; no statistical success-rate claim.",
+      "Measured points determine clusters and motion; no ground-truth obstacle states are published to perception or FRS.",
+      "Failure probes remain in sibling directories; reported cases are listed explicitly.",
+      "Long occlusion, changing visible wall patches and static/dynamic transitions remain robustness risks."
+    ]
+  },
+  "tests": {
+    "geometry_unit_cases": 22,
+    "ros_pipeline_cases": 2,
+    "colcon_report": "26 tests, 0 errors, 0 failures, 0 skipped"
+  },
+  "rejected_attempts": [
+    {
+      "run": "fapp_turn01",
+      "reason": "Strict geometry gating missed dynamic detection; reached alone is not success."
+    },
+    {
+      "run": "fapp_replay01",
+      "reason": "Short shape memory created delayed false velocity spikes."
+    }
+  ],
+  "limits": [
+    "FRS predictor and controller weights unchanged.",
+    "Rigid-support approximation; large rotations/deformation and never-observed extent not solved.",
+    "No real D435i/VINS validation.",
+    "Continuous-start crossing reached but had no FRS intervention: dynamic-interaction acceptance failed."
+  ]
+}

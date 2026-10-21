@@ -6,11 +6,11 @@ from PIL import Image,ImageDraw,ImageFont
 from render_pointcloud_interaction import Render
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('run',type=Path);p.add_argument('--output',type=Path,required=True);a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
+ p=argparse.ArgumentParser();p.add_argument('run',type=Path);p.add_argument('--output',type=Path,required=True);p.add_argument('--times',type=float,nargs=3,default=[3.3,6.5,30.5]);a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
  r=Render(a.run,Path(__file__).resolve().parents[4]/'slash_robot_control')
  r.camera.distance=7.15
  canvas=Image.new('RGB',(4050,1050),'white');d=ImageDraw.Draw(canvas)
- titles=['(a) 导航开始','(b) 动态障碍交互','(c) 通过障碍'];times=[3.3,6.5,30.5];panels=[]
+ titles=['(a) 导航开始','(b) 动态障碍交互','(c) 通过障碍'];times=a.times;panels=[]
  for i,(t,title) in enumerate(zip(times,titles)):
   img,actual=r.image(t,i+1,title,clean=True,show_prediction=(i==1))
   canvas.paste(img.crop((250,105,1600,1000)),(1350*i,0))

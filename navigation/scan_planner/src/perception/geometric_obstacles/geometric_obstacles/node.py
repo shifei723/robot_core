@@ -178,7 +178,8 @@ class GeometricObstacles(Node):
             residual,uv=self.prior_filter(points,pixels,T,stamp)
             self.tracker.process(residual,uv,stamp.nanoseconds*1e-9)
             if self.prior_enabled:
-                stats=String();stats.data=json.dumps({**self.prior_stats,'filter_and_tracking_ms':(time.perf_counter()-started)*1000})
+                stats=String();stats.data=json.dumps({**self.prior_stats,'filter_and_tracking_ms':(time.perf_counter()-started)*1000,
+                    'visibility_corrected_tracks':sum(t.observed and t.visibility_corrected for t in self.tracker.tracks.values())})
                 self.stats_pub.publish(stats)
             healthy = self.tracker.retire(stamp.nanoseconds*1e-9,depth,K,T)
             self.last_pose = T

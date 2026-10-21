@@ -134,3 +134,83 @@ def test_prebuilt_map_matching_uses_map_coordinates():
     prior=StaticPrior(world@R.T+offset)
     assert prior.known(world@R.T+offset).all()
     assert not prior.known(world).any()
+
+
+def surface_cluster(x, y, extent_x=.44, novelty=1.):
+    lo=np.array([x-.22,y-.22,.2]);hi=np.array([x-.22+extent_x,y+.22,.9])
+    return Cluster((lo+hi)/2,.4,np.array([[1,1]]),novelty,np.array([lo,hi]),.10,.2)
+
+
+def test_visible_face_loss_is_not_longitudinal_motion():
+    tracker=Tracker()
+    for i in range(90):
+        # A side face disappears while the object continues across the corridor.
+        width=.44 if i<15 else max(.01,.44-(i-15)*.055)
+        tracker.step(i*.075,[surface_cluster(1.8,-.8+i*.075*.22,width)])
+    tr=tracker.tracks[0]
+    assert abs(tr.x[2])<.06
+    assert tr.x[3]==pytest.approx(.22,abs=.04)
+    assert tr.state=='dynamic'
+    assert tr.radius>=.30
+
+
+def test_real_longitudinal_motion_is_not_frozen_by_shape_memory():
+    tracker=Tracker()
+    for i in range(35):tracker.step(i*.075,[surface_cluster(1.8+i*.075*.30,0)])
+    assert tracker.tracks[0].x[2]==pytest.approx(.30,abs=.04)
+
+
+def test_irregular_sensor_periods_and_reversal():
+    tracker=Tracker();time=0.;y=-.5
+    for i in range(65):
+        dt=[.04,.075,.12][i%3];time+=dt;y+=dt*(.22 if i<30 else -.22)
+        tracker.step(time,[surface_cluster(1.8,y)])
+    assert tracker.tracks[0].x[3]==pytest.approx(-.22,abs=.04)
+
+
+def test_incoherent_jitter_cannot_confirm_new_dynamic_target():
+    tracker=Tracker()
+    for i in range(25):
+        c=surface_cluster(1.8+(.04 if i%2 else -.04),0);c.geometry_variance=3.
+        tracker.step(i*.075,[c])
+    assert tracker.tracks[0].state!='dynamic'
+
+
+def test_existing_dynamic_track_survives_ambiguous_surface():
+    tracker=Tracker()
+    for i in range(35):
+        c=surface_cluster(1.8,-.8+i*.075*.22)
+        if i>20:c.geometry_variance=3.;c.novelty=0.
+        tracker.step(i*.075,[c])
+    assert tracker.tracks[0].state=='dynamic'
+
+
+def test_stationary_object_does_not_move_when_side_face_disappears():
+    tracker=Tracker()
+    for i in range(90):
+        width=.44 if i<20 else max(.01,.44-(i-20)*.055)
+        c=surface_cluster(1.8,0,width,0.)
+        tracker.step(i*.075,[c])
+    tr=tracker.tracks[0]
+    assert tr.state=='static'
+    assert np.linalg.norm(tr.x[2:])<.01
+    assert abs(tr.x[0]-1.8)<.02
+
+
+def test_visible_faces_return_without_a_velocity_spike():
+    tracker=Tracker()
+    speeds=[]
+    for i in range(90):
+        width=.01 if 20<=i<60 else .44
+        tracker.step(i*.075,[surface_cluster(1.8,i*.075*.22,width)])
+        speeds.append(tracker.tracks[0].x[2])
+    assert max(abs(v) for v in speeds)<.02
+
+
+def test_overlapping_depth_surface_motion_has_temporal_fallback():
+    tracker=Tracker()
+    for i in range(35):
+        c=surface_cluster(1.8,i*.075*.22,novelty=0.)
+        c.geometry_mean=.005;c.geometry_variance=3.
+        tracker.step(i*.075,[c])
+    assert tracker.tracks[0].state=='dynamic'
