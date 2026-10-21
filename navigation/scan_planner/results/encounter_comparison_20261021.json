@@ -1,0 +1,296 @@
+{
+  "scope": "Sensor-driven software closed loop, ideal pose and raycast depth, no real-hardware safety claim. Trigger at matched robot x; actual scheduling differs across runs.",
+  "metrics": "Stopped time integrates |v|<0.01 m/s after encounter onset, before GOAL_REACHED. Open-loop conflict is a constant onset-speed counterfactual, not a separately simulated controller.",
+  "all_pass": true,
+  "runs": [
+    {
+      "run": "encounter_fov_soft",
+      "parameters": {
+        "timing_policy": "soft",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 0.8,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "encounter_onset": {
+        "t": 8.627983365004184,
+        "pose": [
+          0.6001182452375406,
+          0.0,
+          0.0
+        ],
+        "v": 0.11663021306436194,
+        "w": 0.0
+      },
+      "arrival_s": 33.43374503098312,
+      "interaction_to_arrival_s": 24.805761665978935,
+      "first_dynamic_after_onset_s": 1.7479117529874202,
+      "open_loop_min_gap_m": -0.18252426363453353,
+      "dynamic_min_gap_m": 0.15000000000000008,
+      "all_obstacles_min_gap_m": 0.15000000000000008,
+      "stopped_after_onset_s": 7.824893443961628,
+      "longest_stop_after_onset_s": 5.900106251006946,
+      "dynamic_wait_after_onset_s": 7.021921181032667,
+      "dynamic_slow_after_onset_s": 0.8582639479718637,
+      "sensor_wait_after_onset_s": 0.0,
+      "shield_decisions": 5,
+      "source_summary": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/encounter_fov_soft/summary.json",
+      "tracking_samples": 119,
+      "tracking_rmse_xy_vxvy": [
+        0.012023122370253766,
+        0.02623787885841958,
+        0.006589309643447642,
+        0.06130540460866682
+      ],
+      "empirical_3sigma_axis_coverage": [
+        1.0,
+        1.0,
+        1.0,
+        0.9327731092436975
+      ],
+      "interaction_valid": true,
+      "safe_arrival": true
+    },
+    {
+      "run": "encounter_fov_soft_repeat",
+      "parameters": {
+        "timing_policy": "soft",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 0.8,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "encounter_onset": {
+        "t": 8.654204821999883,
+        "pose": [
+          0.600232449843725,
+          0.0,
+          0.0
+        ],
+        "v": 0.11644007117672643,
+        "w": 0.0
+      },
+      "arrival_s": 40.65007499899366,
+      "interaction_to_arrival_s": 31.995870176993776,
+      "first_dynamic_after_onset_s": 1.248594773991499,
+      "open_loop_min_gap_m": -0.1815289227255096,
+      "dynamic_min_gap_m": 0.15000000000000008,
+      "all_obstacles_min_gap_m": 0.15000000000000008,
+      "stopped_after_onset_s": 6.569120866945013,
+      "longest_stop_after_onset_s": 4.96000232102233,
+      "dynamic_wait_after_onset_s": 5.747317822970217,
+      "dynamic_slow_after_onset_s": 2.7000589740055148,
+      "sensor_wait_after_onset_s": 0.0,
+      "shield_decisions": 0,
+      "source_summary": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/encounter_fov_soft_repeat/summary.json",
+      "tracking_samples": 131,
+      "tracking_rmse_xy_vxvy": [
+        0.014628028095119084,
+        0.02672473114389239,
+        0.007201331930143702,
+        0.07059797891719968
+      ],
+      "empirical_3sigma_axis_coverage": [
+        1.0,
+        1.0,
+        1.0,
+        0.9389312977099237
+      ],
+      "interaction_valid": true,
+      "safe_arrival": true
+    },
+    {
+      "run": "encounter_fov_hard",
+      "parameters": {
+        "timing_policy": "hard",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 0.8,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "encounter_onset": {
+        "t": 9.165197283000452,
+        "pose": [
+          0.600607923718608,
+          0.0,
+          0.0
+        ],
+        "v": 0.1166596489844249,
+        "w": 0.0
+      },
+      "arrival_s": 40.95935860299505,
+      "interaction_to_arrival_s": 31.7941613199946,
+      "first_dynamic_after_onset_s": 1.2847043979854789,
+      "open_loop_min_gap_m": -0.1831257907150776,
+      "dynamic_min_gap_m": 0.15000000000000008,
+      "all_obstacles_min_gap_m": 0.15000000000000008,
+      "stopped_after_onset_s": 10.710076649003895,
+      "longest_stop_after_onset_s": 10.02041294600349,
+      "dynamic_wait_after_onset_s": 10.02069388399832,
+      "dynamic_slow_after_onset_s": 0.0,
+      "sensor_wait_after_onset_s": 0.0,
+      "shield_decisions": 0,
+      "source_summary": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/encounter_fov_hard/summary.json",
+      "tracking_samples": 129,
+      "tracking_rmse_xy_vxvy": [
+        0.012783075336608852,
+        0.021698012040614258,
+        0.005992786087420753,
+        0.06525954072515643
+      ],
+      "empirical_3sigma_axis_coverage": [
+        1.0,
+        1.0,
+        1.0,
+        0.9457364341085271
+      ],
+      "interaction_valid": true,
+      "safe_arrival": true
+    },
+    {
+      "run": "encounter_fov_hard_repeat",
+      "parameters": {
+        "timing_policy": "hard",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 0.8,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "encounter_onset": {
+        "t": 10.363041264994536,
+        "pose": [
+          0.6002500778040191,
+          0.0,
+          0.0
+        ],
+        "v": 0.11659491723916027,
+        "w": 0.0
+      },
+      "arrival_s": 41.35259204899194,
+      "interaction_to_arrival_s": 30.9895507839974,
+      "first_dynamic_after_onset_s": 1.7955239439907018,
+      "open_loop_min_gap_m": -0.18243723164290457,
+      "dynamic_min_gap_m": 0.15000000000000008,
+      "all_obstacles_min_gap_m": 0.15000000000000008,
+      "stopped_after_onset_s": 9.422046745981788,
+      "longest_stop_after_onset_s": 8.66064207899035,
+      "dynamic_wait_after_onset_s": 8.342987490002997,
+      "dynamic_slow_after_onset_s": 0.0,
+      "sensor_wait_after_onset_s": 0.0,
+      "shield_decisions": 3,
+      "source_summary": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/encounter_fov_hard_repeat/summary.json",
+      "tracking_samples": 111,
+      "tracking_rmse_xy_vxvy": [
+        0.012481233119419064,
+        0.026352730283034795,
+        0.008010416059864774,
+        0.0664818356713774
+      ],
+      "empirical_3sigma_axis_coverage": [
+        1.0,
+        1.0,
+        1.0,
+        0.918918918918919
+      ],
+      "interaction_valid": true,
+      "safe_arrival": true
+    }
+  ],
+  "group_means": {
+    "hard": {
+      "count": 2,
+      "stopped_after_onset_s": 10.066061697492842,
+      "longest_stop_after_onset_s": 9.34052751249692,
+      "interaction_to_arrival_s": 31.391856051996,
+      "dynamic_wait_after_onset_s": 9.181840687000658,
+      "sensor_wait_after_onset_s": 0.0
+    },
+    "soft": {
+      "count": 2,
+      "stopped_after_onset_s": 7.197007155453321,
+      "longest_stop_after_onset_s": 5.430054286014638,
+      "interaction_to_arrival_s": 28.400815921486355,
+      "dynamic_wait_after_onset_s": 6.384619502001442,
+      "sensor_wait_after_onset_s": 0.0
+    }
+  },
+  "soft_reduction_fraction": {
+    "stopped_after_onset_s": 0.28502254687691,
+    "longest_stop_after_onset_s": 0.4186565717247087,
+    "interaction_to_arrival_s": 0.0952807672650966
+  },
+  "development_probes": [
+    {
+      "runs": [
+        "encounter_probe_soft2",
+        "encounter_probe_soft08",
+        "encounter_probe_hard"
+      ],
+      "finding": "Original covariance parameters: lowering soft weight did not materially reduce waiting."
+    },
+    {
+      "runs": [
+        "encounter_calibrated_soft",
+        "encounter_calibrated_hard"
+      ],
+      "finding": "Lower measurement noise underestimated visible-surface position errors and soft policy incurred unresolved-occlusion waiting; not selected."
+    },
+    {
+      "runs": [
+        "encounter_cov02_soft",
+        "encounter_cov02_hard"
+      ],
+      "finding": "With original narrow FOV and side endpoint, soft dynamic waiting fell but 21.26 s of sensor waiting increased total stopping; not selected."
+    },
+    {
+      "runs": [
+        "encounter_fov_soft4"
+      ],
+      "finding": "Weight 4 did not clearly improve over weight 2; retained weight 2 and repeated matched comparison."
+    }
+  ],
+  "limitations": [
+    "Two repeats per policy, with ROS scheduling variability; no statistical generalization.",
+    "Both policies share FOV, object geometry, uncertainty settings, and zero spatial risk weight to isolate timing.",
+    "No physical robot radius or hard safety margin was reduced. Independent safety shield triggered in some runs.",
+    "Empirical y-velocity 3-sigma coverage was only about 92-95% including abrupt starts/stops; not a calibrated probability or real-robot safety proof.",
+    "Narrow-FOV unresolved-occlusion freezing remains a separate algorithm limitation.",
+    "No real D435i/VINS noise or wheel/contact dynamics."
+  ]
+}

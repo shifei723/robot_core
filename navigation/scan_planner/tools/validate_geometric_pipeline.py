@@ -18,12 +18,31 @@ import numpy as np
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--case',choices=['static','crossing','continuous_crossing','turnaround','stop_restart','dropout'],default='crossing')
+    parser.add_argument('--case',choices=['static','crossing','continuous_crossing','turnaround','stop_restart','encounter','dropout'],default='crossing')
     parser.add_argument('--static-prior',action='store_true')
     parser.add_argument('--shifted-map-frame',action='store_true')
     parser.add_argument('--duration',type=float,default=40)
     parser.add_argument('--domain',type=int,default=191)
-    args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=False)
+    parser.add_argument('--timing-policy',choices=['soft','hard'],default='soft')
+    parser.add_argument('--camera-focal',type=float,default=220.)
+    parser.add_argument('--encounter-end-y',type=float,default=None)
+    parser.add_argument('--measurement-sigma',type=float,default=.06)
+    parser.add_argument('--accel-sigma',type=float,default=.8)
+    parser.add_argument('--frs-weight',type=float,default=2.0)
+    parser.add_argument('--spatial-weight',type=float,default=1.5)
+    parser.add_argument('--encounter-trigger-x',type=float,default=.6)
+    parser.add_argument('--encounter-x',type=float,default=1.8)
+    parser.add_argument('--encounter-speed',type=float,default=.22)
+    parser.add_argument('--encounter-side',type=float,default=1.1)
+    args=parser.parse_args()
+    if min(args.frs_weight,args.spatial_weight)<0 or min(args.encounter_speed,args.encounter_side)<=0:
+        parser.error('weights must be nonnegative and encounter scales positive')
+    if args.encounter_end_y is None:args.encounter_end_y=args.encounter_side
+    numeric=[args.camera_focal,args.measurement_sigma,args.accel_sigma,args.frs_weight,args.spatial_weight,args.encounter_speed,args.encounter_side,args.encounter_end_y,args.encounter_x,args.encounter_trigger_x]
+    if not all(math.isfinite(x) for x in numeric) or min(args.camera_focal,args.measurement_sigma,args.accel_sigma)<=0 or args.encounter_end_y<=-args.encounter_side:
+        parser.error('invalid camera, uncertainty, or encounter parameters')
+    encounter_started=None
+    args.output.mkdir(parents=True,exist_ok=False)
     os.environ['ROS_DOMAIN_ID']=str(args.domain)
     import rclpy
     from rclpy.qos import qos_profile_sensor_data
@@ -39,7 +58,7 @@ def main():
     from scipy.spatial.transform import Rotation
     import yaml
     rclpy.init();node=rclpy.create_node('geometric_pipeline_simulator');bridge=CvBridge();tf=TransformBroadcaster(node)
-    width,height=320,180;fx=fy=220.;cx=width/2;cy=height/2
+    width,height=320,180;fx=fy=args.camera_focal;cx=width/2;cy=height/2
     v,u=np.mgrid[:height,:width]
     optical_rays=np.stack(((u-cx)/fx,(v-cy)/fy,np.ones_like(u)),axis=-1).reshape(-1,3)
     optical_to_body=np.array([[0.,0.,1.],[-1.,0.,0.],[0.,-1.,0.]])
@@ -60,7 +79,7 @@ def main():
     def on_tracks(m):
         row={'t':elapsed(),'healthy':m.healthy,'status':m.status,'age':(node.get_clock().now().nanoseconds-(m.header.stamp.sec*10**9+m.header.stamp.nanosec))*1e-9,
              'objects':[{'id':o.id,'state':o.state,'observed':o.observed,'p':[o.position.x,o.position.y],
-                         'v':[o.velocity.x,o.velocity.y],'radius':o.radius} for o in m.obstacles]}
+                         'v':[o.velocity.x,o.velocity.y],'radius':o.radius,'covariance':list(o.covariance)} for o in m.obstacles]}
         data['tracks']=row;histories['tracks'].append(row)
     def on_decision(m):
         row=json.loads(m.data);row['t']=elapsed();data['decision']=row;histories['decisions'].append(row)
@@ -86,7 +105,7 @@ def main():
       'grid_map.double_cylinder_radius':.43,'grid_map.double_cylinder_offset':0.,
       'grid_map.sliding_map_size_x':10.,'grid_map.sliding_map_size_y':6.,'grid_map.sliding_map_size_z':3.,
       'grid_map.skip_pixel':2,'grid_map.local_update_range_y':3.,'grid_map.local_update_range_z':1.5,
-      'manager.wheel_grid_trajectory':True,'manager.wheel_search_timeout':.25,'manager.dynamic_frs_weight':1.5,
+      'manager.wheel_grid_trajectory':True,'manager.wheel_search_timeout':.25,'manager.dynamic_frs_weight':args.spatial_weight,
       'fsm.collision_horizon':3.,'fsm.collision_step':.05,'fsm.replan_interval':.4,
       'manager.max_vel':.3,'manager.max_acc':.3,'optimization.max_vel':.3,'optimization.max_acc':.3,
       'fsm.max_replan_fail_count':1000}
@@ -117,11 +136,11 @@ def main():
         launch('map_generator','map_pub',['-p',f'file_name:={prior_file}','-p',f'frame_id:={prior_frame}',
                '-p','downsample_res:=0.04','-r','global_cloud:=/sim/static_prior'])
     launch('geometric_obstacles','geometric_obstacles_node',['-p',f'static_prior_enabled:={str(args.static_prior).lower()}',
-        '-p','static_prior_topic:=/sim/static_prior','-p','depth_topic:=/sim/depth','-p','camera_info_topic:=/sim/camera_info'])
+        '-p','static_prior_topic:=/sim/static_prior','-p',f'measurement_sigma:={args.measurement_sigma}','-p',f'accel_sigma:={args.accel_sigma}','-p','depth_topic:=/sim/depth','-p','camera_info_topic:=/sim/camera_info'])
     launch('scan_planner','scan_planner_node',['--params-file',str(Path(get_package_share_directory('scan_planner'))/'config/planner.yaml'),
        '--params-file',str(paramfile),'-r','body_pose:=/sim/odom','-r','sensor_pose:=/dynamic_obstacles/camera_pose',
        '-r','depth:=/dynamic_obstacles/depth_static'])
-    launch('scan_planner','closed_loop_controller',['-p',f'static_prior_required:={str(args.static_prior).lower()}','-p','dynamic_soft_constraint:=true','-p','dynamic_horizon:=3.0','-p','dynamic_input:=array','-p','dynamic_prediction:=frs',
+    launch('scan_planner','closed_loop_controller',['-p',f'static_prior_required:={str(args.static_prior).lower()}','-p',f'dynamic_soft_constraint:={str(args.timing_policy=="soft").lower()}','-p',f'dynamic_frs_weight:={args.frs_weight}','-p','dynamic_horizon:=3.0','-p','dynamic_input:=array','-p','dynamic_prediction:=frs',
        '-p','height_safety_enabled:=true','-r','cloud:=/dynamic_obstacles/cloud_static','-p','max_vx:=0.3','-p','max_vyaw:=0.5',
        '-r','body_pose:=/sim/odom','-r','cmd_vel:=/sim/cmd_vel',
        '-r','leg_height_cmd:=/sim/leg_height_cmd','-r','planning/go2_execution_frozen:=/planning/go2_execution_frozen'])
@@ -129,6 +148,10 @@ def main():
     static=[([-2.,-1.65,0.],[8.,-1.55,2.]),([-2.,1.55,0.],[8.,1.65,2.]),([7.9,-1.65,0.],[8.,1.65,2.])]
     if args.case in ('static','dropout'):static.append(([1.3,.65,0.],[1.7,1.05,.8]))
     def moving(t):
+        if args.case=='encounter':
+            age=0. if encounter_started is None else max(0.,t-encounter_started)
+            y=float(np.clip(-args.encounter_side+args.encounter_speed*age,-args.encounter_side,args.encounter_end_y))
+            return [(np.array([args.encounter_x,y,0.]),np.array([.22,.22,.9]))]
         if args.case not in ('crossing','continuous_crossing','turnaround','stop_restart'):return []
         # Cross then stop at the side, remaining visible long enough to confirm stationary.
         motion_start=0. if args.case=='continuous_crossing' else 3.
@@ -157,7 +180,10 @@ def main():
     summary={'case':args.case,'reached':False,'collision':False,'error':None,'ground_truth_input_to_tracker':False,'prebuilt_static_map':args.static_prior,'shifted_map_frame':args.shifted_map_frame,
       'plant':'planar kinematics; ideal odometry, pinhole raycast depth; no contact physics or VINS estimator',
       'arrival_criterion':'distance < 0.16 m AND speed < 0.01 m/s AND controller GOAL_REACHED',
-      'goal':[3.,0.],'sensor_size':[width,height],'static_boxes':static}
+      'goal':[3.,0.],'camera_intrinsics':[fx,fy,cx,cy],'sensor_size':[width,height],'static_boxes':static}
+    summary['experiment_parameters']={'timing_policy':args.timing_policy,'frs_weight':args.frs_weight,
+      'spatial_weight':args.spatial_weight,'camera_focal':args.camera_focal,'encounter_end_y':args.encounter_end_y,'measurement_sigma':args.measurement_sigma,'accel_sigma':args.accel_sigma,'encounter_trigger_x':args.encounter_trigger_x,
+      'encounter_x':args.encounter_x,'encounter_speed':args.encounter_speed,'encounter_side':args.encounter_side}
     import geometric_obstacles.core as tracking_core
     summary['tracker_sha256']=hashlib.sha256(Path(tracking_core.__file__).read_bytes()).hexdigest()
     import geometric_obstacles.node as perception_node
@@ -178,6 +204,9 @@ def main():
             speed,yawrate=command if now-last_command<.3 else (0.,0.)
             state[0]+=speed*dt*math.cos(state[2]+yawrate*dt/2)
             state[1]+=speed*dt*math.sin(state[2]+yawrate*dt/2);state[2]+=yawrate*dt
+            if args.case=='encounter' and encounter_started is None and state[0]>=args.encounter_trigger_x:
+                encounter_started=t
+                summary['encounter_onset']={'t':t,'pose':state.tolist(),'v':float(speed),'w':float(yawrate)}
             base_z+=float(np.clip(data["height_target"]-base_z,-.08*dt,.08*dt))
             stamp=node.get_clock().now().to_msg()
             odom=Odometry();odom.header.stamp=stamp;odom.header.frame_id='world';odom.child_frame_id='base_link'

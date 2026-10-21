@@ -64,7 +64,8 @@ class Render:
    filtered=np.asarray(f['filtered'])[::3,::3]
    if filtered.shape==d.shape:valid&=(filtered!=65535)
    x,y,yaw=f['pose'];z=f.get('base_z',.2822)
-   body=np.stack((d,-(uu-160)*d/220,-(vv-90)*d/220),axis=-1)[valid]
+   fx,fy,cx,cy=self.result.get('camera_intrinsics',[220.,220.,160.,90.])
+   body=np.stack((d,-(uu-cx)*d/fx,-(vv-cy)*d/fy),axis=-1)[valid]
    R=np.array([[math.cos(yaw),-math.sin(yaw),0],[math.sin(yaw),math.cos(yaw),0],[0,0,1]])
    pts=body@R.T+[x,y,z+.1678]
    # Keep observed floor/walls. Object truth is overlaid separately, not inserted into map.

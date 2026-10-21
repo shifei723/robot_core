@@ -1,0 +1,32 @@
+{
+  "timing_policy": "soft",
+  "frs_weight": 2.0,
+  "spatial_weight": 0.0,
+  "camera_focal": 170.0,
+  "encounter_end_y": 0.8,
+  "measurement_sigma": 0.06,
+  "accel_sigma": 0.2,
+  "encounter_trigger_x": 0.6,
+  "encounter_x": 1.8,
+  "encounter_speed": 0.22,
+  "encounter_side": 1.1,
+  "case": "encounter",
+  "static_prior": true,
+  "shifted_map_frame": true,
+  "duration": 75,
+  "robot_radius_m": 0.43,
+  "hard_margin_m": 0.1,
+  "goal": [
+    3,
+    0
+  ],
+  "target_half_extent_xy": [
+    0.22,
+    0.22
+  ],
+  "camera_resolution": [
+    320,
+    180
+  ],
+  "scope": "Experimental preset only; production defaults unchanged."
+}
