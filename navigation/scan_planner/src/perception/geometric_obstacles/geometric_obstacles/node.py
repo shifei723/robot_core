@@ -19,7 +19,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from scan_planner_msgs.msg import DynamicObstacle, DynamicObstacleArray
 from tf2_ros import Buffer, TransformListener
 from cv_bridge import CvBridge
-from geometric_obstacles.core import Config, Tracker, project, rotation
+from geometric_obstacles.core import extend_contact_mask, Config, Tracker, project, rotation
 
 
 class GeometricObstacles(Node):
@@ -246,10 +246,8 @@ class GeometricObstacles(Node):
                 if np.any(visible):
                     rows = np.asarray(info.k).reshape(3,3)[1,1]*optical[visible,1]/optical[visible,2]+info.k[5]
                     bottom = min(depth.shape[0],int(np.ceil(rows.max()))+self.cfg.stride+1)
-                    top = int(t.pixels[:,0].max())
-                    left,right = int(t.pixels[:,1].min()),int(t.pixels[:,1].max())+1
                     target_mask = mask if t.state == 'dynamic' else unknown
-                    target_mask[top:bottom,left:right] = 1
+                    extend_contact_mask(target_mask,t.pixels,bottom)
             # Confident stationary clusters remain solely in the static map.
             if t.state == 'static' and t.observed: continue
             item = DynamicObstacle(); item.id = 'obstacle_'+str(t.id)

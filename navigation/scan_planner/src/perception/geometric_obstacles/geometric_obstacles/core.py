@@ -108,6 +108,21 @@ def project(depth, K, T, cfg):
     return world, np.column_stack((v,u)), float(valid.mean())
 
 
+def extend_contact_mask(mask, pixels, bottom):
+    """Omit the observed image envelope down to projected ground, not free it.
+
+    An oblique object's contact contour has a different last sampled row in
+    each column. Starting only at the global last row leaves low surface strips
+    between those contours in the static map. The envelope also closes stride
+    holes; background inside it remains unobserved, never declared free.
+    """
+    if not len(pixels):return
+    top=max(0,int(pixels[:,0].min()))
+    bottom=min(mask.shape[0],int(bottom))
+    left=max(0,int(pixels[:,1].min()));right=min(mask.shape[1],int(pixels[:,1].max())+1)
+    mask[top:bottom,left:right]=1
+
+
 class Tracker:
     def __init__(self, cfg=None):
         self.cfg = cfg or Config()
@@ -204,16 +219,32 @@ class Tracker:
         observed support until this track is retired: a face disappearing for a
         long time is not evidence that the object physically shrank. This is a
         rigid-support approximation; rotation/deformation remains ambiguous.
+        On one-sided growth, return a reference-centre shift separately from
+        physical displacement so revealing a surface cannot manufacture speed.
         """
         z = cluster.center[:2].copy()
         R = np.eye(2)*self.cfg.measurement_sigma**2
+        shift = np.zeros(2)
         if cluster.bounds is None or track.support_extent is None:
-            return z, R, False
+            return z, R, False, shift
         extent = track.support_extent
         lo, hi = cluster.bounds[:,:2]
         current = hi-lo
         corrected = False
         for axis in range(2):
+            growth = current[axis]-extent[axis]
+            # A newly revealed face changes the support-centre coordinate itself.
+            # Translate the state/history together; only the retained face's
+            # residual may update velocity. Association must use this same frame.
+            if growth > .01:
+                edge_delta = np.array([lo[axis]-(track.x[axis]-extent[axis]/2),
+                                       hi[axis]-(track.x[axis]+extent[axis]/2)])
+                residual = np.abs(edge_delta)
+                if (min(residual) < self.cfg.visibility_extent_tolerance and
+                        abs(residual[0]-residual[1]) > growth*.5):
+                    shift[axis] = growth*.5 if residual[0] < residual[1] else -growth*.5
+                    R[axis,axis] += (growth*.25)**2
+                    corrected = True
             loss = extent[axis]-current[axis]
             if loss > self.cfg.visibility_extent_tolerance:
                 candidates = np.array([lo[axis]+extent[axis]/2, hi[axis]-extent[axis]/2])
@@ -224,7 +255,7 @@ class Tracker:
                 if abs(residual[0]-residual[1]) < self.cfg.measurement_sigma:
                     R[axis,axis] += (loss*.5)**2
                 corrected = True
-        return z, R, corrected
+        return z, R, corrected, shift
 
     def remember_extent(self, track, cluster, stamp):
         if cluster.bounds is not None:
@@ -249,8 +280,8 @@ class Tracker:
         for i, identity in enumerate(ids):
             t = self.tracks[identity]
             for j, cl in enumerate(clusters):
-                z, observation_R, _ = self.observation(t, cl, stamp)
-                delta = z-t.x[:2]
+                z, observation_R, _, shift = self.observation(t, cl, stamp)
+                delta = z-(t.x[:2]+shift)
                 mahal = float(delta @ np.linalg.solve(t.P[:2,:2]+observation_R,delta))
                 if np.linalg.norm(delta) <= c.assoc_distance and mahal < 16 and abs(cl.center[2]-t.z) < .6:
                     cost[i,j] = mahal + abs(cl.radius-t.radius)
@@ -258,7 +289,9 @@ class Tracker:
         for i,j in zip(*linear_sum_assignment(cost)):
             if cost[i,j] >= 1e6: continue
             assigned.add(j); cl = clusters[j]; t = self.tracks[ids[i]]
-            z, R, t.visibility_corrected = self.observation(t, cl, stamp)
+            z, R, t.visibility_corrected, shift = self.observation(t, cl, stamp)
+            t.x[:2] += shift
+            t.observation_history = [(tt, pp+shift) for tt,pp in t.observation_history]
             gain = np.linalg.solve(t.P[:2,:2]+R,t.P[:2,:]).T
             t.x += gain @ (z-t.x[:2])
             A = np.eye(4); A[:,:2] -= gain

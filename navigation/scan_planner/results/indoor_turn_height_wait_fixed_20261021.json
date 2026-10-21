@@ -1,0 +1,414 @@
+{
+  "scope": "Software closed loop with ideal pose and raycast depth; real ROS perception/map/planner/controller. No real sensor or leg contact physics.",
+  "criterion": "Reached, no sampled entity collision, beam passed with >=3 cm clearance, leg height lowered below .215 m and restored, yaw excursion >1 rad, all 3 targets observed while moving, at least 2 moving targets limit navigation decisions. Simultaneous detection is separately reported, not required for sequential corridor encounters.",
+  "runs": [
+    {
+      "run": "indoor_turn_height_growth_02",
+      "policy": "soft",
+      "parameters": {
+        "timing_policy": "soft",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.5,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "onsets": {
+        "truth_0": {
+          "t": 7.838986312010093,
+          "pose": [
+            0.5000457785735593,
+            0.0,
+            0.0
+          ],
+          "v": 0.11644572057427523,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 43.46452975200373,
+          "pose": [
+            4.029935124997853,
+            0.20074370719057108,
+            1.7011305734700213
+          ],
+          "v": 0.12544379029230607,
+          "w": 0.15643534503701229
+        },
+        "truth_2": {
+          "t": 75.57839576699189,
+          "pose": [
+            3.9979416544828035,
+            2.2501293149663972,
+            1.5706228418735337
+          ],
+          "v": 0.09600772257780321,
+          "w": 0.001267847910306874
+        }
+      },
+      "multi_specs": [
+        {
+          "id": "truth_0",
+          "start": [
+            1.8,
+            -1.1
+          ],
+          "end": [
+            1.8,
+            0.8
+          ],
+          "speed": 0.22,
+          "trigger_axis": 0,
+          "trigger_value": 0.5
+        },
+        {
+          "id": "truth_1",
+          "start": [
+            2.9,
+            1.5
+          ],
+          "end": [
+            4.85,
+            1.5
+          ],
+          "speed": 0.22,
+          "trigger_axis": 1,
+          "trigger_value": 0.2
+        },
+        {
+          "id": "truth_2",
+          "start": [
+            2.9,
+            3.6
+          ],
+          "end": [
+            4.85,
+            3.6
+          ],
+          "speed": 0.22,
+          "trigger_axis": 1,
+          "trigger_value": 2.25
+        }
+      ],
+      "duration_s": 111.52324442999088,
+      "arrival_s": 111.5229077609838,
+      "after_onset_s": 103.6839214489737,
+      "stopped_s": 20.895069097925443,
+      "longest_stop_s": 5.249824247992365,
+      "dynamic_wait_s": 17.206403146963567,
+      "dynamic_slow_s": 4.282227125018835,
+      "sensor_wait_s": 0.0,
+      "min_clearance_m": 0.15000000000000008,
+      "target_clearances_m": {
+        "truth_0": 0.15000000000000008,
+        "truth_1": 0.18626280563225212,
+        "truth_2": 0.20106573351351825
+      },
+      "max_simultaneous_observed_dynamic": 1,
+      "max_simultaneous_frs": 2,
+      "false_dynamic_observations_while_stationary": {
+        "truth_0": 23,
+        "truth_1": 22,
+        "truth_2": 22
+      },
+      "limiting_decisions_while_moving": {
+        "truth_0": 61,
+        "truth_1": 61,
+        "truth_2": 56
+      },
+      "dynamic_observations_by_truth": {
+        "truth_0": 90,
+        "truth_1": 94,
+        "truth_2": 101
+      },
+      "limiting_decisions_by_truth": {
+        "truth_0": 74,
+        "truth_1": 76,
+        "truth_2": 64
+      },
+      "associated_ids_by_truth": {
+        "truth_0": [
+          "obstacle_0"
+        ],
+        "truth_1": [
+          "obstacle_1",
+          "obstacle_3"
+        ],
+        "truth_2": [
+          "obstacle_2",
+          "obstacle_4"
+        ]
+      },
+      "id_switches_by_truth": {
+        "truth_0": 0,
+        "truth_1": 1,
+        "truth_2": 1
+      },
+      "matched_position_rmse_xy": [
+        0.04163721153332704,
+        0.03935713476419452
+      ],
+      "shield_decisions": 0,
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "541357fc605c2590cb4075130579276c8f65cd5287ec01a78a5b68b19ad1022d"
+      },
+      "source_summary": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/indoor_turn_height_growth_02/summary.json",
+      "height_validation": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.10979819099903104,
+        "beam_crossed": true,
+        "yaw_range": 1.9075136865702242
+      },
+      "combined_pass": true,
+      "strict_simultaneous_multi_interaction_pass": false,
+      "scene_reference": {
+        "path": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/scan_planner/src/planner/plan_manage/config/simulator.yaml",
+        "sha256": "047ce0d6b12a42eebdac5a7236bff46d0dcca179517dd565713ce017630d8b0b",
+        "beam_clearance": 0.62,
+        "beam_depth": 0.6,
+        "motion": "Ground-plane linear segments, alternating crossings as in combined experiment; deterministic progress triggers; geometry adapted to L corridor."
+      },
+      "goal": [
+        4.0,
+        4.7
+      ],
+      "path_length_m": 8.702862214225544,
+      "total_turn_deg": 189.16516840387425,
+      "controller_states": [
+        "",
+        "ALIGNING",
+        "DYNAMIC_SLOW",
+        "DYNAMIC_WAIT",
+        "GOAL_REACHED",
+        "IDLE",
+        "TRACKING",
+        "WAIT_MAP",
+        "WAIT_ODOM",
+        "WAIT_STATIC_PRIOR"
+      ],
+      "all_three_perceived": true,
+      "interaction_targets": 3,
+      "pass": true
+    },
+    {
+      "run": "indoor_turn_height_growth_03",
+      "policy": "soft",
+      "parameters": {
+        "timing_policy": "soft",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.5,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "onsets": {
+        "truth_0": {
+          "t": 7.914639613009058,
+          "pose": [
+            0.5042558680072463,
+            0.0,
+            0.0
+          ],
+          "v": 0.1167557960543127,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 56.273205594014144,
+          "pose": [
+            4.027047028897903,
+            0.20008058067160842,
+            1.695551337221173
+          ],
+          "v": 0.12372798570322428,
+          "w": 0.11934539731420268
+        },
+        "truth_2": {
+          "t": 88.68034272801015,
+          "pose": [
+            3.997913303491246,
+            2.250083078648724,
+            1.5706476184033629
+          ],
+          "v": 0.10088802898244363,
+          "w": 0.001408175930993072
+        }
+      },
+      "multi_specs": [
+        {
+          "id": "truth_0",
+          "start": [
+            1.8,
+            -1.1
+          ],
+          "end": [
+            1.8,
+            0.8
+          ],
+          "speed": 0.22,
+          "trigger_axis": 0,
+          "trigger_value": 0.5
+        },
+        {
+          "id": "truth_1",
+          "start": [
+            2.9,
+            1.5
+          ],
+          "end": [
+            4.85,
+            1.5
+          ],
+          "speed": 0.22,
+          "trigger_axis": 1,
+          "trigger_value": 0.2
+        },
+        {
+          "id": "truth_2",
+          "start": [
+            2.9,
+            3.6
+          ],
+          "end": [
+            4.85,
+            3.6
+          ],
+          "speed": 0.22,
+          "trigger_axis": 1,
+          "trigger_value": 2.25
+        }
+      ],
+      "duration_s": 124.22262514100294,
+      "arrival_s": 124.22228964001988,
+      "after_onset_s": 116.30765002701082,
+      "stopped_s": 21.593051496020053,
+      "longest_stop_s": 5.264200589997927,
+      "dynamic_wait_s": 17.909531077952124,
+      "dynamic_slow_s": 4.006271206017118,
+      "sensor_wait_s": 0.06127595700672828,
+      "min_clearance_m": 0.15000000000000008,
+      "target_clearances_m": {
+        "truth_0": 0.15000000000000008,
+        "truth_1": 0.17032818046195292,
+        "truth_2": 0.20108728536272275
+      },
+      "max_simultaneous_observed_dynamic": 1,
+      "max_simultaneous_frs": 2,
+      "false_dynamic_observations_while_stationary": {
+        "truth_0": 23,
+        "truth_1": 23,
+        "truth_2": 23
+      },
+      "limiting_decisions_while_moving": {
+        "truth_0": 61,
+        "truth_1": 62,
+        "truth_2": 56
+      },
+      "dynamic_observations_by_truth": {
+        "truth_0": 90,
+        "truth_1": 97,
+        "truth_2": 97
+      },
+      "limiting_decisions_by_truth": {
+        "truth_0": 75,
+        "truth_1": 72,
+        "truth_2": 71
+      },
+      "associated_ids_by_truth": {
+        "truth_0": [
+          "obstacle_0"
+        ],
+        "truth_1": [
+          "obstacle_1"
+        ],
+        "truth_2": [
+          "obstacle_2",
+          "obstacle_3",
+          "obstacle_4",
+          "obstacle_5",
+          "obstacle_6",
+          "obstacle_7"
+        ]
+      },
+      "id_switches_by_truth": {
+        "truth_0": 0,
+        "truth_1": 0,
+        "truth_2": 6
+      },
+      "matched_position_rmse_xy": [
+        0.03860837726675229,
+        0.039086687522443334
+      ],
+      "shield_decisions": 0,
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "541357fc605c2590cb4075130579276c8f65cd5287ec01a78a5b68b19ad1022d"
+      },
+      "source_summary": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/indoor_turn_height_growth_03/summary.json",
+      "height_validation": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.10979884665012357,
+        "beam_crossed": true,
+        "yaw_range": 2.0012766321999744
+      },
+      "combined_pass": true,
+      "strict_simultaneous_multi_interaction_pass": false,
+      "scene_reference": {
+        "path": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/scan_planner/src/planner/plan_manage/config/simulator.yaml",
+        "sha256": "047ce0d6b12a42eebdac5a7236bff46d0dcca179517dd565713ce017630d8b0b",
+        "beam_clearance": 0.62,
+        "beam_depth": 0.6,
+        "motion": "Ground-plane linear segments, alternating crossings as in combined experiment; deterministic progress triggers; geometry adapted to L corridor."
+      },
+      "goal": [
+        4.0,
+        4.7
+      ],
+      "path_length_m": 8.703097107916445,
+      "total_turn_deg": 207.27079202682918,
+      "controller_states": [
+        "",
+        "ALIGNING",
+        "DYNAMIC_SLOW",
+        "DYNAMIC_WAIT",
+        "GOAL_REACHED",
+        "IDLE",
+        "TRACKING",
+        "WAIT_MAP",
+        "WAIT_STATIC_PRIOR",
+        "WAIT_TRACK"
+      ],
+      "all_three_perceived": true,
+      "interaction_targets": 3,
+      "pass": true
+    }
+  ],
+  "all_pass": true
+}

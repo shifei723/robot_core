@@ -1,0 +1,352 @@
+{
+  "scope": "WAIT_* time from actual controller states, separate from DYNAMIC_WAIT; initial static truth association is evaluation-only with 0.55 m distance gate.",
+  "runs": [
+    {
+      "run": "indoor_turn_height_soft_06",
+      "reached": true,
+      "collision": false,
+      "arrival_s": 118.18010055398918,
+      "height_validation": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 1.8812563188527283
+      },
+      "min_clearance_m": 0.15000000000000008,
+      "node_sha256": "a2e92ccc81b1d1137e0ae7372ccc2d29df31e5a94d2bb08eddb3691957b116d2",
+      "simulator_sha256": "541357fc605c2590cb4075130579276c8f65cd5287ec01a78a5b68b19ad1022d",
+      "experiment_parameters": {
+        "timing_policy": "soft",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.5,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "route_waypoints": [
+        [
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.7
+        ]
+      ],
+      "sensor_wait_after_first_onset_s": 10.020099956018385,
+      "wait_intervals": [
+        {
+          "start": 0.10639898301451467,
+          "end": 0.6006439320044592,
+          "state": "WAIT_MAP",
+          "pose": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "duration": 0.49424494898994453,
+          "perception_status_counts": {
+            "no fresh depth/pose": 1,
+            "waiting for prebuilt static map": 2,
+            "ok": 1
+          },
+          "unobserved_track_ids": []
+        },
+        {
+          "start": 0.6006439320044592,
+          "end": 0.6601406249974389,
+          "state": "WAIT_STATIC_PRIOR",
+          "pose": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "duration": 0.05949669299297966,
+          "perception_status_counts": {
+            "ok": 1
+          },
+          "unobserved_track_ids": []
+        },
+        {
+          "start": 56.073504878993845,
+          "end": 66.09360483501223,
+          "state": "WAIT_TRACK",
+          "pose": [
+            4.027004756329329,
+            0.2205239036880806,
+            1.7193971293167996
+          ],
+          "duration": 10.020099956018385,
+          "perception_status_counts": {
+            "unresolved occlusion": 127,
+            "ok": 1
+          },
+          "unobserved_track_ids": [
+            "obstacle_2"
+          ]
+        }
+      ],
+      "before_motion_estimation": {
+        "truth_0": {
+          "observations": 15,
+          "dynamic_observations": 0,
+          "peak_estimated_speed_m_s": 0.014037199972162535
+        },
+        "truth_1": {
+          "observations": 29,
+          "dynamic_observations": 0,
+          "peak_estimated_speed_m_s": 0.07632305683140092
+        },
+        "truth_2": {
+          "observations": 66,
+          "dynamic_observations": 27,
+          "peak_estimated_speed_m_s": 0.5392093190605779
+        }
+      },
+      "tracker_sha256": "7b2a2fa801a2e81bbd3eebd8571e8445e0830a9e8b4f2e19c5f2247af7b57f87"
+    },
+    {
+      "run": "indoor_turn_height_growth_02",
+      "reached": true,
+      "collision": false,
+      "arrival_s": 111.5229077609838,
+      "height_validation": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.10979819099903104,
+        "beam_crossed": true,
+        "yaw_range": 1.9075136865702242
+      },
+      "min_clearance_m": 0.15000000000000008,
+      "node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+      "simulator_sha256": "541357fc605c2590cb4075130579276c8f65cd5287ec01a78a5b68b19ad1022d",
+      "experiment_parameters": {
+        "timing_policy": "soft",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.5,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "route_waypoints": [
+        [
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.7
+        ]
+      ],
+      "sensor_wait_after_first_onset_s": 0,
+      "wait_intervals": [
+        {
+          "start": 0.053950300993165,
+          "end": 0.06455732500762679,
+          "state": "WAIT_ODOM",
+          "pose": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "duration": 0.010607024014461786,
+          "perception_status_counts": {},
+          "unobserved_track_ids": []
+        },
+        {
+          "start": 0.06455732500762679,
+          "end": 0.7534387150080875,
+          "state": "WAIT_MAP",
+          "pose": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "duration": 0.6888813900004607,
+          "perception_status_counts": {
+            "no fresh depth/pose": 1,
+            "waiting for prebuilt static map": 2,
+            "ok": 2
+          },
+          "unobserved_track_ids": []
+        },
+        {
+          "start": 0.7534387150080875,
+          "end": 0.8341673660033848,
+          "state": "WAIT_STATIC_PRIOR",
+          "pose": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "duration": 0.08072865099529736,
+          "perception_status_counts": {
+            "ok": 1
+          },
+          "unobserved_track_ids": []
+        }
+      ],
+      "before_motion_estimation": {
+        "truth_0": {
+          "observations": 15,
+          "dynamic_observations": 0,
+          "peak_estimated_speed_m_s": 0.022709278105135462
+        },
+        "truth_1": {
+          "observations": 30,
+          "dynamic_observations": 0,
+          "peak_estimated_speed_m_s": 0.07417351271363
+        },
+        "truth_2": {
+          "observations": 45,
+          "dynamic_observations": 0,
+          "peak_estimated_speed_m_s": 0.0802167443072061
+        }
+      },
+      "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db"
+    },
+    {
+      "run": "indoor_turn_height_growth_03",
+      "reached": true,
+      "collision": false,
+      "arrival_s": 124.22228964001988,
+      "height_validation": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.10979884665012357,
+        "beam_crossed": true,
+        "yaw_range": 2.0012766321999744
+      },
+      "min_clearance_m": 0.15000000000000008,
+      "node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+      "simulator_sha256": "541357fc605c2590cb4075130579276c8f65cd5287ec01a78a5b68b19ad1022d",
+      "experiment_parameters": {
+        "timing_policy": "soft",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.5,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "route_waypoints": [
+        [
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.7
+        ]
+      ],
+      "sensor_wait_after_first_onset_s": 0.06127595700672828,
+      "wait_intervals": [
+        {
+          "start": 0.10604802001034841,
+          "end": 0.8290725010156166,
+          "state": "WAIT_MAP",
+          "pose": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "duration": 0.7230244810052682,
+          "perception_status_counts": {
+            "no fresh depth/pose": 1,
+            "waiting for prebuilt static map": 1,
+            "ok": 1
+          },
+          "unobserved_track_ids": []
+        },
+        {
+          "start": 0.8290725010156166,
+          "end": 0.8492799600062426,
+          "state": "WAIT_STATIC_PRIOR",
+          "pose": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "duration": 0.020207458990626037,
+          "perception_status_counts": {
+            "ok": 1
+          },
+          "unobserved_track_ids": []
+        },
+        {
+          "start": 83.93470961699495,
+          "end": 83.99598557400168,
+          "state": "WAIT_TRACK",
+          "pose": [
+            3.995307283293018,
+            1.8348030663656014,
+            1.582596569096052
+          ],
+          "duration": 0.06127595700672828,
+          "perception_status_counts": {
+            "ok": 1
+          },
+          "unobserved_track_ids": []
+        }
+      ],
+      "before_motion_estimation": {
+        "truth_0": {
+          "observations": 15,
+          "dynamic_observations": 0,
+          "peak_estimated_speed_m_s": 0.02236256200945613
+        },
+        "truth_1": {
+          "observations": 29,
+          "dynamic_observations": 0,
+          "peak_estimated_speed_m_s": 0.04344999124542049
+        },
+        "truth_2": {
+          "observations": 85,
+          "dynamic_observations": 0,
+          "peak_estimated_speed_m_s": 0.21051145024965262
+        }
+      },
+      "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db"
+    }
+  ],
+  "diagnosis": {
+    "baseline_wait_s": [
+      56.073504878993845,
+      66.09360483501223
+    ],
+    "cause": "Newly visible one-sided support expansion while turning produced false velocity on initially stationary target 2. It then crossed the effective 3 m depth limit; the coasting track made the array unhealthy.",
+    "secondary_issue": "Once the false wait was removed, oblique contact-mask gaps left low static-map strips and caused repeated replanning/map timeouts. Complete observed envelope masking fixed this without writing free-space evidence."
+  },
+  "verification": {
+    "package_test_summary": "50 tests, 0 errors, 0 failures, 0 skipped",
+    "same_parameters": true,
+    "same_simulator": true,
+    "same_route": true,
+    "safety_guards": "Unchanged lost timeout, health gate, depth range and real occlusion retirement policy; no tuning of camera or FRS weights."
+  },
+  "development_failure": {
+    "run": "indoor_turn_height_growth_01",
+    "outcome": "Growth correction alone removed WAIT_TRACK but did not reach within 180 seconds because low contact strips caused replanning and map waiting. Not counted as successful validation."
+  },
+  "limitations": [
+    "Only one saved baseline and two fixed software runs; asynchronous timings vary.",
+    "Arrival times 111.52 and 124.22 s versus baseline 118.18 s do not establish a consistent overall speedup.",
+    "Track reacquisitions remain; target 2 has 1 and 6 association switches in the fixed runs. No claim of fully solved tracking/occlusion.",
+    "A brief tentative speed peak remains in repeat 2 but it does not confirm false dynamic motion; initial-static target 2 has zero observed dynamic classifications in both repeats."
+  ]
+}

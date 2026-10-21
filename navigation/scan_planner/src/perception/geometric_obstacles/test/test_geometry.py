@@ -214,3 +214,54 @@ def test_overlapping_depth_surface_motion_has_temporal_fallback():
         c.geometry_mean=.005;c.geometry_variance=3.
         tracker.step(i*.075,[c])
     assert tracker.tracks[0].state=='dynamic'
+
+
+def test_new_stationary_support_expands_without_false_velocity():
+    tracker=Tracker(Config(accel_sigma=.2))
+    for i in range(10):
+        width=min(.44,.02+i*.06)
+        # Only the right edge is initially visible; the left side is revealed.
+        lo=np.array([3.12-width,3.38,.2]);hi=np.array([3.12,3.82,.9])
+        c=Cluster((lo+hi)/2,.4,np.array([[1,1]]),1.,np.array([lo,hi]),.1,.2)
+        tracker.step(i*.08,[c])
+        assert np.linalg.norm(tracker.tracks[0].x[2:])<.03
+        assert tracker.tracks[0].state!='dynamic'
+    assert tracker.tracks[0].state=='static'
+    assert tracker.tracks[0].x[0]==pytest.approx(2.90,abs=.01)
+
+
+def test_growing_support_preserves_real_motion_on_both_axes():
+    tracker=Tracker(Config(accel_sigma=.2))
+    for i in range(60):
+        time=i*.075
+        width=.02 if i<15 else min(.44,.02+(i-15)*.06)
+        lo=np.array([3.12-width+.25*time,3.38+.22*time,.2])
+        hi=np.array([3.12+.25*time,3.82+.22*time,.9])
+        c=Cluster((lo+hi)/2,.4,np.array([[1,1]]),1.,np.array([lo,hi]),.1,.2)
+        tracker.step(time,[c])
+        if i>12:
+            np.testing.assert_allclose(tracker.tracks[0].x[2:],[.25,.22],atol=.05)
+    assert len(tracker.tracks)==1 and tracker.tracks[0].state=='dynamic'
+
+
+def test_symmetric_support_growth_does_not_shift_reference():
+    tracker=Tracker()
+    for i in range(15):
+        width=.02+i*.02
+        lo=np.array([2.-width/2,-.2,.2]);hi=np.array([2.+width/2,.2,.9])
+        tracker.step(i*.075,[Cluster((lo+hi)/2,.4,np.array([[1,1]]),1.,np.array([lo,hi]))])
+    np.testing.assert_allclose(tracker.tracks[0].x,[2.,0.,0.,0.],atol=1e-8)
+
+
+def test_oblique_contact_contour_does_not_leave_low_static_strips():
+    from geometric_obstacles.core import extend_contact_mask
+    # At the far column the last above-ground sample is row 6; the near column
+    # reaches row 10. Row 8 at column 4 is still object contact, not free floor.
+    pixels=np.array([[2,4],[6,4],[2,8],[6,8],[10,8]])
+    mask=np.zeros((18,16),np.uint8);mask[pixels[:,0],pixels[:,1]]=1
+    extend_contact_mask(mask,pixels,15)
+    assert mask[8,4] and mask[12,8] and mask[8,6]
+    assert not mask[16,6] and not mask[8,2] and not mask[0,6]
+    depth=np.full(mask.shape,1500,np.uint16);depth[mask.astype(bool)]=65535
+    assert depth[8,4]==65535  # omitted ray, never a zero/far free-space return
+    assert depth[8,2]==1500  # measurements outside the envelope are retained
