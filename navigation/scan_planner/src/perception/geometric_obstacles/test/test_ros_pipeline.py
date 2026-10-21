@@ -93,9 +93,9 @@ def test_prebuilt_background_and_new_obstacle_transport():
     def spin(seconds):
         end=time.monotonic()+seconds
         while time.monotonic()<end:executor.spin_once(timeout_sec=.005)
-    def send(new=False):
+    def send(new=False,offset=40):
         depth=np.full((120,160),1600,np.uint16)
-        if new:depth[40:80,40:64]=1200
+        if new:depth[40:80,offset:offset+24]=1200
         msg=perception.bridge.cv2_to_imgmsg(depth,'16UC1');msg.header.frame_id='prior_optical'
         msg.header.stamp=driver.get_clock().now().to_msg();info.header.stamp=msg.header.stamp
         camera.publish(info);pub.publish(msg);spin(.07)
@@ -113,6 +113,23 @@ def test_prebuilt_background_and_new_obstacle_transport():
         send(True)
         assert arrays[-1].healthy and arrays[-1].obstacles
         assert any(abs(o.position.x-1.2)<.1 for o in arrays[-1].obstacles)
-        print('Prebuilt prior verified: missing-map hold, known wall excluded, new obstacle retained')
+        original_prior=perception.prior.points.copy()
+        for _ in range(48):send(True)
+        assert perception.online.promoted_total>=1
+        assert len(perception.online.points)>0
+        assert perception.prior_stats['online_matched_points']>0
+        assert not arrays[-1].obstacles
+        combined=point_cloud2.read_points_numpy(priors[-1],field_names=('x','y','z'),skip_nans=True)
+        assert np.any(combined[:,0]<1.3), 'confirmed online layer must reach the mapper snapshot'
+        before=len(arrays)
+        for i in range(1,36):send(True,40+i*2)
+        assert any(o.state==o.DYNAMIC for a in arrays[before:] for o in a.obstacles), 'promoted object must wake up when moving again'
+        assert perception.online.cleared_total>0
+        for _ in range(12):send(False)
+        assert not len(perception.online.points), 'visible old surface must clear'
+        np.testing.assert_array_equal(perception.prior.points,original_prior)
+        combined=point_cloud2.read_points_numpy(priors[-1],field_names=('x','y','z'),skip_nans=True)
+        assert not np.any(combined[:,0]<1.3), 'cleared online layer must leave mapper snapshot'
+        print('Prior/online layers verified: promotion, resumed motion, clearing, immutable fixed map')
     finally:
         executor.shutdown();perception.destroy_node();driver.destroy_node();rclpy.shutdown()

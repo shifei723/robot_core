@@ -12,6 +12,7 @@ from sensor_msgs_py import point_cloud2
 from std_msgs.msg import String, Header
 import json
 from geometric_obstacles.static_prior import StaticPrior
+from geometric_obstacles.online_background import BackgroundConfig, OnlineBackground, protected_points
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2, PointField
 from nav_msgs.msg import Odometry
 from visualization_msgs.msg import Marker, MarkerArray
@@ -36,6 +37,8 @@ class GeometricObstacles(Node):
         self.prior_voxel = param('static_prior_voxel',.05)
         self.prior_distance = param('static_prior_match_distance',.10)
         self.prior_radius = param('static_prior_local_radius',8.)
+        self.online_enabled = param('online_background_enabled',True)
+        self.online = OnlineBackground(BackgroundConfig(**{k:param('online_'+k,v) for k,v in vars(BackgroundConfig()).items()}))
         self.prior = None; self.prior_frame = ''; self.prior_transform = None
         self.last_prior_publish = -1.; self.prior_stats = {}
         self.prior_pub = self.create_publisher(PointCloud2,'/dynamic_obstacles/static_prior',
@@ -76,34 +79,60 @@ class GeometricObstacles(Node):
             self.get_logger().error(f'Invalid static prior: {exc}')
             self.unhealthy('invalid static prior')
 
-    def prior_filter(self,points,pixels,T,stamp):
-        if not self.prior_enabled:return points,pixels
-        if self.prior_frame==self.world:M=np.eye(4)
-        else:
-            tr=self.tf.lookup_transform(self.prior_frame,self.world,stamp).transform
-            q=tr.rotation;v=tr.translation
-            M=np.eye(4);M[:3,:3]=rotation([q.x,q.y,q.z,q.w]);M[:3,3]=[v.x,v.y,v.z]
-        if self.prior_transform is not None:
-            D=M@np.linalg.inv(self.prior_transform)
-            angle=np.arccos(np.clip((np.trace(D[:3,:3])-1)/2,-1,1))
-            if np.linalg.norm(D[:3,3])>self.max_translation or angle>self.max_rotation:
-                raise ValueError('map/world discontinuity: restart perception and replan after relocalization')
-        self.prior_transform=M
-        in_map=points@M[:3,:3].T+M[:3,3]
-        known=self.prior.known(in_map)
-        self.prior_stats={'input_points':len(points),'known_static_points':int(known.sum()),
-                          'residual_points':int((~known).sum()),'prior_voxels':len(self.prior.points)}
+    def prior_filter(self,points,pixels,T,stamp,depth=None,K=None):
         seconds=stamp.nanoseconds*1e-9
-        if seconds-self.last_prior_publish>=.2:
-            center=M[:3,:3]@T[:3,3]+M[:3,3]
-            crop=self.prior.local(center,self.prior_radius)
-            world=(crop-M[:3,3])@M[:3,:3]
-            # Ground belongs to localization/background matching, not obstacle occupancy.
-            world=world[world[:,2]>self.cfg.ground_z+.05]
-            header=Header();header.frame_id=self.world;header.stamp=stamp.to_msg()
-            self.prior_pub.publish(point_cloud2.create_cloud_xyz32(header,world.astype(np.float32)))
-            self.last_prior_publish=seconds
-        return points[~known],pixels[~known]
+        known=np.zeros(len(points),bool)
+        M=np.eye(4)
+        if self.prior_enabled:
+            if self.prior_frame!=self.world:
+                tr=self.tf.lookup_transform(self.prior_frame,self.world,stamp).transform
+                q=tr.rotation;v=tr.translation
+                M[:3,:3]=rotation([q.x,q.y,q.z,q.w]);M[:3,3]=[v.x,v.y,v.z]
+            if self.prior_transform is not None:
+                D=M@np.linalg.inv(self.prior_transform)
+                angle=np.arccos(np.clip((np.trace(D[:3,:3])-1)/2,-1,1))
+                if np.linalg.norm(D[:3,3])>self.max_translation or angle>self.max_rotation:
+                    raise ValueError('map/world discontinuity: restart perception and replan after relocalization')
+            self.prior_transform=M
+            known=self.prior.known(points@M[:3,:3].T+M[:3,3])
+        online_known=np.zeros(len(points),bool)
+        removed=0
+        if self.online_enabled:
+            if depth is not None:
+                removed=self.online.observe_free(depth,K,T,seconds,self.cfg.min_depth,self.cfg.max_depth)
+            # Fixed-map points do not trigger reinspection of nearby objects.
+            foreground=(~known)&(points[:,2]>self.cfg.ground_z+self.cfg.ground_band)&(points[:,2]<self.cfg.ground_z+self.cfg.max_height)
+            for track in self.online.wake_for_changes(points[foreground],seconds,self.tracker.tracks):
+                self.tracker.tracks[track.id]=track
+            online_known=self.online.known(points,seconds)
+        protected=protected_points(points,self.tracker.tracks.values(),seconds)
+        fixed_background=self.prior.known(points@M[:3,:3].T+M[:3,3],protected) if self.prior_enabled else known
+        background=fixed_background|(online_known&~protected)
+        self.prior_stats={'input_points':len(points),'known_static_points':int(known.sum()),
+                          'online_matched_points':int(online_known.sum()),
+                          'protected_background_points':int(((known|online_known)&~background).sum()),
+                          'residual_points':int((~background).sum()),
+                          'prior_voxels':len(self.prior.points) if self.prior else 0,
+                          'online_cleared_this_frame':removed}
+        return points[~background],pixels[~background]
+
+    def publish_background(self,T,stamp):
+        # GridMap replaces this snapshot atomically. The fixed map is never
+        # mutated; only the separately confirmed online layer can be cleared.
+        if not self.prior_enabled:return
+        seconds=stamp.nanoseconds*1e-9
+        if seconds-self.last_prior_publish<.2:return
+        M=self.prior_transform
+        center=M[:3,:3]@T[:3,3]+M[:3,3]
+        crop=self.prior.local(center,self.prior_radius)
+        world=(crop-M[:3,3])@M[:3,:3]
+        if self.online_enabled and len(self.online.points):
+            local=self.online.points[np.linalg.norm(self.online.points-T[:3,3],axis=1)<=self.prior_radius]
+            world=np.vstack((world,local))
+        world=world[world[:,2]>self.cfg.ground_z+.05]
+        header=Header();header.frame_id=self.world;header.stamp=stamp.to_msg()
+        self.prior_pub.publish(point_cloud2.create_cloud_xyz32(header,world.astype(np.float32)))
+        self.last_prior_publish=seconds
 
     def on_info(self, msg): self.info = msg
     def on_depth(self, msg): self.pending = msg  # Latest only; never build a latency queue.
@@ -175,10 +204,16 @@ class GeometricObstacles(Node):
             if valid < self.minimum_valid:
                 self.unhealthy('insufficient valid depth'); return
             started=time.perf_counter()
-            residual,uv=self.prior_filter(points,pixels,T,stamp)
+            residual,uv=self.prior_filter(points,pixels,T,stamp,depth,K)
             self.tracker.process(residual,uv,stamp.nanoseconds*1e-9)
-            if self.prior_enabled:
-                stats=String();stats.data=json.dumps({**self.prior_stats,'filter_and_tracking_ms':(time.perf_counter()-started)*1000,
+            if self.online_enabled:
+                handed_off=self.online.update(self.tracker.tracks.values(),points,pixels,stamp.nanoseconds*1e-9)
+                for identity in handed_off:self.tracker.tracks.pop(identity,None)
+            self.publish_background(T,stamp)
+            if self.prior_enabled or self.online_enabled:
+                stats=String();stats.data=json.dumps({**self.prior_stats,'online_background_points':len(self.online.points),
+                    'online_promotions':self.online.promoted_total,'online_reactivations':self.online.reactivated_total,'online_cleared_total':self.online.cleared_total,
+                    'filter_and_tracking_ms':(time.perf_counter()-started)*1000,
                     'visibility_corrected_tracks':sum(t.observed and t.visibility_corrected for t in self.tracker.tracks.values())})
                 self.stats_pub.publish(stats)
             healthy = self.tracker.retire(stamp.nanoseconds*1e-9,depth,K,T)

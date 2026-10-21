@@ -7,6 +7,7 @@ install(PROGRAMS geometric_obstacles/node.py DESTINATION lib/${PROJECT_NAME} REN
 if(BUILD_TESTING)
  find_package(ament_cmake_pytest REQUIRED)
  ament_add_pytest_test(test_geometry test/test_geometry.py)
+ ament_add_pytest_test(test_online_background test/test_online_background.py)
  ament_add_pytest_test(test_ros_pipeline test/test_ros_pipeline.py TIMEOUT 30 APPEND_ENV ROS_DOMAIN_ID=187)
 endif()
 ament_package()

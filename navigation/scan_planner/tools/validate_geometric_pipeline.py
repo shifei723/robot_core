@@ -18,7 +18,7 @@ import numpy as np
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--case',choices=['static','crossing','continuous_crossing','turnaround','dropout'],default='crossing')
+    parser.add_argument('--case',choices=['static','crossing','continuous_crossing','turnaround','stop_restart','dropout'],default='crossing')
     parser.add_argument('--static-prior',action='store_true')
     parser.add_argument('--shifted-map-frame',action='store_true')
     parser.add_argument('--duration',type=float,default=40)
@@ -129,10 +129,11 @@ def main():
     static=[([-2.,-1.65,0.],[8.,-1.55,2.]),([-2.,1.55,0.],[8.,1.65,2.]),([7.9,-1.65,0.],[8.,1.65,2.])]
     if args.case in ('static','dropout'):static.append(([1.3,.65,0.],[1.7,1.05,.8]))
     def moving(t):
-        if args.case not in ('crossing','continuous_crossing','turnaround'):return []
+        if args.case not in ('crossing','continuous_crossing','turnaround','stop_restart'):return []
         # Cross then stop at the side, remaining visible long enough to confirm stationary.
         motion_start=0. if args.case=='continuous_crossing' else 3.
         y=float(np.clip(-.95+.22*max(t-motion_start,0),-.95,.95))
+        if args.case=='stop_restart':y=float(np.clip(-.75+.22*max(t-6.,0),-.75,.95))
         if args.case=='turnaround' and t>8.:y=float(np.clip(.15-.22*(t-8.),-.95,.95))
         return [(np.array([1.8,y,0.]),np.array([.22,.22,.9]))]
     def raycast(t):
@@ -160,6 +161,10 @@ def main():
     import geometric_obstacles.core as tracking_core
     summary['tracker_sha256']=hashlib.sha256(Path(tracking_core.__file__).read_bytes()).hexdigest()
     import geometric_obstacles.node as perception_node
+    import geometric_obstacles.online_background as online_background
+    import geometric_obstacles.static_prior as static_prior
+    summary['online_background_sha256']=hashlib.sha256(Path(online_background.__file__).read_bytes()).hexdigest()
+    summary['static_prior_sha256']=hashlib.sha256(Path(static_prior.__file__).read_bytes()).hexdigest()
     summary['perception_node_sha256']=hashlib.sha256(Path(perception_node.__file__).read_bytes()).hexdigest()
     summary['controller_sha256']=hashlib.sha256((Path(get_package_prefix('scan_planner'))/'lib/scan_planner/closed_loop_controller').read_bytes()).hexdigest()
     summary['planner_sha256']=hashlib.sha256((Path(get_package_prefix('scan_planner'))/'lib/scan_planner/scan_planner_node').read_bytes()).hexdigest()

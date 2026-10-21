@@ -37,6 +37,16 @@ def evaluate(root):
         s['pass']=bool(s['pipeline_evidence'] and s['reached'] and not s['collision'] and s['error'] is None)
         if s['case']!='static':s['pass']=s['pass'] and bool(detected) and s['masked_snapshots']>0 and (s['frs_waits']+s['frs_slow'])>0
         s['criterion']='all stages active; goal error <0.16 m (plus stopped/GOAL_REACHED when declared by run); no collision; dynamic scenarios additionally require detected motion, mask and FRS intervention'
+    if stats and 'online_background_points' in stats[0]:
+        s['online_max_points']=max(a['online_background_points'] for a in stats)
+        s['online_promotions']=max(a['online_promotions'] for a in stats)
+        s['online_cleared_points']=max(a['online_cleared_total'] for a in stats)
+        s['online_reactivations']=max(a.get('online_reactivations',0) for a in stats)
+    if s['case']=='stop_restart':
+        s['promoted_before_motion']=any(a['t']<6 and a.get('online_promotions',0)>0 for a in stats)
+        s['false_dynamic_before_motion']=any(t<6 for t in detected)
+        s['pass']=bool(s['pass'] and s['promoted_before_motion'] and not s['false_dynamic_before_motion'] and s.get('online_cleared_points',0)>0)
+        s['criterion']+='; promoted before t=6, no dynamic label before true motion, old online points cleared'
     (root/'evaluation.json').write_text(json.dumps(s,indent=2,ensure_ascii=False))
     return s
 
