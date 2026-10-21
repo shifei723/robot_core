@@ -739,3 +739,17 @@ A=(0,0)，走廊转角路由点=(4,0)，B=(4,4.7) m。路由点是明确配置�
 `results/indoor_turn_height_wait_fixed_20261021.json`；新回放位于
 `output/indoor_turn_height_wait_fixed/frs_perception_navigation.gif`。复现沿用
 `tools/run_indoor_turn_height.sh`，需先构建更新后的 `geometric_obstacles` 包。
+
+四阶段论文过程图可由 `tools/render_indoor_storyboard.py` 从修复后的同一运行生成：
+
+```bash
+python navigation/scan_planner/tools/render_indoor_storyboard.py \
+  data/geometric_validation/indoor_turn_height_growth_02 \
+  --output output/pdf/indoor_navigation_process
+```
+
+依赖 MuJoCo/EGL、Pillow、NumPy 和 ReportLab。输出独立四图、2×2 与横向四联图的
+300 dpi PNG/PDF、中文图注及来源清单。四个关键时刻为 12、48、80、111.52 s，分别
+表示首次交互、转弯后交互、降高过梁与让行、恢复高度到达。A/P/B 标记任务起点、
+配置的转角路由点及终点。横梁点云在展示时剖隐、轮廓透明化以显示低姿态；感知、轨迹
+和 FRS 数据均未改动。最终帧不展示未来预测，所有拖影均来自该运行的历史位置。
