@@ -1,0 +1,38 @@
+{
+  "case": "indoor_turn_height",
+  "route": [
+    [
+      0,
+      0
+    ],
+    [
+      4,
+      0
+    ],
+    [
+      4,
+      4.7
+    ]
+  ],
+  "route_note": "Configured corridor routing waypoint; each segment is planned online, not an end-to-end global route search.",
+  "reference_scene": "src/planner/plan_manage/config/simulator.yaml",
+  "beam_clearance_m": 0.62,
+  "beam_depth_m": 0.6,
+  "leg_rate_m_s": 0.08,
+  "camera_resolution": [
+    320,
+    180
+  ],
+  "camera_focal_px": 170,
+  "frs_weight": 2.0,
+  "spatial_weight": 0.5,
+  "measurement_sigma": 0.06,
+  "accel_sigma": 0.2,
+  "search_timeout_s": 1.0,
+  "search_envelope_radius_m": 0.5,
+  "physical_evaluation_radius_m": 0.43,
+  "static_prior": true,
+  "shifted_map_frame": true,
+  "duration_s": 180,
+  "scope": "Experimental preset; no production launch defaults changed. Three moving boxes with depth-based online tracking, not ideal track injection."
+}

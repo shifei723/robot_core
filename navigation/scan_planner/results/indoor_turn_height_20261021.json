@@ -1,0 +1,242 @@
+{
+  "scope": "Software closed loop with ideal pose and raycast depth; real ROS perception/map/planner/controller. No real sensor or leg contact physics.",
+  "criterion": "Reached, no sampled entity collision, beam passed with >=3 cm clearance, leg height lowered below .215 m and restored, yaw excursion >1 rad, all 3 targets observed while moving, at least 2 moving targets limit navigation decisions. Simultaneous detection is separately reported, not required for sequential corridor encounters.",
+  "runs": [
+    {
+      "run": "indoor_turn_height_soft_06",
+      "policy": "soft",
+      "parameters": {
+        "timing_policy": "soft",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.5,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "onsets": {
+        "truth_0": {
+          "t": 7.805984981008805,
+          "pose": [
+            0.5001033969184413,
+            0.0,
+            0.0
+          ],
+          "v": 0.11643011180100436,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 55.90592579901568,
+          "pose": [
+            4.0298850681450045,
+            0.20000315759556486,
+            1.6995629262723788
+          ],
+          "v": 0.12475947929158493,
+          "w": 0.14620943794911678
+        },
+        "truth_2": {
+          "t": 87.75343663801323,
+          "pose": [
+            3.9982760100184347,
+            2.2529375076864095,
+            1.5702969809953065
+          ],
+          "v": 0.11859027826733362,
+          "w": 0.0037764746852686493
+        }
+      },
+      "multi_specs": [
+        {
+          "id": "truth_0",
+          "start": [
+            1.8,
+            -1.1
+          ],
+          "end": [
+            1.8,
+            0.8
+          ],
+          "speed": 0.22,
+          "trigger_axis": 0,
+          "trigger_value": 0.5
+        },
+        {
+          "id": "truth_1",
+          "start": [
+            2.9,
+            1.5
+          ],
+          "end": [
+            4.85,
+            1.5
+          ],
+          "speed": 0.22,
+          "trigger_axis": 1,
+          "trigger_value": 0.2
+        },
+        {
+          "id": "truth_2",
+          "start": [
+            2.9,
+            3.6
+          ],
+          "end": [
+            4.85,
+            3.6
+          ],
+          "speed": 0.22,
+          "trigger_axis": 1,
+          "trigger_value": 2.25
+        }
+      ],
+      "duration_s": 118.18030174300657,
+      "arrival_s": 118.18010055398918,
+      "after_onset_s": 110.37411557298037,
+      "stopped_s": 25.6754273630213,
+      "longest_stop_s": 10.020209770009387,
+      "dynamic_wait_s": 11.754011010023532,
+      "dynamic_slow_s": 2.829181670997059,
+      "sensor_wait_s": 10.020099956018385,
+      "min_clearance_m": 0.15000000000000008,
+      "target_clearances_m": {
+        "truth_0": 0.15000000000000008,
+        "truth_1": 0.18856102160817872,
+        "truth_2": 0.2009677321008419
+      },
+      "max_simultaneous_observed_dynamic": 1,
+      "max_simultaneous_frs": 2,
+      "false_dynamic_observations_while_stationary": {
+        "truth_0": 23,
+        "truth_1": 23,
+        "truth_2": 50
+      },
+      "limiting_decisions_while_moving": {
+        "truth_0": 59,
+        "truth_1": 0,
+        "truth_2": 61
+      },
+      "dynamic_observations_by_truth": {
+        "truth_0": 90,
+        "truth_1": 95,
+        "truth_2": 96
+      },
+      "limiting_decisions_by_truth": {
+        "truth_0": 73,
+        "truth_1": 0,
+        "truth_2": 71
+      },
+      "associated_ids_by_truth": {
+        "truth_0": [
+          "obstacle_0"
+        ],
+        "truth_1": [
+          "obstacle_1"
+        ],
+        "truth_2": [
+          "obstacle_2",
+          "obstacle_3"
+        ]
+      },
+      "id_switches_by_truth": {
+        "truth_0": 0,
+        "truth_1": 0,
+        "truth_2": 1
+      },
+      "matched_position_rmse_xy": [
+        0.028834499644874008,
+        0.0483363427442097
+      ],
+      "shield_decisions": 0,
+      "source_hashes": {
+        "tracker_sha256": "7b2a2fa801a2e81bbd3eebd8571e8445e0830a9e8b4f2e19c5f2247af7b57f87",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "a2e92ccc81b1d1137e0ae7372ccc2d29df31e5a94d2bb08eddb3691957b116d2",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "541357fc605c2590cb4075130579276c8f65cd5287ec01a78a5b68b19ad1022d"
+      },
+      "source_summary": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/indoor_turn_height_soft_06/summary.json",
+      "height_validation": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 1.8812563188527283
+      },
+      "combined_pass": true,
+      "strict_simultaneous_multi_interaction_pass": false,
+      "scene_reference": {
+        "path": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/scan_planner/src/planner/plan_manage/config/simulator.yaml",
+        "sha256": "047ce0d6b12a42eebdac5a7236bff46d0dcca179517dd565713ce017630d8b0b",
+        "beam_clearance": 0.62,
+        "beam_depth": 0.6,
+        "motion": "Ground-plane linear segments, alternating crossings as in combined experiment; deterministic progress triggers; geometry adapted to L corridor."
+      },
+      "goal": [
+        4.0,
+        4.7
+      ],
+      "path_length_m": 8.697051699521154,
+      "total_turn_deg": 181.5196769730247,
+      "controller_states": [
+        "",
+        "ALIGNING",
+        "DYNAMIC_SLOW",
+        "DYNAMIC_WAIT",
+        "GOAL_REACHED",
+        "IDLE",
+        "TRACKING",
+        "WAIT_MAP",
+        "WAIT_STATIC_PRIOR",
+        "WAIT_TRACK"
+      ],
+      "all_three_perceived": true,
+      "interaction_targets": 2,
+      "pass": true
+    }
+  ],
+  "all_pass": true,
+  "development_history": [
+    {
+      "run": "soft_01",
+      "outcome": "search timeout; no motion"
+    },
+    {
+      "run": "soft_02",
+      "outcome": "smoothed trajectory rejected; no motion"
+    },
+    {
+      "run": "soft_03",
+      "outcome": "stopped obstacle blocks diagonal shortcut; no arrival"
+    },
+    {
+      "run": "soft_04",
+      "outcome": "unresolved out-of-view target; no arrival"
+    },
+    {
+      "run": "soft_05",
+      "outcome": "summary serialization failure; raw traces not saved, excluded"
+    },
+    {
+      "run": "soft_06",
+      "outcome": "complete recorded run; combined criterion passed"
+    }
+  ],
+  "limitations": [
+    "Single development-selected run, no statistical or real-hardware safety claim.",
+    "Configured corridor routing waypoint, not a demonstrated end-to-end global route search.",
+    "Three moving targets observed sequentially; maximum simultaneous truly moving observations is 1.",
+    "Targets 0 and 2 limit FRS decisions; target 1 is perceived but does not become a limiting FRS decision during its motion.",
+    "10.02 seconds of sensor waiting and one third-target ID reacquisition remain.",
+    "Cumulative absolute heading change is 181.52 degrees for a nominal right-angle route, including heading corrections."
+  ]
+}

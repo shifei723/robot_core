@@ -31,7 +31,7 @@ class Render:
   self.model.vis.headlight.ambient[:]=.3;self.model.vis.headlight.diffuse[:]=.3
   self.model.light_diffuse[:]*=.5;self.model.light_ambient[:]*=.5
   self.renderer=mujoco.Renderer(self.model,height=1100,width=1800,max_geom=50000)
-  self.camera=mujoco.MjvCamera();self.camera.lookat[:]=[self.goal[0]/2,0,.15]
+  self.camera=mujoco.MjvCamera();self.camera.lookat[:]=[self.goal[0]/2,self.goal[1]/2,.15]
   self.camera.distance=5.9;self.camera.azimuth=140;self.camera.elevation=-52
   self.font='/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc'
  def pose(self,row):
@@ -86,7 +86,11 @@ class Render:
   self.renderer.update_scene(self.data,camera=self.camera,scene_option=self.option)
   self.renderer.scene.flags[mujoco.mjtRndFlag.mjRND_SHADOW]=False
   # Neutral ground for legibility; it is explicitly a rendering plane, not mapped free space.
-  self.geom(mujoco.mjtGeom.mjGEOM_BOX,[self.goal[0]/2+.8,1.85,.005],[self.goal[0]/2,0,-.025],[.94,.95,.96,1])
+  self.geom(mujoco.mjtGeom.mjGEOM_BOX,[self.goal[0]/2+1.65,abs(self.goal[1])/2+1.85,.005],[self.goal[0]/2,self.goal[1]/2,-.025],[.94,.95,.96,1])
+  for lo,hi in self.result.get('static_boxes',[]):
+   if lo[2]>0:
+    lo=np.array(lo);hi=np.array(hi)
+    self.geom(mujoco.mjtGeom.mjGEOM_BOX,(hi-lo)/2,(hi+lo)/2,[.35,.45,.53,.35])
   for p in self.cloud(t):
    color=[.47,.57,.63,1] if p[2]>.08 else [.70,.76,.80,1]
    self.geom(mujoco.mjtGeom.mjGEOM_SPHERE,[.012,0,0],p,color)

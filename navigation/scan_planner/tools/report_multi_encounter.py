@@ -15,7 +15,8 @@ def evaluate(run):
     def moving_truth(identity,t):
         onset=s['multi_onsets'].get(identity)
         spec=next(x for x in s['multi_specs'] if x['id']==identity)
-        return onset is not None and onset['t']<=t<onset['t']+abs(spec['end_y']-spec['start_y'])/spec['speed']
+        length=np.linalg.norm(np.array(spec['end'])-spec['start']) if 'start' in spec else abs(spec['end_y']-spec['start_y'])
+        return bool(onset is not None and onset['t']<=t<onset['t']+length/spec['speed'])
     def truth(t):
         return poses[min(np.searchsorted(times,t),len(poses)-1)]['truth']
     def match(objs,t):
@@ -76,6 +77,8 @@ def evaluate(run):
       'shield_decisions':sum(bool(d['shield']) for d in r['decisions']),
       'source_hashes':{k:v for k,v in s.items() if k.endswith('_sha256')},
       'source_summary':str((run/'summary.json').resolve())}
+    if 'height_validation' in s:
+        result['height_validation']=s['height_validation'];result['combined_pass']=s['combined_pass']
     result['pass']=bool(s['reached'] and not s['collision'] and not s['error'] and max_dynamic>=2 and max_frs>=2 and all(dynamic[i]>0 and motion_limiting[i]>0 for i in ids))
     return result
 
