@@ -22,7 +22,25 @@ class StaticPrior:
             # geometrically coincident with the wall itself. Otherwise a broad
             # track ROI creates fresh moving wall clusters at every hand-off.
             confident=distance<=min(self.distance*.5,self.voxel*.75)
-            known &= ~np.asarray(protected,bool) | confident
+            guard=np.asarray(protected,bool)
+            ambiguous=np.flatnonzero(known & guard & ~confident)
+            # Sparse/rotated voxel samples on the SAME wall can be farther than
+            # the point-distance confidence radius. Require a local planar
+            # neighbourhood and a small normal residual, not a larger ball that
+            # would swallow foreground objects standing near the wall.
+            if len(ambiguous) and len(self.points)>=6:
+                d,idx=self.tree.query(p[ambiguous],k=min(8,len(self.points)))
+                neighbours=self.points[idx]
+                center=neighbours.mean(axis=1)
+                delta=neighbours-center[:,None,:]
+                covariance=np.einsum('nki,nkj->nij',delta,delta)/len(idx[0])
+                eigenvalues,eigenvectors=np.linalg.eigh(covariance)
+                planar=(eigenvalues[:,0]<=.03*np.maximum(eigenvalues.sum(axis=1),1e-12)) & (eigenvalues[:,1]>self.voxel**2*.02)
+                local=d[:,-1]<=max(3*self.voxel,self.distance)
+                normal=eigenvectors[:,:,0]
+                residual=np.abs(np.einsum('ni,ni->n',p[ambiguous]-center,normal))
+                confident[ambiguous] |= planar & local & (residual<=min(.02,self.distance*.25))
+            known &= ~guard | confident
         return known
 
     def local(self, center, radius):

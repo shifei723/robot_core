@@ -18,7 +18,7 @@ def main():
         p.error('step and fps must be positive')
     args.output.mkdir(parents=True, exist_ok=True)
     r = Render(args.run, Path(__file__).resolve().parents[4] / 'slash_robot_control')
-    r.camera.distance = 7.15
+    r.camera.distance = 7.15 * max(1.,r.goal[0]/3.)**.5
     font = lambda size: ImageFont.truetype(r.font, size)
     states = {'TRACKING': '正常通行', 'DYNAMIC_WAIT': '停车让行',
               'DYNAMIC_SLOW': '减速通行', 'GOAL_REACHED': '到达并停车',
@@ -36,14 +36,13 @@ def main():
             frame = Image.new('RGB', (1080, 800), 'white')
             frame.paste(view.resize((1080, 660), Image.Resampling.LANCZOS), (0, 65))
             d = ImageDraw.Draw(frame)
-            d.text((26, 9), '动态障碍 FRS 感知与导航回放', font=font(27), fill='#243746')
+            d.text((26, 9), ('多动态障碍 FRS 感知与导航回放' if r.result.get('multi_specs') else '动态障碍 FRS 感知与导航回放'), font=font(27), fill='#243746')
             status = states.get(row['status'], row['status'] or '初始化')
             d.text((26, 45), f"t = {actual:4.1f} s   |   {status}   |   机器人速度 {row['v']:.2f} m/s", font=font(20), fill='#425463')
             objs = tracks.get('objects', [])
-            text = '当前无活动目标'
+            text = '当前无活动目标' if tracks.get('healthy') else '感知等待 / 初始化'
             if objs:
-                o = objs[0]
-                text = f"跟踪 {o['id']}   估计速度 (vx, vy) = ({o['v'][0]:+.2f}, {o['v'][1]:+.2f}) m/s"
+                text = f'跟踪目标 {len(objs)} 个  |  ' + '   '.join(f"{o['id'].replace('obstacle_','T')} ({o['v'][0]:+.2f}, {o['v'][1]:+.2f})" for o in objs[:3]) + ' m/s'
             d.text((26, 704), text, font=font(19), fill='#425463')
             d.text((26, 735), '灰点：地图   蓝色：机器人轨迹   橙色：障碍物及位置 FRS（0.5 / 1 / 1.5 s）', font=font(19), fill='#425463')
             d.text((26, 768), f'实体为仿真真值回放，FRS 来自在线感知；软风险区域非硬禁入区。播放 {args.fps*args.step:g} 倍速', font=font(17), fill='#637681')

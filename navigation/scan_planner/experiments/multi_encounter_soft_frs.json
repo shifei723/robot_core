@@ -1,0 +1,53 @@
+{
+  "timing_policy": "soft",
+  "frs_weight": 2.0,
+  "spatial_weight": 0.0,
+  "camera_focal": 170.0,
+  "measurement_sigma": 0.06,
+  "accel_sigma": 0.2,
+  "case": "multi_encounter",
+  "static_prior": true,
+  "shifted_map_frame": true,
+  "duration": 110,
+  "robot_radius_m": 0.43,
+  "hard_margin_m": 0.1,
+  "goal": [
+    4.9,
+    0
+  ],
+  "target_half_extent_xy": [
+    0.22,
+    0.22
+  ],
+  "camera_resolution": [
+    320,
+    180
+  ],
+  "scope": "Experimental software-integration preset. Scenario is defined in validate_geometric_pipeline.py; reproduce with run_multi_encounter_comparison.sh. Production defaults unchanged.",
+  "multi_specs": [
+    {
+      "id": "truth_0",
+      "x": 1.8,
+      "start_y": -1.1,
+      "end_y": 0.8,
+      "speed": 0.22,
+      "trigger_x": 0.6
+    },
+    {
+      "id": "truth_1",
+      "x": 2.5,
+      "start_y": 1.1,
+      "end_y": -0.8,
+      "speed": 0.22,
+      "delay_after_first": 6.0
+    },
+    {
+      "id": "truth_2",
+      "x": 3.7,
+      "start_y": -1.1,
+      "end_y": 0.8,
+      "speed": 0.22,
+      "trigger_x": 2.5
+    }
+  ]
+}

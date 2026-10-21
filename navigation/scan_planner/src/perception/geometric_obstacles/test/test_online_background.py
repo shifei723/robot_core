@@ -142,3 +142,24 @@ def test_background_matching_margin_absorbs_sampling_noise_not_active_motion():
     tr.state='dynamic';tr.last_seen=3.
     protected=protected_points(noisy_surface,[tr],3.)
     assert not (bg.known(noisy_surface,3.)&~protected).any()
+
+
+def test_sparse_rotated_wall_does_not_reenter_foreground_under_track_guard():
+    x,z=np.meshgrid(np.arange(0,.51,.04),np.arange(0,.51,.04))
+    wall=np.column_stack((x.ravel(),np.full(x.size,1.55),z.ravel()))
+    angle=.25
+    R=np.array([[np.cos(angle),-np.sin(angle),0],[np.sin(angle),np.cos(angle),0],[0,0,1.]])
+    offset=np.array([1.2,-.4,0.])
+    prior=StaticPrior(wall@R.T+offset)
+    xx,zz=np.meshgrid(np.arange(.10,.41,.011),np.arange(.10,.41,.013))
+    queries=np.column_stack((xx.ravel(),np.full(xx.size,1.55),zz.ravel()))
+    guard=np.ones(len(queries),bool)
+    assert prior.known(queries@R.T+offset,guard).all()
+    foreground=queries-np.array([0,.08,0])
+    assert not prior.known(foreground@R.T+offset,guard).any()
+
+
+def test_nonplanar_neighbours_do_not_invent_a_static_surface():
+    points=np.array([[x,y,z] for x in [-.035,.035] for y in [-.035,.035] for z in [-.035,.035]])
+    prior=StaticPrior(points,voxel=.02)
+    assert not prior.known([[0,0,0]],[True])[0]

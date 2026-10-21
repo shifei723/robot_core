@@ -18,7 +18,7 @@ import numpy as np
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--case',choices=['static','crossing','continuous_crossing','turnaround','stop_restart','encounter','dropout'],default='crossing')
+    parser.add_argument('--case',choices=['static','crossing','continuous_crossing','turnaround','stop_restart','encounter','multi_encounter','dropout'],default='crossing')
     parser.add_argument('--static-prior',action='store_true')
     parser.add_argument('--shifted-map-frame',action='store_true')
     parser.add_argument('--duration',type=float,default=40)
@@ -42,6 +42,11 @@ def main():
     if not all(math.isfinite(x) for x in numeric) or min(args.camera_focal,args.measurement_sigma,args.accel_sigma)<=0 or args.encounter_end_y<=-args.encounter_side:
         parser.error('invalid camera, uncertainty, or encounter parameters')
     encounter_started=None
+    multi_specs=[{'id':'truth_0','x':1.8,'start_y':-1.1,'end_y':.8,'speed':.22,'trigger_x':.6},
+                 {'id':'truth_1','x':2.5,'start_y':1.1,'end_y':-.8,'speed':.22,'delay_after_first':6.},
+                 {'id':'truth_2','x':3.7,'start_y':-1.1,'end_y':.8,'speed':.22,'trigger_x':2.5}]
+    multi_onsets={}
+    goal_xy=np.array([4.9 if args.case=='multi_encounter' else 3.,0.])
     args.output.mkdir(parents=True,exist_ok=False)
     os.environ['ROS_DOMAIN_ID']=str(args.domain)
     import rclpy
@@ -148,6 +153,15 @@ def main():
     static=[([-2.,-1.65,0.],[8.,-1.55,2.]),([-2.,1.55,0.],[8.,1.65,2.]),([7.9,-1.65,0.],[8.,1.65,2.])]
     if args.case in ('static','dropout'):static.append(([1.3,.65,0.],[1.7,1.05,.8]))
     def moving(t):
+        if args.case=='multi_encounter':
+            objects=[]
+            for spec in multi_specs:
+                start_t=multi_onsets.get(spec['id'],{}).get('t')
+                age=0. if start_t is None else max(0.,t-start_t)
+                direction=np.sign(spec['end_y']-spec['start_y'])
+                y=spec['start_y']+direction*min(abs(spec['end_y']-spec['start_y']),spec['speed']*age)
+                objects.append((np.array([spec['x'],y,0.]),np.array([.22,.22,.9])))
+            return objects
         if args.case=='encounter':
             age=0. if encounter_started is None else max(0.,t-encounter_started)
             y=float(np.clip(-args.encounter_side+args.encounter_speed*age,-args.encounter_side,args.encounter_end_y))
@@ -180,10 +194,11 @@ def main():
     summary={'case':args.case,'reached':False,'collision':False,'error':None,'ground_truth_input_to_tracker':False,'prebuilt_static_map':args.static_prior,'shifted_map_frame':args.shifted_map_frame,
       'plant':'planar kinematics; ideal odometry, pinhole raycast depth; no contact physics or VINS estimator',
       'arrival_criterion':'distance < 0.16 m AND speed < 0.01 m/s AND controller GOAL_REACHED',
-      'goal':[3.,0.],'camera_intrinsics':[fx,fy,cx,cy],'sensor_size':[width,height],'static_boxes':static}
+      'goal':goal_xy.tolist(),'camera_intrinsics':[fx,fy,cx,cy],'sensor_size':[width,height],'static_boxes':static}
     summary['experiment_parameters']={'timing_policy':args.timing_policy,'frs_weight':args.frs_weight,
       'spatial_weight':args.spatial_weight,'camera_focal':args.camera_focal,'encounter_end_y':args.encounter_end_y,'measurement_sigma':args.measurement_sigma,'accel_sigma':args.accel_sigma,'encounter_trigger_x':args.encounter_trigger_x,
       'encounter_x':args.encounter_x,'encounter_speed':args.encounter_speed,'encounter_side':args.encounter_side}
+    if args.case=='multi_encounter':summary['multi_specs']=multi_specs;summary['multi_onsets']=multi_onsets
     import geometric_obstacles.core as tracking_core
     summary['tracker_sha256']=hashlib.sha256(Path(tracking_core.__file__).read_bytes()).hexdigest()
     import geometric_obstacles.node as perception_node
@@ -207,6 +222,13 @@ def main():
             if args.case=='encounter' and encounter_started is None and state[0]>=args.encounter_trigger_x:
                 encounter_started=t
                 summary['encounter_onset']={'t':t,'pose':state.tolist(),'v':float(speed),'w':float(yawrate)}
+            if args.case=='multi_encounter':
+                for spec in multi_specs:
+                    ready=(state[0]>=spec['trigger_x']) if 'trigger_x' in spec else ('truth_0' in multi_onsets and t>=multi_onsets['truth_0']['t']+spec['delay_after_first'])
+                    if spec['id'] not in multi_onsets and ready:
+                        multi_onsets[spec['id']]={'t':t,'pose':state.tolist(),'v':float(speed),'w':float(yawrate)}
+                        if encounter_started is None:
+                            encounter_started=t;summary['encounter_onset']=multi_onsets[spec['id']]
             base_z+=float(np.clip(data["height_target"]-base_z,-.08*dt,.08*dt))
             stamp=node.get_clock().now().to_msg()
             odom=Odometry();odom.header.stamp=stamp;odom.header.frame_id='world';odom.child_frame_id='base_link'
@@ -236,7 +258,7 @@ def main():
                     snapshots.append({'t':t,'pose':state.copy(),'base_z':base_z,'depth':depth,'map':data['map'][::3].copy(),
                                       'filtered':data['filtered'],'decision':data['decision'],'tracks':data['tracks']})
             if t>3 and not goal_sent and data['tracks'] is not None and data['tracks']['healthy'] and len(data['map'])>20:
-                goal=PoseStamped();goal.header.frame_id='world';goal.header.stamp=stamp;goal.pose.position.x=3.;goal.pose.position.z=.2822;goal.pose.orientation.w=1.
+                goal=PoseStamped();goal.header.frame_id='world';goal.header.stamp=stamp;goal.pose.position.x=float(goal_xy[0]);goal.pose.position.z=.2822;goal.pose.orientation.w=1.
                 pubs['goal'].publish(goal);goal_sent=True;summary['goal_sent_at']=t
             clearance=[]
             for center,size in moving(t):clearance.append(float(np.linalg.norm(np.maximum(np.abs(state[:2]-center[:2])-size[:2],0))-.43))
@@ -245,9 +267,9 @@ def main():
                 clearance.append(float(np.linalg.norm(np.maximum(np.abs(state[:2]-center)-half,0))-.43))
             gap=min(clearance);minimum=min(minimum,gap)
             histories['poses'].append({'t':t,'pose':state.tolist(),'base_z':base_z,'v':float(speed),'w':float(yawrate),'clearance':gap,'status':data['status'],
-                'truth':[{'p':c[:2].tolist(),'half':s[:2].tolist()} for c,s in moving(t)]})
+                'truth':[{'id':multi_specs[i]['id'] if args.case=='multi_encounter' else 'truth_0','p':c[:2].tolist(),'half':s[:2].tolist()} for i,(c,s) in enumerate(moving(t))]})
             if gap<0:summary['collision']=True
-            if np.linalg.norm(state[:2]-[3.,0.])<.16:
+            if np.linalg.norm(state[:2]-goal_xy)<.16:
                 summary.setdefault('goal_region_time',t)
                 if abs(speed)<.01 and data['status']=='GOAL_REACHED':
                     summary['reached']=True;summary['arrival_time']=t;break

@@ -1,0 +1,350 @@
+{
+  "scope": "Real ROS perception, mapping, FRS and controller; raycast depth, ideal pose, planar kinematics. Three objects exist from startup; no truth input to perception.",
+  "criterion": "Reached without collision, all three targets observed as dynamic and limiting a slowdown/wait decision, at least two simultaneous observed dynamic targets and FRS tracks.",
+  "association_evaluation": "Hungarian distance association to truth, 0.55 m gate, evaluation only. ID switch counts include reacquisition; not a full MOT benchmark.",
+  "all_pass": true,
+  "runs": [
+    {
+      "run": "multi_encounter_soft_03",
+      "policy": "soft",
+      "parameters": {
+        "timing_policy": "soft",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "onsets": {
+        "truth_0": {
+          "t": 8.683196267986204,
+          "pose": [
+            0.6002597563482834,
+            0.0,
+            0.0
+          ],
+          "v": 0.1165528322029781,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 14.703018750995398,
+          "pose": [
+            0.8095450473788335,
+            0.0,
+            0.0
+          ],
+          "v": 0.0,
+          "w": 0.0
+        },
+        "truth_2": {
+          "t": 32.941847335983766,
+          "pose": [
+            2.5038644021681793,
+            0.0,
+            0.0
+          ],
+          "v": 0.12190276293805473,
+          "w": 0.0
+        }
+      },
+      "multi_specs": [
+        {
+          "id": "truth_0",
+          "x": 1.8,
+          "start_y": -1.1,
+          "end_y": 0.8,
+          "speed": 0.22,
+          "trigger_x": 0.6
+        },
+        {
+          "id": "truth_1",
+          "x": 2.5,
+          "start_y": 1.1,
+          "end_y": -0.8,
+          "speed": 0.22,
+          "delay_after_first": 6.0
+        },
+        {
+          "id": "truth_2",
+          "x": 3.7,
+          "start_y": -1.1,
+          "end_y": 0.8,
+          "speed": 0.22,
+          "trigger_x": 2.5
+        }
+      ],
+      "duration_s": 62.698176584992325,
+      "arrival_s": 62.697981524979696,
+      "after_onset_s": 54.01478525699349,
+      "stopped_s": 15.75982311493135,
+      "longest_stop_s": 5.900564109993866,
+      "dynamic_wait_s": 14.530048662039917,
+      "dynamic_slow_s": 4.508166651095962,
+      "sensor_wait_s": 0.0,
+      "min_clearance_m": 0.15000000000000008,
+      "target_clearances_m": {
+        "truth_0": 0.15000000000000008,
+        "truth_1": 0.15000000000000008,
+        "truth_2": 0.15000000000000008
+      },
+      "max_simultaneous_observed_dynamic": 2,
+      "max_simultaneous_frs": 3,
+      "false_dynamic_observations_while_stationary": {
+        "truth_0": 23,
+        "truth_1": 23,
+        "truth_2": 76
+      },
+      "limiting_decisions_while_moving": {
+        "truth_0": 62,
+        "truth_1": 7,
+        "truth_2": 78
+      },
+      "dynamic_observations_by_truth": {
+        "truth_0": 88,
+        "truth_1": 88,
+        "truth_2": 98
+      },
+      "limiting_decisions_by_truth": {
+        "truth_0": 76,
+        "truth_1": 20,
+        "truth_2": 96
+      },
+      "associated_ids_by_truth": {
+        "truth_0": [
+          "obstacle_0"
+        ],
+        "truth_1": [
+          "obstacle_1"
+        ],
+        "truth_2": [
+          "obstacle_3",
+          "obstacle_4",
+          "obstacle_5"
+        ]
+      },
+      "id_switches_by_truth": {
+        "truth_0": 0,
+        "truth_1": 0,
+        "truth_2": 2
+      },
+      "matched_position_rmse_xy": [
+        0.04537757616179614,
+        0.07436996707746059
+      ],
+      "shield_decisions": 2,
+      "source_hashes": {
+        "tracker_sha256": "7b2a2fa801a2e81bbd3eebd8571e8445e0830a9e8b4f2e19c5f2247af7b57f87",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "a2e92ccc81b1d1137e0ae7372ccc2d29df31e5a94d2bb08eddb3691957b116d2",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "2442d1d0d1e9b31f33bf996c947bf5549791e828ecb025fa79b3670f670661be"
+      },
+      "source_summary": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/multi_encounter_soft_03/summary.json",
+      "pass": true
+    },
+    {
+      "run": "multi_encounter_hard_03",
+      "policy": "hard",
+      "parameters": {
+        "timing_policy": "hard",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "onsets": {
+        "truth_0": {
+          "t": 9.96032159801689,
+          "pose": [
+            0.6001532225866898,
+            0.0,
+            0.0
+          ],
+          "v": 0.11655629362275798,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 15.965350531012518,
+          "pose": [
+            0.6336462433043706,
+            0.0,
+            0.0
+          ],
+          "v": 0.0,
+          "w": 0.0
+        },
+        "truth_2": {
+          "t": 47.1620656690211,
+          "pose": [
+            2.5002602297110585,
+            0.0,
+            0.0
+          ],
+          "v": 0.10009869210731143,
+          "w": 0.0
+        }
+      },
+      "multi_specs": [
+        {
+          "id": "truth_0",
+          "x": 1.8,
+          "start_y": -1.1,
+          "end_y": 0.8,
+          "speed": 0.22,
+          "trigger_x": 0.6
+        },
+        {
+          "id": "truth_1",
+          "x": 2.5,
+          "start_y": 1.1,
+          "end_y": -0.8,
+          "speed": 0.22,
+          "delay_after_first": 6.0
+        },
+        {
+          "id": "truth_2",
+          "x": 3.7,
+          "start_y": -1.1,
+          "end_y": 0.8,
+          "speed": 0.22,
+          "trigger_x": 2.5
+        }
+      ],
+      "duration_s": 82.09895903200959,
+      "arrival_s": 82.09869631801848,
+      "after_onset_s": 72.1383747200016,
+      "stopped_s": 27.833104679972166,
+      "longest_stop_s": 13.350070726999547,
+      "dynamic_wait_s": 26.75475631095469,
+      "dynamic_slow_s": 1.0918617450224701,
+      "sensor_wait_s": 0.0,
+      "min_clearance_m": 0.15000000000000008,
+      "target_clearances_m": {
+        "truth_0": 0.15000000000000008,
+        "truth_1": 0.15000000000000008,
+        "truth_2": 0.15000000000000008
+      },
+      "max_simultaneous_observed_dynamic": 2,
+      "max_simultaneous_frs": 2,
+      "false_dynamic_observations_while_stationary": {
+        "truth_0": 20,
+        "truth_1": 18,
+        "truth_2": 19
+      },
+      "limiting_decisions_while_moving": {
+        "truth_0": 66,
+        "truth_1": 62,
+        "truth_2": 83
+      },
+      "dynamic_observations_by_truth": {
+        "truth_0": 97,
+        "truth_1": 88,
+        "truth_2": 97
+      },
+      "limiting_decisions_by_truth": {
+        "truth_0": 81,
+        "truth_1": 86,
+        "truth_2": 111
+      },
+      "associated_ids_by_truth": {
+        "truth_0": [
+          "obstacle_0"
+        ],
+        "truth_1": [
+          "obstacle_1"
+        ],
+        "truth_2": [
+          "obstacle_2"
+        ]
+      },
+      "id_switches_by_truth": {
+        "truth_0": 0,
+        "truth_1": 0,
+        "truth_2": 0
+      },
+      "matched_position_rmse_xy": [
+        0.037775251838270886,
+        0.020510623742517685
+      ],
+      "shield_decisions": 0,
+      "source_hashes": {
+        "tracker_sha256": "7b2a2fa801a2e81bbd3eebd8571e8445e0830a9e8b4f2e19c5f2247af7b57f87",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "a2e92ccc81b1d1137e0ae7372ccc2d29df31e5a94d2bb08eddb3691957b116d2",
+        "controller_sha256": "ef6776045157775b4772d75689905562a7afff58f19e608beb3d88a6adbaa419",
+        "planner_sha256": "5ec2c28ad1edca512828ef17644ced61c694a05ffad6d8e49f6b91b82ae5c76e",
+        "simulator_sha256": "2442d1d0d1e9b31f33bf996c947bf5549791e828ecb025fa79b3670f670661be"
+      },
+      "source_summary": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/data/geometric_validation/multi_encounter_hard_03/summary.json",
+      "pass": true
+    }
+  ],
+  "group_means": {
+    "soft": {
+      "count": 1,
+      "passed": 1,
+      "after_onset_s": 54.01478525699349,
+      "stopped_s": 15.75982311493135,
+      "longest_stop_s": 5.900564109993866,
+      "dynamic_wait_s": 14.530048662039917,
+      "sensor_wait_s": 0.0
+    },
+    "hard": {
+      "count": 1,
+      "passed": 1,
+      "after_onset_s": 72.1383747200016,
+      "stopped_s": 27.833104679972166,
+      "longest_stop_s": 13.350070726999547,
+      "dynamic_wait_s": 26.75475631095469,
+      "sensor_wait_s": 0.0
+    }
+  },
+  "soft_reduction_fraction": {
+    "after_onset_s": 0.25123368156481396,
+    "stopped_s": 0.4337741586452758,
+    "longest_stop_s": 0.5580125206332874
+  },
+  "development_history": [
+    {
+      "runs": "multi_encounter_*_01",
+      "accepted": false,
+      "reason": "Sparse fixed-wall samples reopened inside protected ROI caused wall ghost tracks and unresolved occlusion; neither run reached."
+    },
+    {
+      "runs": "multi_encounter_*_02",
+      "accepted": false,
+      "reason": "After local-plane fix both reached, but second target did not independently limit soft-policy motion; delay changed from 3 to 6 seconds."
+    },
+    {
+      "runs": "multi_encounter_*_03",
+      "accepted": true,
+      "reason": "Final matched pair, all three moving targets limited decisions. One run per policy; development-selected scenario, not statistical evidence."
+    }
+  ],
+  "limitations": [
+    "Ideal pose and raycast depth; no physical sensor or contact dynamics validation.",
+    "Spatial risk weight is zero; comparison evaluates temporal soft FRS cost versus hard FRS exclusion.",
+    "Soft run has two third-target ID reacquisitions and two shield decisions. Safety outcome belongs to the full control pipeline.",
+    "Three targets total, at most two simultaneously observed as truly moving. Transition lag and stationary dynamic classifications remain; see per-run counters."
+  ]
+}

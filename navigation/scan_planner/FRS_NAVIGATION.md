@@ -612,3 +612,54 @@ bash navigation/scan_planner/tools/run_encounter_comparison.sh encounter_reprodu
 等待。该结果不意味着解决了任意遮挡下的冻结。包括突然启停在内，y 速度的经验 3σ 覆盖率
 约 92%–95%，不支持概率安全保证。完整对照、估计误差与失败探索记录见
 `results/encounter_comparison_20261021.json`；这是重复软件集成验证，不是实机统计安全证明。
+
+
+## 2026-10-21：三动态障碍物闭环验证
+
+复现命令（需已构建 `install/ws_nav_frs`）：
+
+```bash
+bash navigation/scan_planner/tools/run_multi_encounter_comparison.sh multi_reproduce 201
+```
+
+场景和参数见 `experiments/multi_encounter_soft_frs.json`。机器人从 (0,0) 到 (4.9,0) m，
+三个障碍分别在 x=1.8、2.5、3.7 m 横穿，速度均为 0.22 m/s。第一目标在机器人到达
+x=0.6 m 后启动，第二目标在其后 6 s 反向横穿，第三目标在机器人到达 x=2.5 m 后启动。
+三个物体从场景初始化即存在；最多两个真实运动目标被同时观测。真值仅用于深度射线、
+运动学回放和离线评价，不送入感知或 FRS。在线链路使用实际 ROS 感知、地图、预测及控制节点。
+
+固定底图保护区增加局部平面一致性判定：稀疏墙面采样导致最近邻点距偏大时，只有局部
+邻域充分、平面性成立且法向残差不超过 2 cm 的已匹配点才保留为背景，避免墙面虚假动态
+目标阻断通行。不扩大整个背景匹配半径；回归检查保留离墙 8 cm 的前景，拒绝非平面邻域。
+`geometric_obstacles` 构建及测试通过（测试汇总 46 项，0 失败）。
+
+最终匹配实验每种策略运行一次：
+
+| 指标 | 软 FRS | 硬 FRS |
+|---|---:|---:|
+| 到达 / 碰撞 | 是 / 无 | 是 / 无 |
+| 首次交互至到达 / s | 54.01 | 72.14 |
+| 交互后累计停车 / s | 15.76 | 27.83 |
+| 最长连续停车 / s | 5.90 | 13.35 |
+| 最小实体包络净距 / m | 0.15 | 0.15 |
+
+软策略累计停车减少 43.4%，最长连续停车减少 55.8%。三个目标均在真实运动期间被识别
+为动态目标，并分别成为减速或停车决策的限制目标。空间风险权重仍为 0，本实验只比较
+FRS 时序软代价与硬排除；实体硬检查和独立保护保留。
+
+软策略第三个目标发生两次 ID 重获，独立保护触发两次，停止后的动态分类滞后仍存在。
+因此不能把无碰撞归因于软代价单独提供安全保证，也不能以这一组开发场景证明普遍性能。
+首轮墙面误跟踪导致未到达；第二轮虽到达，但第二目标未独立影响软策略，均保留为未通过
+的开发记录。结果及统计口径见 `results/multi_encounter_20261021.json`，原始日志见
+`data/geometric_validation/multi_encounter_*_03`。这是理想位姿及射线深度的软件闭环验证，
+尚非 D435i/VINS 实机验证。
+
+回放命令（需要含 pyrender 的 Python 环境）：
+
+```bash
+python navigation/scan_planner/tools/render_frs_animation.py \
+  data/geometric_validation/multi_encounter_soft_03 \
+  --output output/multi_encounter_frs_animation --step .75 --fps 4
+```
+
+GIF 显示仿真实体与在线感知产生的 FRS 位置截面，播放为 3 倍速，渲染不重新生成预测。
