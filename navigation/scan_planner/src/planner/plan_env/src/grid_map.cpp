@@ -19,6 +19,11 @@ void load_parameter(rclcpp::Node *node, const std::string &name, T &value, const
 void GridMap::initMap(rclcpp::Node *node)
 {
   node_ = node;
+  load_parameter(node_, "grid_map.dynamic_mask_sentinel", dynamic_mask_sentinel_, -1);
+  load_parameter(node_, "grid_map.skip_invalid_depth", skip_invalid_depth_, false);
+  load_parameter(node_, "grid_map.require_camera_info", require_camera_info_, false);
+  if(require_camera_info_) camera_info_sub_=node_->create_subscription<sensor_msgs::msg::CameraInfo>(
+    "/dynamic_obstacles/camera_info",10,[this](sensor_msgs::msg::CameraInfo::ConstSharedPtr msg) {camera_info_=msg;});
 
   /* get parameter */
   double x_size, y_size, z_size;
@@ -198,6 +203,10 @@ void GridMap::initMap(rclcpp::Node *node)
   /* init callback */
   tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(*node_);
 
+  prior_applied_pub_=node_->create_publisher<sensor_msgs::msg::PointCloud2>("grid_map/static_prior_applied",1);
+  if(node_->declare_parameter<bool>("grid_map.static_prior_enabled",false))
+    prior_sub_=node_->create_subscription<sensor_msgs::msg::PointCloud2>("/dynamic_obstacles/static_prior",
+      rclcpp::QoS(1).reliable().transient_local(),std::bind(&GridMap::priorCallback,this,std::placeholders::_1));
   if (mp_.sensor_type_ == "depth")
   {
     depth_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::Image>>();
@@ -369,6 +378,8 @@ double GridMap::queryCeilingHeight(const Eigen::Vector3d& pos, double yaw,
         continue;
       }
 
+      const auto prior=prior_columns_.find(id_xy.head<2>());
+      if(prior!=prior_columns_.end()) z_ceil=std::min(z_ceil,prior->second);
       const int iz_begin = std::max(id_start(2), mp_.map_bound_min_idx_(2));
       const int iz_end = std::min(id_limit(2), mp_.map_bound_max_idx_(2));
       for (int iz = iz_begin; iz <= iz_end; ++iz)
@@ -666,6 +677,10 @@ void GridMap::projectDepthImage()
   // int cols = current_img_.cols, rows = current_img_.rows;
   int cols = md_.depth_image_.cols;
   int rows = md_.depth_image_.rows;
+  // Runtime CameraInfo permits resolutions other than the legacy 640x480.
+  if(mp_.skip_pixel_<=0) return;
+  md_.proj_points_.resize(((rows+mp_.skip_pixel_-1)/mp_.skip_pixel_)*
+                          ((cols+mp_.skip_pixel_-1)/mp_.skip_pixel_));
 
   double depth;
 
@@ -692,6 +707,7 @@ void GridMap::projectDepthImage()
       const uint16_t raw_depth = *row_ptr;
       depth = raw_depth * inv_factor;
       row_ptr = row_ptr + mp_.skip_pixel_;
+      if (raw_depth == dynamic_mask_sentinel_ || (skip_invalid_depth_ && raw_depth == 0)) continue;
 
       // filter depth
       // depth += rand_noise_(eng_);
@@ -1014,6 +1030,17 @@ void GridMap::depthPoseCallback(const sensor_msgs::msg::Image::ConstSharedPtr &i
   if (mp_.sensor_type_ != "depth")
     return;
 
+  if(require_camera_info_) {
+    if(!camera_info_ || camera_info_->width!=img->width || camera_info_->height!=img->height ||
+       camera_info_->header.frame_id!=img->header.frame_id ||
+       std::abs((rclcpp::Time(camera_info_->header.stamp)-rclcpp::Time(img->header.stamp)).seconds())>0.1 ||
+       !std::isfinite(camera_info_->k[0]) || !std::isfinite(camera_info_->k[4]) ||
+       !std::isfinite(camera_info_->k[2]) || !std::isfinite(camera_info_->k[5]) ||
+       camera_info_->k[0]<=0 || camera_info_->k[4]<=0) return;
+    mp_.fx_=camera_info_->k[0]; mp_.fy_=camera_info_->k[4];
+    mp_.cx_=camera_info_->k[2]; mp_.cy_=camera_info_->k[5];
+  }
+  if(img->encoding != "16UC1" && img->encoding != "32FC1") return;
   /* get depth image */
   cv_bridge::CvImagePtr cv_ptr;
   cv_ptr = cv_bridge::toCvCopy(img, img->encoding);
@@ -1174,6 +1201,36 @@ void GridMap::cloudCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr 
   md_.occ_need_update_ = true;
 }
 
+void GridMap::priorCallback(sensor_msgs::msg::PointCloud2::ConstSharedPtr msg) {
+  if(msg->header.frame_id!=mp_.frame_id_) return;
+  const double age=(node_->now()-rclcpp::Time(msg->header.stamp)).seconds();
+  if(age<-.05 || age>.8) return;
+  pcl::PointCloud<pcl::PointXYZ> cloud;pcl::fromROSMsg(*msg,cloud);
+  decltype(prior_voxels_) voxels;decltype(prior_columns_) columns;
+  for(const auto& p:cloud) {
+    if(!std::isfinite(p.x)||!std::isfinite(p.y)||!std::isfinite(p.z)||p.z<=mp_.ground_height_+mp_.resolution_)continue;
+    Eigen::Vector3i id;posToIndex(Eigen::Vector3d(p.x,p.y,p.z),id);
+    voxels.insert(id);Eigen::Vector2i xy=id.head<2>();double z=id.z()*mp_.resolution_;
+    const auto found=columns.find(xy);
+    if(found==columns.end()) columns.emplace(xy,z);else found->second=std::min(found->second,z);
+  }
+  prior_voxels_.swap(voxels);prior_columns_.swap(columns);
+  // A header-only acknowledgement is sent only after the planner layer is replaced.
+  sensor_msgs::msg::PointCloud2 applied;applied.header=msg->header;prior_applied_pub_->publish(applied);
+}
+
+double GridMap::priorCeiling(const Eigen::Vector3d& pos,double radius) {
+  double ceiling=std::numeric_limits<double>::infinity();
+  if(prior_columns_.empty())return ceiling;
+  Eigen::Vector3i id;posToIndex(pos,id);int cells=std::ceil(radius/mp_.resolution_);
+  for(int x=-cells;x<=cells;++x)for(int y=-cells;y<=cells;++y) {
+    if(std::hypot(x,y)*mp_.resolution_>radius)continue;
+    const auto found=prior_columns_.find(Eigen::Vector2i(id.x()+x,id.y()+y));
+    if(found!=prior_columns_.end())ceiling=std::min(ceiling,found->second);
+  }
+  return ceiling;
+}
+
 void GridMap::publishMap()
 {
 
@@ -1203,6 +1260,13 @@ void GridMap::publishMap()
         cloud.push_back(pt);
       }
 
+  // The prebuilt layer cannot be erased by online free-space ray updates.
+  for(const auto& id:prior_voxels_) {
+    if(!isInMap(id))continue;
+    Eigen::Vector3d pos;indexToPos(id,pos);
+    if(md_.occupancy_buffer_[toAddress(id)]>mp_.min_occupancy_log_)continue;
+    cloud.push_back(pcl::PointXYZ(pos.x(),pos.y(),pos.z()));
+  }
   cloud.width = cloud.points.size();
   cloud.height = 1;
   cloud.is_dense = true;

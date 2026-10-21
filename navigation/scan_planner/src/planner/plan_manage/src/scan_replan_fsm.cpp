@@ -40,6 +40,11 @@ namespace scan_planner
     emergency_time_ = load_parameter<double>(node_, "fsm.emergency_time", 1.0);
     enable_fail_safe_ = load_parameter<bool>(node_, "fsm.fail_safe", true);
     max_replan_fail_count_ = load_parameter<int>(node_, "fsm.max_replan_fail_count", 1000);
+    collision_horizon_ = load_parameter<double>(node_, "fsm.collision_horizon", 0.0);
+    collision_step_ = load_parameter<double>(node_, "fsm.collision_step", 0.01);
+    replan_interval_ = load_parameter<double>(node_, "fsm.replan_interval", 0.0);
+    if(collision_horizon_<0 || collision_step_<=0 || replan_interval_<0)
+      throw std::invalid_argument("invalid collision/replanning budget");
     self_inflation_z_up_ = load_parameter<double>(node_, "grid_map.obstacles_inflation_z_up", 0.0);
     self_inflation_z_down_ = load_parameter<double>(node_, "grid_map.obstacles_inflation_z_down", 0.0);
     self_double_cylinder_radius_ = load_parameter<double>(node_, "grid_map.double_cylinder_radius", 0.0);
@@ -538,6 +543,11 @@ namespace scan_planner
       fsm_num = 0;
     }
 
+    // Leave time for depth, odometry and map callbacks between planning attempts.
+    if (exec_state_ == GEN_NEW_TRAJ || exec_state_ == REPLAN_TRAJ) {
+      if(node_->now().seconds()<next_plan_time_) return;
+      next_plan_time_=node_->now().seconds()+replan_interval_;
+    }
     switch (exec_state_)
     {
     case INIT:
@@ -815,14 +825,15 @@ namespace scan_planner
     LocalTrajData *info = &planner_manager_->local_data_;
     auto map = planner_manager_->grid_map_;
 
-    if (exec_state_ == WAIT_TARGET || info->start_time_.seconds() < 1e-5)
+    if (exec_state_ == WAIT_TARGET || (collision_horizon_>0 && exec_state_!=EXEC_TRAJ) || info->start_time_.seconds() < 1e-5)
       return;
 
     /* ---------- check trajectory ---------- */
-    constexpr double time_step = 0.01;
+    const double time_step = collision_step_;
     double t_cur = (node_->now() - info->start_time_).seconds();
     double t_2_3 = info->duration_ * 2 / 3;
-    for (double t = t_cur; t < info->duration_; t += time_step)
+    const double check_end=collision_horizon_>0 ? std::min(info->duration_,t_cur+collision_horizon_) : info->duration_;
+    for (double t = t_cur; t < check_end; t += time_step)
     {
       if (t_cur < t_2_3 && t >= t_2_3) // If t_cur < t_2_3, only the first 2/3 partition of the trajectory is considered valid and will get checked.
         break;
@@ -831,6 +842,14 @@ namespace scan_planner
       Eigen::Vector3d pos_next = info->position_traj_.evaluateDeBoorT(std::min(t + time_step, info->duration_));
       if (planner_manager_->trajectoryCollision(pos, estimateYawFromSegment(pos, pos_next)))
       {
+        // In bounded mode, planning runs only in the FSM, never inside this timer.
+        if (collision_horizon_>0) {
+          if (t-t_cur<emergency_time_) {
+            flag_escape_emergency_=true;
+            changeFSMExecState(EMERGENCY_STOP, "SAFETY");
+          } else changeFSMExecState(REPLAN_TRAJ, "SAFETY");
+          return;
+        }
         if (planFromCurrentTraj()) // Make a chance
         {
           changeFSMExecState(EXEC_TRAJ, "SAFETY");
@@ -946,6 +965,7 @@ namespace scan_planner
     double t_step = planning_horizon_ / 20 / planner_manager_->pp_.max_vel_;
     double dist_min = 9999, dist_min_t = 0.0;
     double target_t = planner_manager_->global_data_.global_duration_;
+    local_target_pt_ = end_pt_; // Also valid when the sampling loop ends exactly at duration.
     for (t = planner_manager_->global_data_.last_progress_time_; t < planner_manager_->global_data_.global_duration_; t += t_step)
     {
       Eigen::Vector3d pos_t = planner_manager_->global_data_.getPosition(t);
@@ -974,7 +994,7 @@ namespace scan_planner
         break;
       }
     }
-    if (t > planner_manager_->global_data_.global_duration_) // Last global point
+    if (t >= planner_manager_->global_data_.global_duration_) // Last global point
     {
       local_target_pt_ = end_pt_;
       target_t = planner_manager_->global_data_.global_duration_;

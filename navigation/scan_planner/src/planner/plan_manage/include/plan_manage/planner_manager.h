@@ -8,6 +8,8 @@
 #include <plan_env/grid_map.h>
 #include <plan_manage/plan_container.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <plan_manage/intent_frs.hpp>
+#include <scan_planner_msgs/msg/dynamic_obstacle_array.hpp>
 #include <traj_utils/planning_visualization.h>
 
 namespace scan_planner
@@ -51,6 +53,10 @@ namespace scan_planner
 
     int continuous_failures_count_{0};
     bool wheel_grid_trajectory_{false};
+    double wheel_search_timeout_{1.0};
+    double dynamic_spatial_weight_{0.0};
+    SnapshotTracks dynamic_tracks_;
+    rclcpp::Subscription<scan_planner_msgs::msg::DynamicObstacleArray>::SharedPtr dynamic_sub_;
     bool planWheelTrajectory(const Eigen::Vector3d &start, const Eigen::Vector3d &goal);
 
     void updateTrajInfo(const UniformBspline &position_traj, const rclcpp::Time time_now);

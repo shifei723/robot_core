@@ -192,6 +192,7 @@ ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d
     double tentative_gScore;
     std::unordered_map<std::uint64_t, int> occupancy_cache;
     occupancy_cache.reserve(4096);
+    std::unordered_map<std::uint64_t,double> preference_cache;
 
     int num_iter = 0;
     while (!openSet_.empty())
@@ -269,7 +270,13 @@ ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d
                     }
 
                     const double static_cost = sqrt(dx * dx + dy * dy + dz * dz);
-                    tentative_gScore = current->gScore + static_cost;
+                    double preference=0;
+                    if(soft_cost) {
+                      const auto found=preference_cache.find(voxel_key);
+                      preference=found!=preference_cache.end() ? found->second :
+                        preference_cache.emplace(voxel_key,std::max(0.0,soft_cost(Index2Coord(neighborPtr->index)))).first->second;
+                    }
+                    tentative_gScore = current->gScore + static_cost*(1.0+preference);
 
                     if (!flag_explored)
                     {

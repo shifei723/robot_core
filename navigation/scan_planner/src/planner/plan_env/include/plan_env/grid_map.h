@@ -1,3 +1,6 @@
+#include <sensor_msgs/msg/camera_info.hpp>
+#include <unordered_map>
+#include <unordered_set>
 #ifndef _GRID_MAP_H
 #define _GRID_MAP_H
 
@@ -241,6 +244,13 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:
+  std::unordered_set<Eigen::Vector3i,matrix_hash<Eigen::Vector3i>> prior_voxels_;
+  std::unordered_map<Eigen::Vector2i,double,matrix_hash<Eigen::Vector2i>> prior_columns_;
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr prior_sub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr prior_applied_pub_;
+  double priorCeiling(const Eigen::Vector3d& pos,double radius);
+  void priorCallback(sensor_msgs::msg::PointCloud2::ConstSharedPtr msg);
+
   MappingParameters mp_;
   MappingData md_;
 
@@ -291,6 +301,11 @@ private:
   typedef shared_ptr<message_filters::Synchronizer<SyncPolicyImagePose>> SynchronizerImagePose;
 
   rclcpp::Node* node_{nullptr};
+  int dynamic_mask_sentinel_{-1};
+  bool skip_invalid_depth_{false};
+  bool require_camera_info_{false};
+  sensor_msgs::msg::CameraInfo::ConstSharedPtr camera_info_;
+  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_sub_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Image>> depth_sub_;
   shared_ptr<message_filters::Subscriber<nav_msgs::msg::Odometry>> depth_pose_sub_;
@@ -351,7 +366,7 @@ inline void GridMap::boundIndex(Eigen::Vector3i& id) {
 inline bool GridMap::isUnknown(const Eigen::Vector3i& id) {
   Eigen::Vector3i id1 = id;
   boundIndex(id1);
-  return md_.occupancy_buffer_[toAddress(id1)] < mp_.clamp_min_log_ - 1e-3;
+  return !prior_voxels_.count(id1) && md_.occupancy_buffer_[toAddress(id1)] < mp_.clamp_min_log_ - 1e-3;
 }
 
 inline bool GridMap::isUnknown(const Eigen::Vector3d& pos) {
@@ -367,7 +382,7 @@ inline bool GridMap::isKnownFree(const Eigen::Vector3i& id) {
 
   // return md_.occupancy_buffer_[adr] >= mp_.clamp_min_log_ &&
   //     md_.occupancy_buffer_[adr] < mp_.min_occupancy_log_;
-  return md_.occupancy_buffer_[adr] >= mp_.clamp_min_log_ && md_.occupancy_buffer_inflate_[adr] == 0;
+  return !prior_voxels_.count(id1) && md_.occupancy_buffer_[adr] >= mp_.clamp_min_log_ && md_.occupancy_buffer_inflate_[adr] == 0;
 }
 
 inline bool GridMap::isKnownOccupied(const Eigen::Vector3i& id) {
@@ -375,7 +390,7 @@ inline bool GridMap::isKnownOccupied(const Eigen::Vector3i& id) {
   boundIndex(id1);
   int adr = toAddress(id1);
 
-  return md_.occupancy_buffer_inflate_[adr] == 1;
+  return prior_voxels_.count(id1) || md_.occupancy_buffer_inflate_[adr] == 1;
 }
 
 inline void GridMap::setOccupied(Eigen::Vector3d pos) {
@@ -407,7 +422,7 @@ inline int GridMap::getOccupancy(Eigen::Vector3d pos) {
   Eigen::Vector3i id;
   posToIndex(pos, id);
 
-  return md_.occupancy_buffer_[toAddress(id)] > mp_.min_occupancy_log_ ? 1 : 0;
+  return (prior_voxels_.count(id) || md_.occupancy_buffer_[toAddress(id)] > mp_.min_occupancy_log_) ? 1 : 0;
 }
 
 inline int GridMap::getInflateOccupancy(Eigen::Vector3d pos, double yaw) {
@@ -427,6 +442,8 @@ inline int GridMap::getInflateOccupancyFromBuffer(Eigen::Vector3d pos, const std
   Eigen::Vector3i id;
   posToIndex(pos, id);
 
+  const double ceiling=priorCeiling(pos,mp_.double_cylinder_radius_);
+  if(std::isfinite(ceiling) && pos.z()+mp_.body_top_offset_+mp_.ceiling_margin_>ceiling) return 1;
   return int(buffer[toAddress(id)]);
 }
 
@@ -468,7 +485,7 @@ inline int GridMap::getOccupancy(Eigen::Vector3i id) {
   if (!isInMap(id))
     return -1;
 
-  return md_.occupancy_buffer_[toAddress(id)] > mp_.min_occupancy_log_ ? 1 : 0;
+  return (prior_voxels_.count(id) || md_.occupancy_buffer_[toAddress(id)] > mp_.min_occupancy_log_) ? 1 : 0;
 }
 
 inline bool GridMap::isInMap(const Eigen::Vector3d& pos) {

@@ -130,6 +130,8 @@ Thumbs.db
 # ---------- 其他运行时 ----------
 *.log
 /outputs/
+# Reproducible raw FRS navigation runs and rendered replay assets.
+/output/multi_frs*/
 # 注意：不要用裸 "core"，它会把同名源码目录一起忽略掉，
 # 例如 localization/visual_slam/rtabmap/corelib/include/rtabmap/core/
 # （当时就是这样把 rtabmap 全部公共头文件排除出版本库的）。

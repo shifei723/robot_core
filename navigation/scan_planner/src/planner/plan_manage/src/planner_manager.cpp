@@ -72,6 +72,20 @@ namespace scan_planner
       return node->get_parameter(name).as_double();
     };
     wheel_grid_trajectory_ = node_->declare_parameter<bool>("manager.wheel_grid_trajectory", false);
+    wheel_search_timeout_ = node_->declare_parameter<double>("manager.wheel_search_timeout", 1.0);
+    dynamic_spatial_weight_ = get_double("manager.dynamic_frs_weight",0.0);
+    if(dynamic_spatial_weight_>0) dynamic_sub_=node_->create_subscription<scan_planner_msgs::msg::DynamicObstacleArray>(
+      "/dynamic_obstacles/tracks",rclcpp::QoS(1),[this](scan_planner_msgs::msg::DynamicObstacleArray::ConstSharedPtr msg) {
+        std::vector<ObstacleSample> samples;
+        for(const auto& o:msg->obstacles) {
+          ObstacleSample s; s.id=o.id;s.position={o.position.x,o.position.y};s.velocity={o.velocity.x,o.velocity.y};
+          s.radius=o.radius;s.observed=o.observed;s.last_observed=rclcpp::Time(o.last_observed).seconds();
+          for(int i=0;i<4;++i) for(int j=0;j<4;++j) s.covariance(i,j)=o.covariance[i*4+j];
+          samples.push_back(s);
+        }
+        dynamic_tracks_.accept(rclcpp::Time(msg->header.stamp).seconds(),msg->epoch,
+          msg->healthy && msg->header.frame_id=="world",samples,node_->now().seconds());
+      });
     pp_.max_vel_ = get_double("manager.max_vel", -1.0);
     pp_.max_acc_ = get_double("manager.max_acc", -1.0);
     pp_.max_jerk_ = get_double("manager.max_jerk", -1.0);
@@ -363,7 +377,21 @@ namespace scan_planner
                                                const Eigen::Vector3d &goal)
   {
     auto search = bspline_optimizer_rebound_->a_star_;
-    if (search->AstarSearch(grid_map_->getResolution(), start, goal, 1.0) != ASTAR_RET::SUCCESS)
+    search->soft_cost={};
+    // Weighted A* bounds search work after adding a positive risk field.
+    // Collision checking is unchanged; the result is not the minimum-cost path.
+    search->heuristic_weight=dynamic_spatial_weight_>0 ? 1.8 : 1.0;
+    if(dynamic_spatial_weight_>0 && dynamic_tracks_.fresh(node_->now().seconds())) {
+      const auto views=dynamic_tracks_.bank.views(node_->now().seconds());
+      // Spatial risk field over the near future. Timing is checked again by the controller.
+      search->soft_cost=[views,this](const Eigen::Vector3d& p) {
+        double cost=0;
+        for(const auto& v:views) for(double t: {0.0,0.5,1.0,1.5})
+          cost=std::max(cost,frsRisk(*v.track,v.age,t,p.head<2>(),"frs"));
+        return dynamic_spatial_weight_*cost;
+      };
+    }
+    if (search->AstarSearch(grid_map_->getResolution(), start, goal, wheel_search_timeout_) != ASTAR_RET::SUCCESS)
       return false;
     auto path = search->getPath();
     if (path.empty()) return false;

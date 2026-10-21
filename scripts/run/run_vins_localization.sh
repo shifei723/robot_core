@@ -334,6 +334,10 @@ RTABMAP_ARGS=(
     -r depth/image:=$DEPTH_TOPIC
     -r rgb/camera_info:=$INFO_TOPIC
 )
+# Frozen navigation background should include the saved map, not just the previous session.
+if [ "${STATIC_PRIOR:-false}" = "true" ]; then
+    RTABMAP_ARGS+=(-p "Mem/InitWMWithAllNodes:='true'" -p "GridGlobal/MaxNodes:='0'")
+fi
 if [ -n "$INITIAL_POSE" ]; then
     # initial_pose 期望 "x y z roll pitch yaw"（Transform::fromString 格式）
     RTABMAP_ARGS+=(-p initial_pose:="'$INITIAL_POSE'")

@@ -43,6 +43,14 @@ SENSOR_TYPE=${SENSOR_TYPE:-depth}
 NAVI_MODE=${NAVI_MODE:-1}
 CONTROLLER_MODE=${CONTROLLER_MODE:-closed_loop}
 USE_GPU=${USE_GPU:-false}
+# 几何动态障碍物感知 + FRS（首次接入建议先单独观察感知话题）
+GEOMETRIC_PERCEPTION=${GEOMETRIC_PERCEPTION:-false}
+GEOMETRIC_GROUND_Z=${GEOMETRIC_GROUND_Z:-0.0}
+STATIC_PRIOR=${STATIC_PRIOR:-false}
+STATIC_PRIOR_TOPIC=${STATIC_PRIOR_TOPIC:-/cloud_obstacles}
+STATIC_PRIOR_PCD=${STATIC_PRIOR_PCD:-}
+STATIC_PRIOR_FRAME=${STATIC_PRIOR_FRAME:-map}
+STATIC_PRIOR_MATCH_DISTANCE=${STATIC_PRIOR_MATCH_DISTANCE:-0.10}
 # 真机首跑限速(深度相机有效视距只有 ~3m, 视野外全 unknown, 速度必须压低)
 REAL_MAX_VEL=${REAL_MAX_VEL:-0.3}
 REAL_MAX_ACC=${REAL_MAX_ACC:-0.3}
@@ -108,7 +116,7 @@ loc_running() {
 }
 
 # 规划器组件清单(stop/status 共用; 模式首字符用字符类包住, 防 pgrep 匹配到自己)
-NAV_COMPONENTS=("scan_planner run.launch.py" scan_planner_node closed_loop_controller open_loop_controller goal_frame_bridge.py leg_height_to_posture.py robot_state_publisher "rviz2.*vins_nav.rviz")
+NAV_COMPONENTS=(navigation_prior_map geometric_obstacles_node "scan_planner run.launch.py" scan_planner_node closed_loop_controller open_loop_controller goal_frame_bridge.py leg_height_to_posture.py robot_state_publisher "rviz2.*vins_nav.rviz")
 
 case "$1" in
 status)
@@ -220,6 +228,13 @@ LAUNCH_ARGS=(
     navi_mode:="$NAVI_MODE"
     controller_mode:="$CONTROLLER_MODE"
     use_gpu:="$USE_GPU"
+    geometric_perception:="$GEOMETRIC_PERCEPTION"
+    geometric_ground_z:="$GEOMETRIC_GROUND_Z"
+    static_prior:="$STATIC_PRIOR"
+    static_prior_topic:="$STATIC_PRIOR_TOPIC"
+    static_prior_pcd:="$STATIC_PRIOR_PCD"
+    static_prior_frame:="$STATIC_PRIOR_FRAME"
+    static_prior_match_distance:="$STATIC_PRIOR_MATCH_DISTANCE"
     use_sim_time:=false
     real_max_vel:="$REAL_MAX_VEL"
     real_max_acc:="$REAL_MAX_ACC"

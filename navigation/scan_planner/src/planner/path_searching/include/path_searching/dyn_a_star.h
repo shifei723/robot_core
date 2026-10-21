@@ -6,6 +6,7 @@
 #include <Eigen/Eigen>
 #include <plan_env/grid_map.h>
 #include <queue>
+#include <functional>
 #include <limits>
 
 constexpr double inf = std::numeric_limits<double>::infinity();
@@ -94,11 +95,13 @@ public:
 	ASTAR_RET AstarSearch(const double step_size, Eigen::Vector3d start_pt, Eigen::Vector3d end_pt, double timeout_s = 0.2);
 
 	std::vector<Eigen::Vector3d> getPath();
+    std::function<double(const Eigen::Vector3d&)> soft_cost;
+    double heuristic_weight{1.0};
 };
 
 inline double AStar::getHeu(GridNodePtr node1, GridNodePtr node2)
 {
-	return tie_breaker_ * getDiagHeu(node1, node2);
+	return heuristic_weight * tie_breaker_ * getDiagHeu(node1, node2);
 }
 
 inline Eigen::Vector3d AStar::Index2Coord(const Eigen::Vector3i &index) const

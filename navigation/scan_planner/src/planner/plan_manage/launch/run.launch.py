@@ -103,6 +103,22 @@ def _setup(context):
         need_extrinsic = False
         intrinsics = {}
 
+    geometric = _as_bool(LaunchConfiguration("geometric_perception").perform(context))
+    if geometric and (sensor_type != "depth" or controller_mode != "closed_loop"):
+        raise RuntimeError("geometric_perception requires depth and closed_loop")
+    prior_enabled = _as_bool(LaunchConfiguration("static_prior").perform(context))
+    if prior_enabled and not geometric:
+        raise RuntimeError("static_prior requires geometric_perception:=true")
+    prior_file = LaunchConfiguration("static_prior_pcd").perform(context)
+    if prior_file and not os.path.isfile(prior_file):
+        raise RuntimeError("static_prior_pcd must reference an existing PCD file")
+    prior_topic = "/navigation_static_map" if prior_file else LaunchConfiguration("static_prior_topic").perform(context)
+    raw_depth = depth
+    if geometric:
+        sensor_pose = "/dynamic_obstacles/camera_pose"
+        depth = "/dynamic_obstacles/depth_static"
+        cloud = "/dynamic_obstacles/cloud_static"
+        need_extrinsic = False
     common = {"use_sim_time": use_sim_time}
     planner_overrides = {
         **common,
@@ -112,13 +128,22 @@ def _setup(context):
         "grid_map.cloud_is_world": cloud_is_world,
         "grid_map.need_extrinsic": need_extrinsic,
     }
+    if geometric:
+        planner_overrides.update({"fsm.collision_horizon": 3.0, "fsm.collision_step": 0.05,
+                                  "fsm.replan_interval": 0.4, "manager.dynamic_frs_weight": 1.5, "manager.wheel_search_timeout": 0.25,
+                                  "grid_map.static_prior_enabled": prior_enabled,
+                                  "grid_map.dynamic_mask_sentinel": 65535,
+                                  "grid_map.skip_invalid_depth": True,
+                                  "grid_map.require_camera_info": True,
+                                  "grid_map.k_depth_scaling_factor": 1000.0,
+                                  "grid_map.ground_height": float(LaunchConfiguration("geometric_ground_z").perform(context))})
     if robot_model == "slash" and not is_real:
         planner_overrides.update({
             "manager.wheel_grid_trajectory": True,
             "grid_map.double_cylinder_radius": 0.55,  # 0.25 radius + 0.18 offset + 0.12 tracking allowance
             "grid_map.double_cylinder_offset": 0.0,  # circumscribed disc permits in-place turns
 
-            "fsm.max_replan_fail_count": 5,
+            "fsm.max_replan_fail_count": 1000 if geometric else 5,
             "grid_map.ceiling_margin": 0.05,
             "optimization.ceiling_margin": 0.05,
             "grid_map.height_min": 0.1722,
@@ -126,6 +151,12 @@ def _setup(context):
             "optimization.height_min": 0.1722,
             "optimization.height_max": 0.3922,
         })
+    if geometric and prior_enabled and robot_model == "slash":
+        # Same low-speed wheel planning mode as the prebuilt-map depth validation.
+        planner_overrides.update({"manager.wheel_grid_trajectory": True,
+            "grid_map.double_cylinder_radius": 0.43, "grid_map.double_cylinder_offset": 0.0,
+            "fsm.max_replan_fail_count": 1000,
+            "grid_map.allow_unverified_ceiling_clearance": False})
     if not is_real:
         # 仿真世界边界与仿真地图尺寸保持一致, 边界外不可达
         planner_overrides.update({
@@ -153,6 +184,12 @@ def _setup(context):
     # 使用 /move_base_simple/goal。规划器不看 frame_id，真机模式下两者都先经
     # goal_frame_bridge 转到 world 再喂给规划器，中间话题避免自环。
     planner_goal = "/planner/goal_world" if is_real else "/move_base_simple/goal"
+    if geometric and prior_enabled:
+        planner_overrides["grid_map.allow_unverified_ceiling_clearance"] = False
+        prior_speed=float(LaunchConfiguration("real_max_vel").perform(context))
+        prior_acc=float(LaunchConfiguration("real_max_acc").perform(context))
+        planner_overrides.update({"manager.max_vel":prior_speed,"manager.max_acc":prior_acc,
+                                  "optimization.max_vel":prior_speed,"optimization.max_acc":prior_acc})
     actions = [
         Node(
             package="scan_planner",
@@ -194,10 +231,36 @@ def _setup(context):
 
     if robot_model == "slash" and not is_real:
         controller_overrides.append({"height_safety_enabled": True,
+            "dynamic_prediction": LaunchConfiguration("dynamic_prediction").perform(context),
+            "dynamic_min_tracks": int(LaunchConfiguration("dynamic_min_tracks").perform(context)),
             "stable_heading": LaunchConfiguration("stable_heading").perform(context).lower() == "true",
             "max_vx": 0.35, "max_vy": 0.0, "max_vyaw": 0.8,
             "heading_error_threshold": 0.35,
             "leg_height_min": 0.14, "leg_height_max": 0.36})
+    if geometric:
+        if prior_enabled:
+            controller_overrides.append({"max_vx":float(LaunchConfiguration("real_max_vel").perform(context)),
+                "max_vyaw":float(LaunchConfiguration("real_max_vyaw").perform(context)),
+                "heading_error_threshold":0.8,"leg_height_min":0.13,"leg_height_max":0.37,
+                "stable_heading":True})
+        if prior_enabled and prior_file:
+            actions.append(Node(package="map_generator",executable="map_pub",name="navigation_prior_map",
+                output="screen",parameters=[common,{"file_name":prior_file,
+                "frame_id":LaunchConfiguration("static_prior_frame").perform(context),
+                "publish_rate":0.2,"downsample_res":0.05}],
+                remappings=[("global_cloud",prior_topic)]))
+        mode = LaunchConfiguration("dynamic_prediction").perform(context)
+        controller_overrides.append({"dynamic_soft_constraint": True, "dynamic_frs_weight": 2.0, "dynamic_horizon": 3.0, "dynamic_input": "array", "dynamic_prediction": "frs" if mode == "off" else mode,
+                                     "height_safety_enabled": True, "static_prior_required": prior_enabled})
+        actions.append(Node(package="geometric_obstacles", executable="geometric_obstacles_node",
+            name="geometric_obstacles", output="screen", parameters=[common, {
+                "static_prior_enabled": prior_enabled,
+                "static_prior_topic": prior_topic,
+                "static_prior_match_distance": float(LaunchConfiguration("static_prior_match_distance").perform(context)),
+                "depth_topic": raw_depth,
+                "camera_info_topic": LaunchConfiguration("geometric_camera_info").perform(context),
+                "ground_z": float(LaunchConfiguration("geometric_ground_z").perform(context)),
+            }]))
     if controller_mode == "open_loop":
         actions.append(
             Node(
@@ -358,7 +421,17 @@ def generate_launch_description():
             DeclareLaunchArgument("map_size_y", default_value="20.0"),
             DeclareLaunchArgument("map_size_z", default_value="3.0"),
             DeclareLaunchArgument("beam_clearance", default_value=""),
+            DeclareLaunchArgument("geometric_perception", default_value="false"),
+            DeclareLaunchArgument("geometric_camera_info", default_value="/camera/camera/color/camera_info"),
+            DeclareLaunchArgument("geometric_ground_z", default_value="0.0"),
+            DeclareLaunchArgument("static_prior", default_value="false"),
+            DeclareLaunchArgument("static_prior_topic", default_value="/cloud_obstacles"),
+            DeclareLaunchArgument("static_prior_pcd", default_value=""),
+            DeclareLaunchArgument("static_prior_frame", default_value="map"),
+            DeclareLaunchArgument("static_prior_match_distance", default_value="0.10"),
             DeclareLaunchArgument("dynamic_obstacles", default_value="false"),
+            DeclareLaunchArgument("dynamic_prediction", default_value="off"),
+            DeclareLaunchArgument("dynamic_min_tracks", default_value="1"),
             DeclareLaunchArgument("leg_height_rate", default_value="0.08"),
             DeclareLaunchArgument("stable_heading", default_value="true"),
             DeclareLaunchArgument("init_yaw", default_value="0.0"),

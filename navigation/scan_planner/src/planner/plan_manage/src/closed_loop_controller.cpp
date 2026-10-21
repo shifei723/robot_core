@@ -1,7 +1,9 @@
+#include <scan_planner_msgs/msg/dynamic_obstacle_array.hpp>
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <memory>
+#include <sstream>
 #include <vector>
 
 #include <Eigen/Eigen>
@@ -16,6 +18,7 @@
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include "plan_manage/height_safety.hpp"
 #include "plan_manage/heading_tracker.hpp"
+#include "plan_manage/intent_frs.hpp"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/utils.hpp>
 
@@ -43,6 +46,53 @@ public:
     base_z_offset_ = declare_parameter<double>("base_z_offset", 0.0322);
 
     height_safety_enabled_ = declare_parameter<bool>("height_safety_enabled", false);
+    prior_required_=declare_parameter<bool>("static_prior_required",false);
+    if(prior_required_) prior_applied_sub_=create_subscription<sensor_msgs::msg::PointCloud2>("grid_map/static_prior_applied",1,
+      [this](sensor_msgs::msg::PointCloud2::ConstSharedPtr msg) {
+        const double stamp=rclcpp::Time(msg->header.stamp).seconds();
+        if(msg->header.frame_id=="world" && stamp<=now().seconds()+.05 && now().seconds()-stamp<.8)
+          prior_applied_stamp_=stamp;
+      });
+    dynamic_mode_=declare_parameter<std::string>("dynamic_prediction", "off");
+    dynamic_input_=declare_parameter<std::string>("dynamic_input", "legacy");
+    dynamic_horizon_=declare_parameter<double>("dynamic_horizon",3.0);
+    dynamic_soft_=declare_parameter<bool>("dynamic_soft_constraint",false);
+    dynamic_weight_=declare_parameter<double>("dynamic_frs_weight",2.0);
+    if(!std::isfinite(dynamic_weight_) || dynamic_weight_<0) throw std::invalid_argument("negative FRS weight");
+    if(!std::isfinite(dynamic_horizon_) || dynamic_horizon_<0.5 || dynamic_horizon_>3.0)
+      throw std::invalid_argument("dynamic_horizon must be within [0.5,3.0]");
+    if(dynamic_input_!="legacy" && dynamic_input_!="array") throw std::invalid_argument("dynamic_input must be legacy/array");
+    dynamic_min_tracks_=declare_parameter<int>("dynamic_min_tracks",1);
+    if(dynamic_min_tracks_<1) throw std::invalid_argument("dynamic_min_tracks must be positive");
+    if(dynamic_mode_!="off" && dynamic_mode_!="cv" && dynamic_mode_!="frs" && dynamic_mode_!="physical")
+      throw std::invalid_argument("dynamic_prediction must be off/cv/frs/physical");
+    dynamic_log_=create_publisher<std_msgs::msg::String>("dynamic_navigation/decision",10);
+    if(dynamic_mode_!="off" && dynamic_input_=="array") {
+      obstacle_sub_=create_subscription<scan_planner_msgs::msg::DynamicObstacleArray>("/dynamic_obstacles/tracks",10,
+        [this](scan_planner_msgs::msg::DynamicObstacleArray::ConstSharedPtr msg) {
+          std::vector<ObstacleSample> samples;
+          for(const auto& o:msg->obstacles) {
+            ObstacleSample s; s.id=o.id; s.position={o.position.x,o.position.y};
+            s.velocity={o.velocity.x,o.velocity.y}; s.radius=o.radius; s.observed=o.observed;
+            s.last_observed=rclcpp::Time(o.last_observed).seconds();
+            for(int i=0;i<4;++i) for(int j=0;j<4;++j) s.covariance(i,j)=o.covariance[i*4+j];
+            samples.push_back(s);
+          }
+          obstacle_tracks_.accept(rclcpp::Time(msg->header.stamp).seconds(),msg->epoch,
+            msg->healthy && msg->header.frame_id=="world",samples,now().seconds());
+        });
+    }
+    if(dynamic_mode_!="off" && dynamic_input_=="legacy") {
+      pedestrian_sub_=create_subscription<nav_msgs::msg::Odometry>("dynamic_navigation/pedestrian",10,
+        [this](nav_msgs::msg::Odometry::ConstSharedPtr msg) {
+          // Independent histories keyed by stable tracker identity.
+          if(msg->header.frame_id!="world") return;
+          const double stamp=rclcpp::Time(msg->header.stamp).seconds();
+          if(stamp>now().seconds()+0.05) return;
+          pedestrians_.update(msg->child_frame_id,stamp,{msg->pose.pose.position.x,msg->pose.pose.position.y},
+                                    {msg->twist.twist.linear.x,msg->twist.twist.linear.y});
+        });
+    }
     stable_heading_ = declare_parameter<bool>("stable_heading", true);
     height_rate_ = declare_parameter<double>("height_command_rate", 0.08);
     height_tolerance_ = declare_parameter<double>("height_tolerance", 0.008);
@@ -229,7 +279,7 @@ private:
 
   void cmdCallback()
   {
-    if (!height_safety_enabled_) { legacyCmdCallback(); return; }
+    if (!height_safety_enabled_ && dynamic_mode_=="off") { legacyCmdCallback(); return; }
     const auto current=now();
     double dt=(current-last_update_time_).seconds();
     last_update_time_=current;
@@ -243,6 +293,9 @@ private:
     if (height_safety_enabled_ && (!have_map_ || !have_cloud_ ||
         (current-map_time_).seconds()>data_timeout_ || (current-cloud_time_).seconds()>data_timeout_)) {
       hold("WAIT_MAP"); return;
+    }
+    if(prior_required_ && (prior_applied_stamp_<0 || current.seconds()-prior_applied_stamp_>.8)) {
+      hold("WAIT_STATIC_PRIOR");return;
     }
     if (no_path_) { hold("NO_PATH"); return; }
     if (!receive_traj_) { hold("IDLE"); return; }
@@ -321,11 +374,87 @@ private:
       v=0;w=0;state="GOAL_REACHED";
       if (terminal_capture) { exec_time_=traj_duration_; frozen=false; }
     }
+    double progress_scale=1.0;
+    if(dynamic_mode_!="off") {
+      const auto tracks=(dynamic_input_=="array" ? obstacle_tracks_.bank : pedestrians_).views(current.seconds());
+      const bool stale=dynamic_input_=="array" ? !obstacle_tracks_.fresh(current.seconds()) :
+        !pedestrians_.fresh(current.seconds(),dynamic_min_tracks_);
+      TimingDecision decision;
+      const double before_v=v;
+      const auto clock_start=std::chrono::steady_clock::now();
+      if(!stale) {
+        auto candidate=[&](double scale,double ahead) {
+          // Freeze candidate progression when height/alignment already requires a hold.
+          const double advance=frozen ? 0.0 : scale*ahead;
+          Eigen::Vector2d point=odom_pos_.head<2>()+
+            (traj_[0].evaluateDeBoorT(std::min(t+advance,traj_duration_))-desired).head<2>();
+          return point;
+        };
+        const double hard_horizon=0.5+std::abs(before_v)/0.3; // latency + braking at validated 0.3 m/s^2
+        decision=dynamic_soft_ ? chooseSoftTiming(tracks,dynamic_mode_,candidate,dynamic_horizon_,hard_horizon,dynamic_weight_)
+          : chooseTiming(tracks,dynamic_mode_,candidate,0.83,dynamic_horizon_);
+      }
+      if(!stale && dynamic_input_=="array" && tracks.empty()) { decision.scale=1.; decision.feasible=true; }
+      progress_scale=stale ? 0.0 : decision.scale;
+      v*=progress_scale; w*=progress_scale;
+      if(progress_scale==0) { frozen=true; state=stale ? "WAIT_TRACK" : "DYNAMIC_WAIT"; }
+      else if(progress_scale<1) state="DYNAMIC_SLOW";
+      // Independent reactive layer, identical in all prediction modes. Count separately.
+      const bool shield=std::any_of(tracks.begin(),tracks.end(),[&](const auto &view) {
+        return view.age>=0 && view.age<=0.5 && view.track->predict(view.age,"cv").clearance(odom_pos_.head<2>(),
+          view.track->collision_radius>0 ? view.track->collision_radius-0.05 : 0.78)<0;
+      });
+      if(shield) { v=0;w=0;frozen=true;progress_scale=0;state="DYNAMIC_SHIELD"; }
+      const double elapsed=std::chrono::duration<double,std::milli>(
+          std::chrono::steady_clock::now()-clock_start).count();
+      if(current.seconds()-last_dynamic_log_>=0.099) {
+        last_dynamic_log_=current.seconds();
+        std::ostringstream out; out.precision(17);
+        out<<"{\"stamp\":"<<current.seconds()<<",\"mode\":\""<<dynamic_mode_
+           <<"\",\"scale\":"<<progress_scale<<",\"stale\":"<<stale
+           <<",\"feasible\":"<<decision.feasible<<",\"shield\":"<<shield
+           <<",\"nominal_clearance\":"<<decision.nominal_clearance
+           <<",\"chosen_clearance\":"<<decision.chosen_clearance
+           <<",\"decision_ms\":"<<elapsed<<",\"before_v\":"<<before_v
+           <<",\"v\":"<<v<<",\"x\":"<<odom_pos_.x()<<",\"y\":"<<odom_pos_.y()
+           <<",\"soft_constraint\":"<<dynamic_soft_<<",\"frs_weight\":"<<dynamic_weight_<<",\"horizon\":"<<dynamic_horizon_<<",\"track_count\":"<<tracks.size()<<",\"nominal_obstacle\":\""<<decision.nominal_obstacle<<"\"";
+        auto boxes=[&](const TrackView &view) {
+          out<<"[";
+          for(int k=1;k<=30;++k) {
+            const auto box=view.track->predict(std::max(0.0,view.age)+k*.1,dynamic_mode_);
+            if(k>1) out<<",";
+            out<<"["<<k*.1<<","<<box.center.x()<<","<<box.center.y()<<","<<box.half.x()<<","<<box.half.y()<<"]";
+          }
+          out<<"]";
+        };
+        // Legacy first-track field retained for single-pedestrian result readers.
+        out<<",\"boxes\":"; if(tracks.empty())out<<"[]";else boxes(tracks.front());
+        out<<",\"tracks\":[";
+        for(size_t i=0;i<tracks.size();++i) {
+          if(i)out<<",";
+          out<<"{\"id\":\""<<tracks[i].id<<"\",\"age\":"<<tracks[i].age<<",\"boxes\":";
+          boxes(tracks[i]);out<<"}";
+        }
+        out<<"]";
+        for(const auto &name : {std::string("nominal_path"),std::string("chosen_path")}) {
+          out<<",\""<<name<<"\":[";
+          for(int k=0;k<=30;++k) {
+            const double scale=name=="nominal_path" ? 1.0 : progress_scale;
+            const Eigen::Vector2d point=odom_pos_.head<2>()+
+              (traj_[0].evaluateDeBoorT(std::min(t+scale*k*.1,traj_duration_))-desired).head<2>();
+            if(k)out<<",";
+            out<<"["<<point.x()<<","<<point.y()<<"]";
+          }
+          out<<"]";
+        }
+        out<<"}"; std_msgs::msg::String msg;msg.data=out.str();dynamic_log_->publish(msg);
+      }
+    }
     geometry_msgs::msg::Twist command;
     command.linear.x=v; command.angular.z=w;
     cmd_vel_pub_->publish(command);
     publishExecutionFrozen(frozen); reportState(state);
-    if(!frozen) exec_time_=std::min(traj_duration_,exec_time_+dt);
+    if(!frozen) exec_time_=std::min(traj_duration_,exec_time_+dt*progress_scale);
   }
 
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
@@ -335,9 +464,24 @@ private:
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
   rclcpp::TimerBase::SharedPtr cmd_timer_;
   HeightSafety safety_;
+  FrsTracks pedestrians_;
+  SnapshotTracks obstacle_tracks_;
+  std::string dynamic_input_;
+  rclcpp::Subscription<scan_planner_msgs::msg::DynamicObstacleArray>::SharedPtr obstacle_sub_;
+  int dynamic_min_tracks_{1};
+  std::string dynamic_mode_{"off"};
+  double last_dynamic_log_{0};
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr pedestrian_sub_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr dynamic_log_;
   bool no_path_{false},stable_heading_{true},lowering_{false};
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr planner_status_sub_;
   bool height_safety_enabled_{false}, have_map_{false}, have_cloud_{false};
+  bool prior_required_{false};
+  double prior_applied_stamp_{-1};
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr prior_applied_sub_;
+  bool dynamic_soft_{false};
+  double dynamic_weight_{2.0};
+  double dynamic_horizon_{3.0};
   double height_rate_{0.08},height_tolerance_{0.008},data_timeout_{0.8},last_height_cmd_{0.25};
   rclcpp::Time odom_time_{0,0,RCL_ROS_TIME},map_time_{0,0,RCL_ROS_TIME},cloud_time_{0,0,RCL_ROS_TIME};
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr map_sub_,cloud_sub_;
