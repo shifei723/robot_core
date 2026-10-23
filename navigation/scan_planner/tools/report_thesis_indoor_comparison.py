@@ -50,6 +50,7 @@ def main():
     task_s_mean_successful=float(np.mean([r['task_s'] for r in successful])) if successful else None,
     arrival_s_mean_successful=float(np.mean([r['arrival_s'] for r in successful])) if successful else None,
     wait_s_mean=float(np.mean([r['dynamic_wait_s'] for r in sub])),
+    sensor_wait_s_mean=float(np.mean([r['sensor_wait_s'] for r in sub])),
     longest_dynamic_stop_s_max=max(r['longest_dynamic_stop_s'] for r in sub),
     min_clearance_m=min(r['min_clearance_m'] for r in sub),long_wait_episodes=sum(r['long_wait_episodes'] for r in sub))
  report={'design':'3 methods x 3 speeds, one recorded run per condition. Same five speed candidates, perception, map, height controller and route. Spatial FRS cost disabled in all conditions. 180 s horizon. Sequential execution. No significance claim.',

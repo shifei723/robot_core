@@ -1,0 +1,791 @@
+{
+  "design": "3 methods x 3 speeds, one recorded run per condition. Same five speed candidates, perception, map, height controller and route. Spatial FRS cost disabled in all conditions. 180 s horizon. Sequential execution. No significance claim.",
+  "methods": {
+    "cv_hard": "CV with position/velocity uncertainty; 3 s hard constraint",
+    "frs_hard": "learned-acceleration FRS; 3 s hard constraint",
+    "frs_soft": "3 s FRS risk, weight 2; near-term CV hard horizon 0.5+abs(v)/0.3 s"
+  },
+  "long_wait_definition": "continuous DYNAMIC_WAIT/SHIELD with abs(v)<0.01 m/s for >=10 s",
+  "timing_definition": "arrival_s since simulation start; task_s since first goal publication; incomplete runs censored at 180 s",
+  "rows": [
+    {
+      "run": "cv_hard_0.18",
+      "parameters": {
+        "timing_policy": "hard",
+        "prediction": "cv",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.18,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "arrival_s": 128.8561352879624,
+      "task_s": 125.85590309498366,
+      "observed_s": 128.85632597398944,
+      "timeout_s": 180.0,
+      "dynamic_wait_s": 30.447518285014667,
+      "sensor_wait_s": 1.7098857940291055,
+      "longest_dynamic_stop_s": 9.548147369991057,
+      "long_wait_episodes": 0,
+      "min_clearance_m": 0.15000000000000008,
+      "path_length_m": 8.707894878097525,
+      "height": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 1.98782452059757
+      },
+      "combined_pass": true,
+      "onsets": {
+        "truth_0": {
+          "t": 7.818519031978212,
+          "pose": [
+            0.5006241597911439,
+            0.0,
+            0.0
+          ],
+          "v": 0.11633399098234358,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 61.47473136999179,
+          "pose": [
+            4.029804080651571,
+            0.20282097178909314,
+            1.704311854153573
+          ],
+          "v": 0.12484034752931636,
+          "w": 0.14527156998759805
+        },
+        "truth_2": {
+          "t": 92.09926784195704,
+          "pose": [
+            3.999149727161399,
+            2.2515530014926433,
+            1.5698802989358962
+          ],
+          "v": 0.12960066251767377,
+          "w": 0.0015384510336172719
+        }
+      },
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "290b4199c541640a1d95b0af80c852a7cfe7a315b495cfc4f2cffd091e2258ff",
+        "planner_sha256": "615269a0eb3cbcbc8d9d7d588ed9bc230677ffe3b666c25374b5541c2220d3ae",
+        "simulator_sha256": "0d614e704c00154073b22e5a894af3cd96627f19cfdafc1dc1655e6fadc83c12"
+      },
+      "trace_sha256": "a642895f306551a68282373bc55b26850f6aabc163fb258a5fc5af3dfd686341",
+      "method": "cv_hard",
+      "speed": 0.18
+    },
+    {
+      "run": "frs_hard_0.18",
+      "parameters": {
+        "timing_policy": "hard",
+        "prediction": "frs",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.18,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "arrival_s": 121.28353196202079,
+      "task_s": 118.26012108998839,
+      "observed_s": 121.28386958700139,
+      "timeout_s": 180.0,
+      "dynamic_wait_s": 32.61009215930244,
+      "sensor_wait_s": 1.6994820139952935,
+      "longest_dynamic_stop_s": 11.961077316023875,
+      "long_wait_episodes": 1,
+      "min_clearance_m": 0.1468376496337513,
+      "path_length_m": 8.710596107652652,
+      "height": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 1.9674249444134926
+      },
+      "combined_pass": true,
+      "onsets": {
+        "truth_0": {
+          "t": 8.809258948022034,
+          "pose": [
+            0.5021658838160007,
+            0.0,
+            0.0
+          ],
+          "v": 0.11673980061678743,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 57.50897205900401,
+          "pose": [
+            4.028782939621512,
+            0.20063688291207463,
+            1.6987140369148548
+          ],
+          "v": 0.12393630738601429,
+          "w": 0.12795125621253922
+        },
+        "truth_2": {
+          "t": 88.02972419600701,
+          "pose": [
+            3.996752359276284,
+            2.2531336770876043,
+            1.5656745596944268
+          ],
+          "v": 0.12932044226870734,
+          "w": 0.00614236306677185
+        }
+      },
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "290b4199c541640a1d95b0af80c852a7cfe7a315b495cfc4f2cffd091e2258ff",
+        "planner_sha256": "615269a0eb3cbcbc8d9d7d588ed9bc230677ffe3b666c25374b5541c2220d3ae",
+        "simulator_sha256": "0d614e704c00154073b22e5a894af3cd96627f19cfdafc1dc1655e6fadc83c12"
+      },
+      "trace_sha256": "285dcbe5680d93f861ce6af618f3b8e84547943a57bcab9c45a5383e8aaa9820",
+      "method": "frs_hard",
+      "speed": 0.18
+    },
+    {
+      "run": "frs_soft_0.18",
+      "parameters": {
+        "timing_policy": "soft",
+        "prediction": "frs",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.18,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "arrival_s": 119.79882173298392,
+      "task_s": 116.79109740501735,
+      "observed_s": 119.79898704797961,
+      "timeout_s": 180.0,
+      "dynamic_wait_s": 21.343830243044067,
+      "sensor_wait_s": 1.8000806100317277,
+      "longest_dynamic_stop_s": 6.8596385910059325,
+      "long_wait_episodes": 0,
+      "min_clearance_m": 0.14982307411899892,
+      "path_length_m": 8.707648668370464,
+      "height": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.24240092933177948,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 2.1998898817767945
+      },
+      "combined_pass": true,
+      "onsets": {
+        "truth_0": {
+          "t": 7.809613046993036,
+          "pose": [
+            0.5001554529268804,
+            0.0,
+            0.0
+          ],
+          "v": 0.11661569810045246,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 54.244904966966715,
+          "pose": [
+            4.03005771383197,
+            0.20012222477474467,
+            1.7004089940116627
+          ],
+          "v": 0.12492087398140984,
+          "w": 0.15147299465703212
+        },
+        "truth_2": {
+          "t": 87.42386802198598,
+          "pose": [
+            3.998834190973692,
+            2.2507817013796836,
+            1.5702290684349598
+          ],
+          "v": 0.10050447411783216,
+          "w": 0.0011443595238900262
+        }
+      },
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "290b4199c541640a1d95b0af80c852a7cfe7a315b495cfc4f2cffd091e2258ff",
+        "planner_sha256": "615269a0eb3cbcbc8d9d7d588ed9bc230677ffe3b666c25374b5541c2220d3ae",
+        "simulator_sha256": "0d614e704c00154073b22e5a894af3cd96627f19cfdafc1dc1655e6fadc83c12"
+      },
+      "trace_sha256": "a30f394494332ff3860010726adc247427ba040ff0d8c542948c8899aa20456a",
+      "method": "frs_soft",
+      "speed": 0.18
+    },
+    {
+      "run": "cv_hard_0.22",
+      "parameters": {
+        "timing_policy": "hard",
+        "prediction": "cv",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "arrival_s": 139.01438550004968,
+      "task_s": 135.20505959400907,
+      "observed_s": 139.01473842700943,
+      "timeout_s": 180.0,
+      "dynamic_wait_s": 27.986209154012613,
+      "sensor_wait_s": 23.265149609011132,
+      "longest_dynamic_stop_s": 7.83885401400039,
+      "long_wait_episodes": 0,
+      "min_clearance_m": 0.15000000000000008,
+      "path_length_m": 8.69443602862446,
+      "height": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 1.7323401675207208
+      },
+      "combined_pass": true,
+      "onsets": {
+        "truth_0": {
+          "t": 8.891726296045817,
+          "pose": [
+            0.500025694954147,
+            0.0,
+            0.0
+          ],
+          "v": 0.11662593271124715,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 51.253803692001384,
+          "pose": [
+            4.029683617586944,
+            0.2000726857381348,
+            1.7013490673055758
+          ],
+          "v": 0.12491583466564164,
+          "w": 0.1374016974444655
+        },
+        "truth_2": {
+          "t": 82.15413905901369,
+          "pose": [
+            3.99915390732422,
+            2.250082294461112,
+            1.5704490284450088
+          ],
+          "v": 0.10191207191838766,
+          "w": 0.0008067152015950318
+        }
+      },
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "290b4199c541640a1d95b0af80c852a7cfe7a315b495cfc4f2cffd091e2258ff",
+        "planner_sha256": "615269a0eb3cbcbc8d9d7d588ed9bc230677ffe3b666c25374b5541c2220d3ae",
+        "simulator_sha256": "0d614e704c00154073b22e5a894af3cd96627f19cfdafc1dc1655e6fadc83c12"
+      },
+      "trace_sha256": "a7961e243a530e9db3f186d6e57c3209d54e54b16120a7f09b2a3d180015af4d",
+      "method": "cv_hard",
+      "speed": 0.22
+    },
+    {
+      "run": "frs_hard_0.22",
+      "parameters": {
+        "timing_policy": "hard",
+        "prediction": "frs",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "arrival_s": 122.78864171396708,
+      "task_s": 119.78609580500051,
+      "observed_s": 122.78879803896416,
+      "timeout_s": 180.0,
+      "dynamic_wait_s": 33.27967638714472,
+      "sensor_wait_s": 0.0,
+      "longest_dynamic_stop_s": 9.900975726020988,
+      "long_wait_episodes": 0,
+      "min_clearance_m": 0.15000000000000008,
+      "path_length_m": 8.696368743786786,
+      "height": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 1.729268111475876
+      },
+      "combined_pass": true,
+      "onsets": {
+        "truth_0": {
+          "t": 8.19377481500851,
+          "pose": [
+            0.5004673158104975,
+            0.0,
+            0.0
+          ],
+          "v": 0.11608653417378854,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 57.74363087996608,
+          "pose": [
+            4.0282785788579085,
+            0.20512468959084396,
+            1.706153508227858
+          ],
+          "v": 0.1234482192086775,
+          "w": 0.1257625041258742
+        },
+        "truth_2": {
+          "t": 90.61913682700833,
+          "pose": [
+            3.999208497361313,
+            2.2501891526379794,
+            1.569693690340179
+          ],
+          "v": 0.126049972475658,
+          "w": 0.0016059966161907635
+        }
+      },
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "290b4199c541640a1d95b0af80c852a7cfe7a315b495cfc4f2cffd091e2258ff",
+        "planner_sha256": "615269a0eb3cbcbc8d9d7d588ed9bc230677ffe3b666c25374b5541c2220d3ae",
+        "simulator_sha256": "0d614e704c00154073b22e5a894af3cd96627f19cfdafc1dc1655e6fadc83c12"
+      },
+      "trace_sha256": "2290adc574c48a36e9116f3386d2101f3c0c30eab4555dc71c5bc26c683baf83",
+      "method": "frs_hard",
+      "speed": 0.22
+    },
+    {
+      "run": "frs_soft_0.22",
+      "parameters": {
+        "timing_policy": "soft",
+        "prediction": "frs",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.22,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "arrival_s": 127.17876308702398,
+      "task_s": 123.22223979001865,
+      "observed_s": 127.17908022098709,
+      "timeout_s": 180.0,
+      "dynamic_wait_s": 11.40098188992124,
+      "sensor_wait_s": 31.659091826993972,
+      "longest_dynamic_stop_s": 4.87167096597841,
+      "long_wait_episodes": 0,
+      "min_clearance_m": 0.15000000000000008,
+      "path_length_m": 8.697377882443197,
+      "height": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 1.7307475877537726
+      },
+      "combined_pass": true,
+      "onsets": {
+        "truth_0": {
+          "t": 8.803195188986138,
+          "pose": [
+            0.5011089528773779,
+            0.0,
+            0.0
+          ],
+          "v": 0.11657126467852237,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 45.52647822099971,
+          "pose": [
+            4.029830209925846,
+            0.20315277463266548,
+            1.7043920551348548
+          ],
+          "v": 0.12478506167707358,
+          "w": 0.13616833391683503
+        },
+        "truth_2": {
+          "t": 97.81854734598892,
+          "pose": [
+            3.9993959281326346,
+            2.2500426913638356,
+            1.5700251067634108
+          ],
+          "v": 0.12887170855634197,
+          "w": 0.001181621388987475
+        }
+      },
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "290b4199c541640a1d95b0af80c852a7cfe7a315b495cfc4f2cffd091e2258ff",
+        "planner_sha256": "615269a0eb3cbcbc8d9d7d588ed9bc230677ffe3b666c25374b5541c2220d3ae",
+        "simulator_sha256": "0d614e704c00154073b22e5a894af3cd96627f19cfdafc1dc1655e6fadc83c12"
+      },
+      "trace_sha256": "3055b4a6a329f3e397b1b97bc7d305b53a9006fe4dfebf97eed9d3a20e9394e4",
+      "method": "frs_soft",
+      "speed": 0.22
+    },
+    {
+      "run": "cv_hard_0.26",
+      "parameters": {
+        "timing_policy": "hard",
+        "prediction": "cv",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.26,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "arrival_s": 111.44012321898481,
+      "task_s": 108.44006115198135,
+      "observed_s": 111.440475350013,
+      "timeout_s": 180.0,
+      "dynamic_wait_s": 22.494989756145515,
+      "sensor_wait_s": 0.0,
+      "longest_dynamic_stop_s": 6.581650130043272,
+      "long_wait_episodes": 0,
+      "min_clearance_m": 0.15000000000000008,
+      "path_length_m": 8.695480358733713,
+      "height": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.10979921917915342,
+        "beam_crossed": true,
+        "yaw_range": 1.727366456509706
+      },
+      "combined_pass": true,
+      "onsets": {
+        "truth_0": {
+          "t": 7.833572083967738,
+          "pose": [
+            0.5015494397954059,
+            0.0,
+            0.0
+          ],
+          "v": 0.11662679544722972,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 46.44812750502024,
+          "pose": [
+            4.028517045136099,
+            0.20038118702456698,
+            1.6972880093610692
+          ],
+          "v": 0.12985366907430146,
+          "w": 0.14972998138499516
+        },
+        "truth_2": {
+          "t": 76.21891302900622,
+          "pose": [
+            3.999117910019434,
+            2.2500567468531716,
+            1.5696287569627234
+          ],
+          "v": 0.12773985724276127,
+          "w": 0.0017040656097969675
+        }
+      },
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "290b4199c541640a1d95b0af80c852a7cfe7a315b495cfc4f2cffd091e2258ff",
+        "planner_sha256": "615269a0eb3cbcbc8d9d7d588ed9bc230677ffe3b666c25374b5541c2220d3ae",
+        "simulator_sha256": "0d614e704c00154073b22e5a894af3cd96627f19cfdafc1dc1655e6fadc83c12"
+      },
+      "trace_sha256": "201d08391fb1551f9083e324e74e74b98c4662392e5dd489e40e4b8c0c1e478d",
+      "method": "cv_hard",
+      "speed": 0.26
+    },
+    {
+      "run": "frs_hard_0.26",
+      "parameters": {
+        "timing_policy": "hard",
+        "prediction": "frs",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.26,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "arrival_s": 118.25819447799586,
+      "task_s": 115.25718070199946,
+      "observed_s": 118.25853386899689,
+      "timeout_s": 180.0,
+      "dynamic_wait_s": 27.11377662490122,
+      "sensor_wait_s": 0.0,
+      "longest_dynamic_stop_s": 7.569427689013537,
+      "long_wait_episodes": 0,
+      "min_clearance_m": 0.15000000000000008,
+      "path_length_m": 8.694584064446873,
+      "height": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 1.728884782278584
+      },
+      "combined_pass": true,
+      "onsets": {
+        "truth_0": {
+          "t": 8.807425185048487,
+          "pose": [
+            0.5001510832439348,
+            0.0,
+            0.0
+          ],
+          "v": 0.1179671922027065,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 55.578941056039184,
+          "pose": [
+            4.027154423363621,
+            0.2052754997864192,
+            1.7033240816179869
+          ],
+          "v": 0.1245891365108438,
+          "w": 0.13956380238328392
+        },
+        "truth_2": {
+          "t": 86.7161993770278,
+          "pose": [
+            3.9988104744087316,
+            2.2505417414963484,
+            1.5689881730421855
+          ],
+          "v": 0.11777863205028437,
+          "w": 0.002511815454658395
+        }
+      },
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "290b4199c541640a1d95b0af80c852a7cfe7a315b495cfc4f2cffd091e2258ff",
+        "planner_sha256": "615269a0eb3cbcbc8d9d7d588ed9bc230677ffe3b666c25374b5541c2220d3ae",
+        "simulator_sha256": "0d614e704c00154073b22e5a894af3cd96627f19cfdafc1dc1655e6fadc83c12"
+      },
+      "trace_sha256": "62b328a826534439c2d1153b991cd1b9e51bc1ca17da49d3dcc17a8d78c5953f",
+      "method": "frs_hard",
+      "speed": 0.26
+    },
+    {
+      "run": "frs_soft_0.26",
+      "parameters": {
+        "timing_policy": "soft",
+        "prediction": "frs",
+        "frs_weight": 2.0,
+        "spatial_weight": 0.0,
+        "camera_focal": 170.0,
+        "encounter_end_y": 1.1,
+        "measurement_sigma": 0.06,
+        "accel_sigma": 0.2,
+        "encounter_trigger_x": 0.6,
+        "encounter_x": 1.8,
+        "encounter_speed": 0.26,
+        "encounter_side": 1.1
+      },
+      "reached": true,
+      "collision": false,
+      "error": null,
+      "arrival_s": 97.88126637501409,
+      "task_s": 94.85028761497233,
+      "observed_s": 97.88142934103962,
+      "timeout_s": 180.0,
+      "dynamic_wait_s": 12.648825906042475,
+      "sensor_wait_s": 0.0,
+      "longest_dynamic_stop_s": 4.097430533031002,
+      "long_wait_episodes": 0,
+      "min_clearance_m": 0.15000000000000008,
+      "path_length_m": 8.69591873017015,
+      "height": {
+        "min_leg_height": 0.15000000596046448,
+        "final_leg_height": 0.25,
+        "min_beam_margin": 0.1097999940395355,
+        "beam_crossed": true,
+        "yaw_range": 1.7264325335175141
+      },
+      "combined_pass": true,
+      "onsets": {
+        "truth_0": {
+          "t": 7.869260188017506,
+          "pose": [
+            0.500232021701727,
+            0.0,
+            0.0
+          ],
+          "v": 0.11645481239580621,
+          "w": 0.0
+        },
+        "truth_1": {
+          "t": 43.29697355203098,
+          "pose": [
+            4.0291807063923555,
+            0.20043856910244096,
+            1.6992372422153887
+          ],
+          "v": 0.12416712551118869,
+          "w": 0.14069905259764626
+        },
+        "truth_2": {
+          "t": 69.96825180499582,
+          "pose": [
+            3.9994025237847235,
+            2.252450132759393,
+            1.5704272370787116
+          ],
+          "v": 0.0944863915939834,
+          "w": 0.0005831359711772066
+        }
+      },
+      "source_hashes": {
+        "tracker_sha256": "25588fcec61865c4724b0d0d00ab718e24c68b8bc654b1583f178edee861b2db",
+        "online_background_sha256": "a8aa2db5cdc0aece5d627062f17d305867d420dd2ab70d4764183943f09c5a9c",
+        "static_prior_sha256": "bf2be95b3ab5417f9f6c086bca1b1af17efa0e6c003cb77dedc52a12bfe4849b",
+        "perception_node_sha256": "157926bb7fb8a0d7ad154be9d22eee2d91d59c98c8ec9e31e6534dc03293a80f",
+        "controller_sha256": "290b4199c541640a1d95b0af80c852a7cfe7a315b495cfc4f2cffd091e2258ff",
+        "planner_sha256": "615269a0eb3cbcbc8d9d7d588ed9bc230677ffe3b666c25374b5541c2220d3ae",
+        "simulator_sha256": "0d614e704c00154073b22e5a894af3cd96627f19cfdafc1dc1655e6fadc83c12"
+      },
+      "trace_sha256": "b006cb0cfa8d03be6ae38f48358556ea9bfc80572e998f328f4dd1dc2f8a1427",
+      "method": "frs_soft",
+      "speed": 0.26
+    }
+  ],
+  "groups": {
+    "cv_hard": {
+      "n": 3,
+      "reached": 3,
+      "collision_runs": 0,
+      "completed_without_collision": 3,
+      "task_s_mean_successful": 123.16700794699136,
+      "arrival_s_mean_successful": 126.43688133566563,
+      "wait_s_mean": 26.976239065057598,
+      "sensor_wait_s_mean": 8.325011801013412,
+      "longest_dynamic_stop_s_max": 9.548147369991057,
+      "min_clearance_m": 0.15000000000000008,
+      "long_wait_episodes": 0
+    },
+    "frs_hard": {
+      "n": 3,
+      "reached": 3,
+      "collision_runs": 0,
+      "completed_without_collision": 3,
+      "task_s_mean_successful": 117.76779919899612,
+      "arrival_s_mean_successful": 120.77678938466124,
+      "wait_s_mean": 31.001181723782793,
+      "sensor_wait_s_mean": 0.5664940046650978,
+      "longest_dynamic_stop_s_max": 11.961077316023875,
+      "min_clearance_m": 0.1468376496337513,
+      "long_wait_episodes": 1
+    },
+    "frs_soft": {
+      "n": 3,
+      "reached": 3,
+      "collision_runs": 0,
+      "completed_without_collision": 3,
+      "task_s_mean_successful": 111.62120827000278,
+      "arrival_s_mean_successful": 114.95295039834066,
+      "wait_s_mean": 15.131212679669261,
+      "sensor_wait_s_mean": 11.153057479008567,
+      "longest_dynamic_stop_s_max": 6.8596385910059325,
+      "min_clearance_m": 0.14982307411899892,
+      "long_wait_episodes": 0
+    }
+  }
+}
