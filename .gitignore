@@ -142,3 +142,9 @@ Thumbs.db
 # 这些是 unitree_lidar 等包链接所需的预编译库, 缺失则新机器 clone 后编译失败。
 !sensors/lidar/unitree_lidar/unitree_lidar_sdk/lib/aarch64/libunilidar_sdk2.a
 !sensors/lidar/unitree_lidar/unitree_lidar_sdk/lib/x86_64/libunilidar_sdk2.a
+
+/data/geometric_validation/
+
+/output/
+
+/tmp/

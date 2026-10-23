@@ -1,0 +1,18 @@
+{
+  "design": "3 paired obstacle-speed conditions x 3 controllers; all scheduled runs retained",
+  "obstacle_speeds_m_s": [0.18, 0.22, 0.26],
+  "methods": ["cv_hard", "frs_hard", "frs_soft"],
+  "speed_candidates": [1.0, 0.75, 0.5, 0.25, 0.0],
+  "timeout_s": 180,
+  "spatial_frs_weight_all": 0,
+  "soft_risk_weight": 2,
+  "prediction_horizon_s": 3,
+  "hard_baseline_horizon_s": 3,
+  "soft_method_hard_horizon": "0.5 + abs(v_pre)/0.3 s",
+  "matching": "same executable, map, sensor model, route, height controller, geometry, perception configuration, target progress triggers and action resolution",
+  "execution": "sequential, isolated ROS domain 211, no robot actuator topics",
+  "failure_handling": "retain collisions/timeouts, infrastructure errors flagged separately; never replace timeout with an arrival",
+  "long_wait": "continuous DYNAMIC_WAIT/SHIELD and abs(v)<0.01 m/s lasting >=10 s",
+  "scope": "kinematic ROS software closed loop; one run per method per speed, not random-seed repeats or physical trials",
+  "excluded_pilot": "thesis_indoor_compare_20261023/cv_hard_0.18; deliberately interrupted before matching hard/soft speed candidate sets"
+}

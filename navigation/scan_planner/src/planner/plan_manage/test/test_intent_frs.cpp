@@ -138,3 +138,12 @@ TEST(SoftFrs, WeightChangesPreferenceWithoutChangingHardFeasibility) {
   EXPECT_TRUE(empty.feasible);EXPECT_DOUBLE_EQ(empty.scale,1.);
   EXPECT_TRUE(std::isfinite(empty.nominal_clearance));
 }
+
+TEST(IntentFrs, HardTimingRetainsFastestSafeQuarterStep) {
+  IntentFrs f; f.update(0,{1.1,0},{0,0});
+  auto path=[](double scale,double t){return Eigen::Vector2d(.3*scale*t,0);};
+  auto decision=chooseTiming(f,0,"cv",path,.4);
+  EXPECT_TRUE(decision.feasible);
+  EXPECT_DOUBLE_EQ(decision.scale,.75);
+  EXPECT_GE(decision.chosen_clearance,0);
+}

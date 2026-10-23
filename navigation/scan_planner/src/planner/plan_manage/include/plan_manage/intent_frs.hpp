@@ -2,6 +2,7 @@
 #include <Eigen/Core>
 #include <Eigen/Eigenvalues>
 #include <set>
+#include <array>
 #include <cstdint>
 #include <algorithm>
 #include <cmath>
@@ -12,6 +13,8 @@
 #include <vector>
 
 namespace scan_planner {
+// Matched action resolution for hard and soft timing comparisons.
+inline constexpr std::array<double,5> kTimingScales{1.0,0.75,0.5,0.25,0.0};
 // For the double integrator with an axis-aligned acceleration box, the
 // projected Zonotope is exactly a rectangle. No sampled-boundary enclosure.
 struct ReachBox {
@@ -150,7 +153,7 @@ TimingDecision chooseTiming(const std::vector<TrackView> &tracks, const std::str
                             Path point, double radius=0.83, double horizon=3.0) {
   TimingDecision result;
   if(tracks.empty()) return result;
-  for(double scale: {1.0,0.5,0.0}) {
+  for(double scale: kTimingScales) {
     double clearance=std::numeric_limits<double>::infinity();
     std::string limiting;
     const int steps=std::max(1,static_cast<int>(std::ceil(horizon/0.1)));
@@ -183,7 +186,7 @@ TimingDecision chooseSoftTiming(const std::vector<TrackView>& tracks,const std::
   TimingDecision result;
   if(tracks.empty()) {result.scale=1.;result.feasible=true;return result;}
   double best=std::numeric_limits<double>::infinity();
-  for(double scale: {1.0,0.75,0.5,0.25,0.0}) {
+  for(double scale: kTimingScales) {
     double gap=std::numeric_limits<double>::infinity(), risk=0;
     std::string limiting;
     for(int k=0;k<=30;++k) {

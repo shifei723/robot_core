@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--duration',type=float,default=40)
     parser.add_argument('--domain',type=int,default=191)
     parser.add_argument('--timing-policy',choices=['soft','hard'],default='soft')
+    parser.add_argument('--prediction',choices=['cv','frs'],default='frs')
     parser.add_argument('--camera-focal',type=float,default=220.)
     parser.add_argument('--encounter-end-y',type=float,default=None)
     parser.add_argument('--measurement-sigma',type=float,default=.06)
@@ -53,9 +54,9 @@ def main():
     indoor=args.case=='indoor_turn_height'
     if indoor:
         goal_xy=np.array([4.,4.7])
-        multi_specs=[{'id':'truth_0','start':[1.8,-1.1],'end':[1.8,.8],'speed':.22,'trigger_axis':0,'trigger_value':.5},
-                     {'id':'truth_1','start':[2.9,1.5],'end':[4.85,1.5],'speed':.22,'trigger_axis':1,'trigger_value':.2},
-                     {'id':'truth_2','start':[2.9,3.6],'end':[4.85,3.6],'speed':.22,'trigger_axis':1,'trigger_value':2.25}]
+        multi_specs=[{'id':'truth_0','start':[1.8,-1.1],'end':[1.8,.8],'speed':args.encounter_speed,'trigger_axis':0,'trigger_value':.5},
+                     {'id':'truth_1','start':[2.9,1.5],'end':[4.85,1.5],'speed':args.encounter_speed,'trigger_axis':1,'trigger_value':.2},
+                     {'id':'truth_2','start':[2.9,3.6],'end':[4.85,3.6],'speed':args.encounter_speed,'trigger_axis':1,'trigger_value':2.25}]
     static=[([-2.,-1.65,0.],[8.,-1.55,2.]),([-2.,1.55,0.],[8.,1.65,2.]),([7.9,-1.65,0.],[8.,1.65,2.])]
     if indoor:
         static=[([-2.,-1.65,0.],[5.65,-1.55,2.]),
@@ -178,7 +179,7 @@ def main():
     launch('scan_planner','scan_planner_node',['--params-file',str(Path(get_package_share_directory('scan_planner'))/'config/planner.yaml'),
        '--params-file',str(paramfile),'-r','body_pose:=/sim/odom','-r','sensor_pose:=/dynamic_obstacles/camera_pose',
        '-r','depth:=/dynamic_obstacles/depth_static'])
-    launch('scan_planner','closed_loop_controller',['-p',f'static_prior_required:={str(args.static_prior).lower()}','-p',f'dynamic_soft_constraint:={str(args.timing_policy=="soft").lower()}','-p',f'dynamic_frs_weight:={args.frs_weight}','-p','dynamic_horizon:=3.0','-p','dynamic_input:=array','-p','dynamic_prediction:=frs',
+    launch('scan_planner','closed_loop_controller',['-p',f'static_prior_required:={str(args.static_prior).lower()}','-p',f'dynamic_soft_constraint:={str(args.timing_policy=="soft").lower()}','-p',f'dynamic_frs_weight:={args.frs_weight}','-p','dynamic_horizon:=3.0','-p','dynamic_input:=array','-p',f'dynamic_prediction:={args.prediction}',
        '-p','height_safety_enabled:=true','-r','cloud:=/dynamic_obstacles/cloud_static','-p','max_vx:=0.3','-p','max_vyaw:=0.5',
        '-r','body_pose:=/sim/odom','-r','cmd_vel:=/sim/cmd_vel',
        '-r','leg_height_cmd:=/sim/leg_height_cmd','-r','planning/go2_execution_frozen:=/planning/go2_execution_frozen'])
@@ -231,7 +232,7 @@ def main():
       'arrival_criterion':'distance < 0.16 m AND speed < 0.01 m/s AND controller GOAL_REACHED',
       'goal':goal_xy.tolist(),'camera_intrinsics':[fx,fy,cx,cy],'sensor_size':[width,height],'static_boxes':static}
     if indoor:summary['scene_reference']={'path':str(reference_path),'sha256':hashlib.sha256(reference_path.read_bytes()).hexdigest(),'beam_clearance':reference['indoor.beam_clearance'],'beam_depth':reference['indoor.beam_depth'],'motion':'Ground-plane linear segments, alternating crossings as in combined experiment; deterministic progress triggers; geometry adapted to L corridor.'}
-    summary['experiment_parameters']={'timing_policy':args.timing_policy,'frs_weight':args.frs_weight,
+    summary['experiment_parameters']={'timing_policy':args.timing_policy,'prediction':args.prediction,'frs_weight':args.frs_weight,
       'spatial_weight':args.spatial_weight,'camera_focal':args.camera_focal,'encounter_end_y':args.encounter_end_y,'measurement_sigma':args.measurement_sigma,'accel_sigma':args.accel_sigma,'encounter_trigger_x':args.encounter_trigger_x,
       'encounter_x':args.encounter_x,'encounter_speed':args.encounter_speed,'encounter_side':args.encounter_side}
     if args.case=='multi_encounter' or indoor:summary['multi_specs']=multi_specs;summary['multi_onsets']=multi_onsets
