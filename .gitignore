@@ -105,7 +105,7 @@ FAST-Calib-ROS2/calib_data/
 *.whl
 *.deb
 *.7z
-
+.workbuddy/
 # ---------- 音视频 / 演示媒体 ----------
 *.mp4
 *.mov

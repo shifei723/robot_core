@@ -1,0 +1,4 @@
+
+
+# 启动命令，上位机监视程序
+cd /Users/shifei/Documents/robot/slash_pc_test && python3 pc_monitor.py

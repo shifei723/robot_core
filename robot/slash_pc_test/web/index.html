@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>轮式腿机器人上位机</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171d2b; --card2:#1d2433; --line:#263046;
+    --text:#e6ebf5; --dim:#8b98b4; --accent:#4da3ff; --green:#3ddc97;
+    --amber:#ffc857; --red:#ff5d6c; --purple:#b48ead;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,"PingFang SC","Helvetica Neue",Arial,sans-serif;}
+  body{padding:14px 18px 24px;}
+  h1{font-size:17px;margin:0 0 10px;letter-spacing:.5px}
+  h1 small{color:var(--dim);font-size:12px;font-weight:400;margin-left:8px}
+
+  /* ---------- 顶栏 ---------- */
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:10px 14px;margin-bottom:12px}
+  select,input[type=text]{background:var(--card2);color:var(--text);
+    border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:13px;
+    outline:none}
+  input[type=text]{min-width:150px}
+  button{background:var(--card2);color:var(--text);border:1px solid var(--line);
+    border-radius:6px;padding:6px 14px;font-size:13px;cursor:pointer;
+    transition:.15s}
+  button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.primary{background:var(--green);color:#08281c;border-color:var(--green);font-weight:600}
+  button.primary:hover:not(:disabled){background:#5ff0ad;color:#08281c}
+  button.danger{background:var(--red);color:#2a0a0e;border-color:var(--red);font-weight:600}
+  button.danger:hover:not(:disabled){background:#ff808c;color:#2a0a0e}
+  label{font-size:12px;color:var(--dim);margin-right:4px}
+  .led{width:11px;height:11px;border-radius:50%;background:var(--red);
+    box-shadow:0 0 8px var(--red);display:inline-block}
+  .led.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+  .chip{background:var(--card2);border:1px solid var(--line);border-radius:6px;
+    padding:3px 9px;font-size:12px;color:var(--dim)}
+  .chip b{color:var(--accent);font-family:Menlo,monospace;margin-left:5px}
+
+  /* ---------- 栅格 ---------- */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:12px 14px}
+  .card h2{font-size:13px;margin:0 0 10px;color:var(--dim);font-weight:600;
+    letter-spacing:.6px}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px}
+  .kv span{color:var(--dim)}
+  .kv b{font-family:Menlo,monospace;font-weight:500;text-align:right}
+  .v-green b{color:var(--green)} .v-amber b{color:var(--amber)}
+  .v-purple b{color:var(--purple)}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;
+    font-family:Menlo,monospace}
+  th,td{padding:4px 6px;text-align:right;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-weight:500;font-family:inherit}
+  td:first-child,th:first-child{text-align:left;color:var(--text)}
+  tbody tr:last-child td{border-bottom:none}
+
+  .sbus{display:grid;grid-template-columns:auto 1fr auto;gap:4px 8px;
+    align-items:center;font-size:11.5px}
+  .sbus .ch{color:var(--dim);font-family:Menlo,monospace}
+  .sbus .track{position:relative;height:9px;background:#101724;
+    border-radius:5px;overflow:hidden}
+  .sbus .mid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#33405c}
+  .sbus .fill{position:absolute;top:0;bottom:0;background:var(--accent)}
+  .sbus .val{font-family:Menlo,monospace;min-width:42px;text-align:right}
+
+  /* ---------- 曲线 ---------- */
+  .charts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+  .chart h2{display:flex;justify-content:space-between;align-items:center}
+  .legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .lg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--dim);
+    background:var(--card2);border:1px solid var(--line);border-radius:5px;
+    padding:2px 7px;cursor:pointer;user-select:none}
+  .lg i{width:9px;height:9px;border-radius:2px;display:inline-block}
+  .lg.off{opacity:.35}
+  .lg em{font-style:normal;font-family:Menlo,monospace;color:var(--text)}
+  canvas{width:100%;height:150px;display:block;background:#101724;
+    border-radius:8px}
+
+  /* ---------- 录制 ---------- */
+  .rec{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:12px 14px}
+  .rec .status{font-size:12.5px;color:var(--dim);font-family:Menlo,monospace}
+  .rec .status.on{color:var(--red)}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--red);margin-right:6px;animation:blink 1s infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .note{color:var(--dim);font-size:11.5px}
+  .err{color:var(--red);font-size:12px}
+</style>
+</head>
+<body>
+
+<h1>轮式腿机器人上位机 <small id="sub">串口实时监测 · 全量录制</small></h1>
+
+<!-- ================= 顶栏 ================= -->
+<div class="bar">
+  <label>串口</label>
+  <select id="port" style="min-width:230px"></select>
+  <button id="refresh">刷新</button>
+  <label>波特率</label>
+  <select id="baud"></select>
+  <button id="connect" class="primary">连接</button>
+  <button id="disconnect" disabled>断开</button>
+  <span class="led" id="led"></span>
+  <span id="connText" class="note">未连接</span>
+  <div class="chips">
+    <div class="chip">RX<b id="s-hz">0.0 Hz</b></div>
+    <div class="chip">帧数<b id="s-frames">0</b></div>
+    <div class="chip">变体<b id="s-variant">0</b></div>
+    <div class="chip">CRC错<b id="s-crc">0</b></div>
+    <div class="chip">丢弃<b id="s-drop">0</b></div>
+    <div class="chip">帧型<b id="s-ftype">--</b></div>
+    <div class="chip">时长<b id="s-elapsed">00:00</b></div>
+  </div>
+</div>
+
+<!-- ================= 数据区 ================= -->
+<div class="grid">
+  <div class="card">
+    <h2>里程计</h2>
+    <div class="kv v-green">
+      <span>左轮速度</span><b id="o-lw">--</b>
+      <span>右轮速度</span><b id="o-rw">--</b>
+      <span>前进速度</span><b id="o-spd">--</b>
+      <span>角速度</span><b id="o-av">--</b>
+    </div>
+    <h2 style="margin-top:14px">机器人状态</h2>
+    <div class="kv v-purple">
+      <span>开关机</span><b id="r-power">--</b>
+      <span>工作模式</span><b id="r-model">--</b>
+      <span>帧计数</span><b id="r-count">--</b>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>IMU 姿态</h2>
+    <div class="kv v-amber">
+      <span>加速度</span><b id="i-acc">--</b>
+      <span>陀螺仪</span><b id="i-gyro">--</b>
+      <span>四元数</span><b id="i-quat">--</b>
+      <span>R/P/Y (°)</span><b id="i-euler">--</b>
+    </div>
+    <h2 style="margin-top:14px">遥控器 SBUS</h2>
+    <div class="sbus" id="sbus"></div>
+  </div>
+
+  <div class="card">
+    <h2>电机反馈 (6 轴 MIT)</h2>
+    <table>
+      <thead><tr><th>电机</th><th>位置°</th><th>速度°/s</th><th>力矩N·m</th><th>温度℃</th></tr></thead>
+      <tbody id="motors"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ================= 曲线 ================= -->
+<div class="charts" id="charts"></div>
+
+<!-- ================= 录制 ================= -->
+<div class="rec">
+  <button id="recStart" class="danger">● 开始记录</button>
+  <button id="recStop" disabled>■ 结束记录</button>
+  <label>名称</label>
+  <input type="text" id="recName" placeholder="留空按时间戳命名">
+  <label>目录</label>
+  <input type="text" id="recDir" style="min-width:260px">
+  <button id="pickDir">打开目录</button>
+  <label><input type="checkbox" id="recCsv" checked>解码CSV</label>
+  <label><input type="checkbox" id="recBin" checked>原始bin</label>
+  <span class="status" id="recStatus">未录制</span>
+</div>
+
+<script>
+// ============================ 工具 ============================
+const $ = id => document.getElementById(id);
+const fmt = (v, n=3) => (v===null||v===undefined||Number.isNaN(v)) ? '--' : Number(v).toFixed(n);
+const vec = (a, n=2) => (!a || a.some(x=>x===null||x===undefined)) ? '--' : a.map(x=>Number(x).toFixed(n)).join('  ');
+const kb = b => (b/1024).toFixed(0) + ' KB';
+const mmss = s => String(Math.floor(s/60)).padStart(2,'0') + ':' + String(Math.floor(s%60)).padStart(2,'0');
+async function api(path, opt){
+  const r = await fetch(path, opt);
+  if(!r.ok) throw new Error(path + ' HTTP ' + r.status);
+  return r.json();
+}
+async function post(path, body){
+  return api(path, {method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(body||{})});
+}
+
+// ============================ 曲线定义 ============================
+const PALETTE = ['#ff5d6c','#ffc857','#3ddc97','#4da3ff','#b48ead','#f78fb3'];
+const CHARTS = [
+  {id:'ch_speed', title:'轮式速度', unit:'m/s',
+   ch:[['lw','左轮',PALETTE[0]],['rw','右轮',PALETTE[1]],['spd','前进',PALETTE[2]],['av','角速度',PALETTE[3]]]},
+  {id:'ch_att', title:'姿态角', unit:'°',
+   ch:[['roll','Roll',PALETTE[3]],['pitch','Pitch',PALETTE[1]],['yaw','Yaw',PALETTE[4]]]},
+  {id:'ch_pos', title:'关节位置', unit:'°',
+   ch:[0,1,2,3,4,5].map(i=>['p'+i,'M'+i,PALETTE[i%6]])},
+  {id:'ch_tq', title:'关节力矩', unit:'N·m',
+   ch:[0,1,2,3,4,5].map(i=>['q'+i,'M'+i,PALETTE[i%6]])},
+];
+let samples = [];      // 曲线采样
+let since = 0;         // 已拉取到的 seq
+
+// 构建曲线卡片
+function buildCharts(){
+  const wrap = $('charts');
+  wrap.innerHTML = '';
+  CHARTS.forEach(c=>{
+    const div = document.createElement('div');
+    div.className = 'card chart';
+    div.innerHTML = `<h2><span>${c.title}</span><span class="note">${c.unit}</span></h2>
+                     <canvas id="${c.id}"></canvas><div class="legend"></div>`;
+    wrap.appendChild(div);
+    const lg = div.querySelector('.legend');
+    c.on = {};
+    c.ch.forEach(([key,label,color])=>{
+      c.on[key] = true;
+      const el = document.createElement('span');
+      el.className = 'lg';
+      el.innerHTML = `<i style="background:${color}"></i>${label}<em>--</em>`;
+      el.onclick = ()=>{ c.on[key] = !c.on[key]; el.classList.toggle('off', !c.on[key]); drawAll(); };
+      el._val = el.querySelector('em');
+      lg.appendChild(el);
+      (c._lg = c._lg || {})[key] = el;
+    });
+    c.canvas = div.querySelector('canvas');
+    c.ctx = c.canvas.getContext('2d');
+  });
+}
+
+function drawChart(c){
+  const cv = c.canvas, ctx = c.ctx;
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if(cv.width !== Math.round(w*dpr) || cv.height !== Math.round(h*dpr)){
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const padL=48,padR=8,padT=10,padB=16;
+  const x0=padL,x1=w-padR,y0=padT,y1=h-padB;
+
+  // 网格
+  ctx.strokeStyle='#1e2740'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){ const y=y0+(y1-y0)*i/4;
+    ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke(); }
+  ctx.strokeStyle='#2b3757';
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x0,y1); ctx.lineTo(x1,y1); ctx.stroke();
+
+  const keys = c.ch.filter(([k])=>c.on[k]).map(([k])=>k);
+  if(!samples.length || !keys.length){
+    ctx.fillStyle='#5b6885'; ctx.font='12px Menlo,monospace'; ctx.textAlign='center';
+    ctx.fillText(samples.length?'（已隐藏全部通道）':'等待数据…',(x0+x1)/2,(y0+y1)/2);
+    return;
+  }
+  let lo=Infinity, hi=-Infinity;
+  samples.forEach(s=>keys.forEach(k=>{const v=s[k]; if(v<lo)lo=v; if(v>hi)hi=v;}));
+  if(!isFinite(lo)||!isFinite(hi)) return;
+  if(hi-lo < 1e-6){ const m=Math.max(Math.abs(hi)*0.1,0.5); lo-=m; hi+=m; }
+  else { const m=(hi-lo)*0.12; lo-=m; hi+=m; }
+
+  // Y 轴刻度
+  ctx.fillStyle='#8b98b4'; ctx.font='10px Menlo,monospace'; ctx.textAlign='right';
+  ctx.fillText(hi.toFixed(2), x0-5, y0+9);
+  ctx.fillText(lo.toFixed(2), x0-5, y1-2);
+  ctx.textAlign='left'; ctx.fillStyle='#5b6885';
+  ctx.fillText(c.unit, x0-44, (y0+y1)/2);
+
+  const n = samples.length, step = (x1-x0)/Math.max(n-1,1);
+  c.ch.forEach(([key,,color])=>{
+    if(!c.on[key]) return;
+    ctx.strokeStyle=color; ctx.lineWidth=1.4; ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const v=samples[i][key];
+      const x=x0+i*step, y=y1-(v-lo)/(hi-lo)*(y1-y0);
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    ctx.stroke();
+  });
+}
+function drawAll(){ CHARTS.forEach(drawChart); }
+
+// ============================ 面板渲染 ============================
+function buildSbus(){
+  const el = $('sbus'); el.innerHTML='';
+  for(let i=0;i<10;i++){
+    el.insertAdjacentHTML('beforeend',
+      `<div class="ch">CH${i+1}</div>
+       <div class="track"><div class="mid"></div><div class="fill" id="sb${i}"></div></div>
+       <div class="val" id="sv${i}">--</div>`);
+  }
+}
+const SBUS_RANGE = {};   // 每通道自适应量程
+function renderSbus(v){
+  if(!v) return;
+  v.forEach((x,i)=>{
+    const r = SBUS_RANGE[i] || (SBUS_RANGE[i] = {lo:x, hi:x});
+    r.lo = Math.min(r.lo,x); r.hi = Math.max(r.hi,x);
+    const span = (r.hi-r.lo) || 1;
+    const f = (x-r.lo)/span;
+    const fill = $('sb'+i);
+    fill.style.left = (Math.min(f,0.5)*100)+'%';
+    fill.style.width = (Math.abs(f-0.5)*100)+'%';
+    fill.style.background = Math.abs(f-0.5)<0.06 ? '#3ddc97' : '#4da3ff';
+    $('sv'+i).textContent = x;
+  });
+}
+function buildMotors(){
+  const tb = $('motors'); tb.innerHTML='';
+  const names = ['左前','左后','右前','右后','左轮','右轮'];
+  names.forEach((n,i)=>{
+    tb.insertAdjacentHTML('beforeend',
+      `<tr><td>${n}</td><td id="m${i}p">--</td><td id="m${i}v">--</td>
+       <td id="m${i}q">--</td><td id="m${i}t">--</td></tr>`);
+  });
+}
+let motorRows = 0;
+function render(st){
+  // 统计
+  const s = st.stats;
+  $('s-hz').textContent = s.hz.toFixed(1)+' Hz';
+  $('s-frames').textContent = s.frames;
+  $('s-variant').textContent = s.variant;
+  $('s-crc').textContent = s.crc_err;
+  $('s-drop').textContent = s.dropped;
+  $('s-ftype').textContent = s.frame_type;
+  $('s-elapsed').textContent = mmss(st.elapsed);
+  $('led').classList.toggle('on', st.connected);
+  $('connText').textContent = st.connected
+    ? `已连接 ${st.port} @ ${st.baudrate}` : (st.error ? '错误: '+st.error : '未连接');
+
+  const d = st.latest;
+  if(d){
+    $('o-lw').textContent = fmt(d.lw); $('o-rw').textContent = fmt(d.rw);
+    $('o-spd').textContent = fmt(d.spd); $('o-av').textContent = fmt(d.av,4);
+    $('i-acc').textContent = vec(d.acc,2);
+    $('i-gyro').textContent = vec(d.gyro,3);
+    $('i-quat').textContent = vec(d.quat,4);
+    $('i-euler').textContent = vec(d.euler,2);
+    $('r-power').textContent = d.switched_on==null ? '--' : (d.switched_on?'开机':'关机');
+    $('r-model').textContent = d.model==null ? '--' : (d.model?'电机控制':'底盘控制');
+    $('r-count').textContent = d.count==null ? '--' : d.count;
+    (d.motors||[]).forEach((m,i)=>{
+      $('m'+i+'p').textContent = fmt(m.pos,2);
+      $('m'+i+'v').textContent = fmt(m.vel,2);
+      $('m'+i+'q').textContent = fmt(m.torque,3);
+      $('m'+i+'t').textContent = fmt(m.temp,1);
+    });
+    if(d.sbus) renderSbus(d.sbus);
+  }
+  // 曲线当前值
+  if(samples.length){
+    const last = samples[samples.length-1];
+    CHARTS.forEach(c=>c.ch.forEach(([k])=>{ if(c._lg[k]) c._lg[k]._val.textContent = fmt(last[k],2); }));
+  }
+}
+
+// ============================ 轮询 ============================
+let broken = false;
+async function poll(){
+  try{
+    const st = await api('/api/state?since='+since);
+    broken = false;
+    if(st.samples && st.samples.length){
+      samples.push(...st.samples);
+      if(samples.length > 900) samples.splice(0, samples.length-900);
+      since = samples[samples.length-1].seq;
+    }
+    render(st);
+    drawAll();
+    // 录制状态
+    const rs = $('recStatus');
+    if(st.recording){
+      rs.className = 'status on';
+      rs.innerHTML = `<span class="dot"></span>[${st.record.name}] ${mmss(st.record.duration)} · CSV ${st.record.rows} 行 · 原始 ${kb(st.record.raw_bytes)}`;
+      $('recStart').disabled = true; $('recStop').disabled = false;
+    }else{
+      rs.className = 'status'; rs.textContent = '未录制';
+      $('recStart').disabled = false; $('recStop').disabled = true;
+    }
+  }catch(e){
+    if(!broken){ broken = true; $('connText').textContent = '服务未响应'; }
+  }
+  setTimeout(poll, 60);
+}
+
+// ============================ 交互 ============================
+async function loadPorts(){
+  try{
+    const {ports} = await api('/api/ports');
+    const sel = $('port'); const cur = sel.value;
+    sel.innerHTML = ports.length ? '' : '<option value="">(未检测到串口)</option>';
+    ports.forEach(p=>{
+      const o = document.createElement('option'); o.value=p; o.textContent=p;
+      sel.appendChild(o);
+    });
+    if(ports.includes(cur)) sel.value = cur;
+    else if(ports.length){
+      const pref = ports.find(p=>p.includes('usbmodem')) || ports[0];
+      sel.value = pref;
+    }
+  }catch(e){}
+}
+async function loadConfig(){
+  try{
+    const c = await api('/api/config');
+    $('baud').innerHTML = c.baudrates.map(b=>
+      `<option value="${b}" ${b===2000000?'selected':''}>${b}</option>`).join('');
+    if(!$('recDir').value) $('recDir').value = c.log_dir;
+  }catch(e){
+    $('baud').innerHTML = '<option value="2000000">2000000</option>';
+  }
+}
+$('refresh').onclick = loadPorts;
+$('connect').onclick = async ()=>{
+  const p = $('port').value;
+  if(!p){ alert('未选择串口'); return; }
+  const r = await post('/api/connect', {port:p, baudrate:parseInt($('baud').value,10)});
+  if(!r.ok) alert('连接失败: ' + r.msg);
+  syncButtons();
+};
+$('disconnect').onclick = async ()=>{ await post('/api/disconnect'); syncButtons(); };
+function syncButtons(){
+  api('/api/state?since=999999999').then(st=>{
+    $('connect').disabled = st.connected;
+    $('disconnect').disabled = !st.connected;
+  });
+}
+$('recStart').onclick = async ()=>{
+  const r = await post('/api/record/start', {
+    name: $('recName').value.trim(),
+    dir: $('recDir').value.trim(),
+    csv: $('recCsv').checked, bin: $('recBin').checked});
+  if(!r.ok) alert('无法开始录制: ' + r.msg);
+  else $('recStatus').textContent = '录制中: ' + r.dir;
+};
+$('recStop').onclick = async ()=>{
+  const r = await post('/api/record/stop');
+  if(r.ok){
+    alert(`录制完成\n名称: ${r.name}\n目录: ${r.dir}\n时长: ${r.duration_s.toFixed(1)} s\n`
+        + `全量帧: ${r.frames_full}  精简帧: ${r.frames_lite}\n`
+        + `CSV 行: ${r.csv_rows}  原始字节: ${r.raw_bytes}`);
+    $('recStatus').textContent = '已保存到 ' + r.dir;
+  }
+};
+$('pickDir').onclick = ()=> post('/api/open_dir', {dir: $('recDir').value.trim()});
+window.addEventListener('resize', drawAll);
+
+// ============================ 启动 ============================
+buildCharts(); buildSbus(); buildMotors();
+loadPorts(); loadConfig(); poll(); syncButtons();
+</script>
+</body>
+</html>
