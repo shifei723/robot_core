@@ -126,7 +126,7 @@ class RobotLink:
 
     def _close_locked(self):
         if self.recorder.recording:
-            self.recorder.stop()
+            self.recorder.stop(self.parser)
         self.stop_event.set()
         if self.thread and self.thread.is_alive():
             self.thread.join(timeout=1.5)
@@ -154,6 +154,12 @@ class RobotLink:
         ser = self.ser
         while not self.stop_event.is_set():
             try:
+                # 实测 (2026-10-25, macOS, 2 Mbps): in_waiting+sleep(0.4ms) 与
+                # select+短自旋的 read_burst 收帧率无统计差别, 但后者 CPU 高 6 倍,
+                # 故用前者 (旧解析器时代的 85.5Hz/12.9% vs 85.8Hz/12.4% 已不适用,
+                # 锚点扫描式 FrameParser 修复后实测 99.4 Hz / 零丢帧)。
+                # 注意: 真正会毁掉数据的是"同一串口被两个进程同时读取"
+                # (macOS cu.* 允许多开), 已由 open() 的 TIOCEXCL 独占打开防护。
                 n = ser.in_waiting()
                 if n <= 0:
                     time.sleep(0.0004)
@@ -205,6 +211,9 @@ class RobotLink:
 
     # ---------------------------------------------------------------- 状态
     def state(self, since=0):
+        # 锁内只做"取快照"这类廉价操作 (O(1) 或 O(缓冲长度) 的指针拷贝),
+        # 过滤 / 字典构造 / recorder.info() 一律放到锁外:
+        # 读取线程每帧都要抢这把锁, 锁内多耗 1 ms 就等于丢一帧。
         with self.lock:
             now = time.perf_counter()
             t0, f0 = self._hz_mark
@@ -213,62 +222,68 @@ class RobotLink:
                 self._hz_mark = (now, self.parser.frames_ok)
             elif not self.connected:
                 self._hz = 0.0
-
-            samples = [s for s in self.samples if s["seq"] > since]
+            snap = list(self.samples)          # 900 个指针拷贝, 微秒级
             d = self.latest
-            latest = None
-            if d:
-                motors = []
-                for i in range(6):
-                    m = d["motors"][i] if d.get("motors") and i < len(d["motors"]) else {}
-                    motors.append({
-                        "name": MOTOR_NAMES[i],
-                        "pos": m.get("position"), "vel": m.get("velocity"),
-                        "torque": m.get("torque"), "temp": m.get("temp")})
-                e = d.get("euler_deg")
-                latest = {
-                    "type": d.get("type"),
-                    "count": d.get("count"),
-                    "lw": d.get("lw_speed"), "rw": d.get("rw_speed"),
-                    "spd": d.get("speed"), "av": d.get("angular_vel"),
-                    "acc": d.get("acc"), "gyro": d.get("gyro"),
-                    "quat": d.get("quat"),
-                    "euler": list(e) if e else None,
-                    "motors": motors,
-                    "sbus": d.get("sbus"),
-                    "switched_on": d.get("switched_on"),
-                    "model": d.get("model"),
-                }
-            ft = self.frame_types
-            ftype = ("全量182B" if ft == {"full"} else "精简124B" if ft == {"lite"}
-                     else "混合" if ft else "--")
-            rec = self.recorder.info()
-            return {
-                "connected": self.connected,
-                "port": self.port,
-                "baudrate": self.baudrate,
-                "error": self.error,
-                "elapsed": (now - self.t_connect) if (self.connected and self.t_connect) else 0.0,
-                "stats": {
-                    "hz": round(self._hz, 1),
-                    "frames": self.parser.frames_ok,
-                    "variant": self.parser.frames_variant,
-                    "crc_err": self.parser.frames_crc_err,
-                    "bad_len": self.parser.frames_bad_len,
-                    "dropped": self.parser.bytes_dropped,
-                    "bytes": self.parser.total_bytes,
-                    "frame_type": ftype,
-                },
-                "latest": latest,
-                "seq": self.seq,
-                "samples": samples,
-                "recording": bool(rec),
-                "record": ({"name": rec["name"], "dir": rec["dir"],
-                            "duration": round(rec["duration"], 1),
-                            "rows": rec["rows"], "raw_bytes": rec["raw_bytes"],
-                            "frames_full": rec["frames_full"],
-                            "frames_lite": rec["frames_lite"]} if rec else None),
+            seq = self.seq
+            connected = self.connected
+            port, baudrate, error = self.port, self.baudrate, self.error
+            t_connect = self.t_connect
+            hz, parser = self._hz, self.parser
+            frame_types = set(self.frame_types)
+
+        samples = [s for s in snap if s["seq"] > since]
+        latest = None
+        if d:
+            motors = []
+            for i in range(6):
+                m = d["motors"][i] if d.get("motors") and i < len(d["motors"]) else {}
+                motors.append({
+                    "name": MOTOR_NAMES[i],
+                    "pos": m.get("position"), "vel": m.get("velocity"),
+                    "torque": m.get("torque"), "temp": m.get("temp")})
+            e = d.get("euler_deg")
+            latest = {
+                "type": d.get("type"),
+                "count": d.get("count"),
+                "lw": d.get("lw_speed"), "rw": d.get("rw_speed"),
+                "spd": d.get("speed"), "av": d.get("angular_vel"),
+                "acc": d.get("acc"), "gyro": d.get("gyro"),
+                "quat": d.get("quat"),
+                "euler": list(e) if e else None,
+                "motors": motors,
+                "sbus": d.get("sbus"),
+                "switched_on": d.get("switched_on"),
+                "model": d.get("model"),
             }
+        ftype = ("全量182B" if frame_types == {"full"} else "精简124B" if frame_types == {"lite"}
+                 else "混合" if frame_types else "--")
+        rec = self.recorder.info()
+        return {
+            "connected": connected,
+            "port": port,
+            "baudrate": baudrate,
+            "error": error,
+            "elapsed": (now - t_connect) if (connected and t_connect) else 0.0,
+            "stats": {
+                "hz": round(hz, 1),
+                "frames": parser.frames_ok,
+                "variant": parser.frames_variant,
+                "crc_err": parser.frames_crc_err,
+                "bad_len": parser.frames_bad_len,
+                "dropped": parser.bytes_dropped,
+                "bytes": parser.total_bytes,
+                "frame_type": ftype,
+            },
+            "latest": latest,
+            "seq": seq,
+            "samples": samples,
+            "recording": bool(rec),
+            "record": ({"name": rec["name"], "dir": rec["dir"],
+                        "duration": round(rec["duration"], 1),
+                        "rows": rec["rows"], "raw_bytes": rec["raw_bytes"],
+                        "frames_full": rec["frames_full"],
+                        "frames_lite": rec["frames_lite"]} if rec else None),
+        }
 
     # ---------------------------------------------------------------- 录制
     def start_record(self, name, save_dir, save_csv=True, save_bin=True):
@@ -276,6 +291,7 @@ class RobotLink:
             try:
                 info = self.recorder.start(
                     name=name, save_dir=save_dir or DEFAULT_LOG_DIR,
+                    parser=self.parser,
                     port=self.port, baudrate=self.baudrate,
                     save_csv=save_csv, save_bin=save_bin)
             except RecorderError as e:
@@ -284,7 +300,8 @@ class RobotLink:
 
     def stop_record(self):
         with self.lock:
-            s = self.recorder.stop()
+            # 传入 parser 以便把丢弃字节/缺头帧等链路指标写入 meta
+            s = self.recorder.stop(self.parser)
             if s is None:
                 return {"ok": False, "msg": "当前未在录制"}
             return {"ok": True, **s}

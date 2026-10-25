@@ -114,6 +114,8 @@ class SerialPort:
                 pass
 
             termios.tcflush(self.fd, termios.TCIFLUSH)
+            # 独占打开: 防止第二个进程同时读取把字节流撕碎 (见 set_exclusive)
+            self.set_exclusive()
         except Exception as e:
             try:
                 os.close(self.fd)
@@ -155,6 +157,22 @@ class SerialPort:
             return b""
         except OSError as e:
             raise SerialPortError(f"读取串口失败: {e.strerror}")
+
+    def set_exclusive(self):
+        """设置独占打开 (TIOCEXCL)
+
+        macOS 的 cu.* 设备默认允许多个进程同时打开。若两个进程同时读取同一
+        串口, 字节流会被撕碎: 双方都出现大量 CRC 错误与丢帧 (实测: 单读
+        85 Hz / 0 CRC 错, 双读降至 5~57 Hz / 上百 CRC 错)。本服务在 open()
+        中已自动调用, 可防止误开第二个读取器 (如 Arduino 监视器/另一个上位机)。
+        """
+        if self.fd == -1:
+            return False
+        try:
+            fcntl.ioctl(self.fd, termios.TIOCEXCL, 0)
+            return True
+        except OSError:
+            return False            # 平台不支持则忽略, 不影响正常使用
 
     def write(self, data):
         try:

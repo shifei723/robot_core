@@ -588,7 +588,7 @@ class App:
         baud = int(self.baud_var.get()) if self.baud_var.get().isdigit() else 0
         try:
             info = self.recorder.start(
-                name=name, save_dir=save_dir,
+                name=name, save_dir=save_dir, parser=self.parser,
                 port=self.port_var.get() if self.connected else "",
                 baudrate=baud,
                 save_csv=self.var_csv.get(), save_bin=self.var_bin.get())
@@ -603,7 +603,7 @@ class App:
     def stop_recording(self, notify=True):
         if not self.recorder.recording:
             return
-        summary = self.recorder.stop()
+        summary = self.recorder.stop(self.parser)
         self.recording = False
         self.btn_rec_start.config(state="normal")
         self.btn_rec_stop.config(state="disabled")

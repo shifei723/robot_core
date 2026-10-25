@@ -66,6 +66,33 @@ def sanitize_name(name: str) -> str:
     return name[:64] if name else ""
 
 
+_BASELINE_KEYS = ("frames_variant", "frames_headless", "bytes_dropped")
+
+
+def _baseline_of(parser):
+    """记录 parser 此刻的累计统计, 供 stop() 计算录制区间内的增量"""
+    if parser is None:
+        return {}
+    return {k: int(getattr(parser, k, 0)) for k in _BASELINE_KEYS}
+
+
+def _link_health(parser, n_rows, raw_bytes, duration, baseline=None):
+    """汇总链路健康指标 —— 让「解析器吞帧」这类问题不再隐形
+
+    历史教训: meta 只记了 crc_errors, 而 FrameParser 当年把 15% 的完好帧
+    当作同步垃圾丢掉时 crc_errors 仍然是 0, 问题被完全掩盖, 一度误判成
+    「下位机丢帧」。丢弃字节数是唯一能暴露它的指标, 必须入库。
+    """
+    health = {}
+    for k in _BASELINE_KEYS:
+        v = int(getattr(parser, k, 0)) if parser is not None else 0
+        health[k] = max(0, v - (baseline or {}).get(k, 0))
+    health["bytes_dropped_pct"] = round(
+        health["bytes_dropped"] / (raw_bytes or 1) * 100, 4)
+    health["frame_hz"] = round(n_rows / duration, 1) if duration > 0 else 0.0
+    return health
+
+
 class Recorder:
     """全量录制器: CSV + 原始二进制 + 元数据"""
 
@@ -93,10 +120,11 @@ class Recorder:
         self.baudrate = 0
         self.save_csv = True
         self.save_bin = True
+        self._baseline = {}          # 录制起始时的 parser 统计快照
 
     # ------------------------------------------------------------------ 开始
     def start(self, name, save_dir, port="", baudrate=0,
-              save_csv=True, save_bin=True):
+              save_csv=True, save_bin=True, parser=None):
         with self._lock:
             if self.recording:
                 raise RecorderError("已在录制中")
@@ -138,6 +166,7 @@ class Recorder:
 
             self.frames_full = self.frames_lite = self.crc_errors = 0
             self.raw_bytes = self.csv_rows = 0
+            self._baseline = _baseline_of(parser)
             self.t0 = time.perf_counter()
             self.t0_wall = time.time()
             self._last_flush = self.t0
@@ -217,13 +246,19 @@ class Recorder:
         return ["" if row.get(k) is None else row.get(k) for k in CSV_FIELDS]
 
     # ------------------------------------------------------------------ 结束
-    def stop(self):
+    def stop(self, parser=None):
+        """结束录制并写入 meta
+
+        parser: 可选 FrameParser, 用于把链路健康指标一并入库 (见 _link_health)
+        """
         with self._lock:
             if not self.recording:
                 return None
             self.recording = False
             duration = time.perf_counter() - self.t0
             self._close_files()
+            health = _link_health(parser, self.csv_rows,
+                                  self.raw_bytes, duration, self._baseline)
             summary = {
                 "name": self.name, "dir": self.dir,
                 "csv": self.csv_path if self.save_csv else None,
@@ -234,8 +269,9 @@ class Recorder:
                 "crc_errors": self.crc_errors,
                 "raw_bytes": self.raw_bytes,
                 "csv_rows": self.csv_rows,
+                **health,
             }
-            self._write_meta(duration)
+            self._write_meta(duration, health)
             return summary
 
     def _close_files(self):
@@ -248,7 +284,7 @@ class Recorder:
                 pass
         self._csv_file = self._bin_file = self._csv_writer = None
 
-    def _write_meta(self, duration):
+    def _write_meta(self, duration, health=None):
         meta = {
             "name": self.name,
             "port": self.port,
@@ -262,6 +298,7 @@ class Recorder:
             "crc_errors": self.crc_errors,
             "raw_bytes": self.raw_bytes,
             "csv_rows": self.csv_rows,
+            **(health or {}),
             "files": {
                 "csv": os.path.basename(self.csv_path) if self.save_csv else None,
                 "raw": os.path.basename(self.bin_path) if self.save_bin else None,
