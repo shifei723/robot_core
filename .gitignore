@@ -148,3 +148,6 @@ Thumbs.db
 /output/
 
 /tmp/
+
+# 运行时 PID 锁文件（pc_monitor 进程锁，不应入库）
+.monitor.pid
