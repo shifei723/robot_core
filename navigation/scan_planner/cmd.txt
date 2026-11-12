@@ -60,3 +60,12 @@ ros2 launch scan_planner run.launch.py robot_model:=slash use_gpu:=true
 
 # 腿高调节 GUI（slash 蹲伏/抬升，需 run.launch.py 已在运行）
 ros2 run scan_planner leg_height_gui.py
+
+# 最新静态/动态 BARN 对比（从 robot_core 根目录执行）
+./navigation/benchmarks/build.sh
+./navigation/benchmarks/static_barn/run.sh slash 0 0
+./navigation/benchmarks/static_barn/run.sh mppi 0 0
+./navigation/benchmarks/dynamic_dynabarn/run.sh frs_soft 0 0
+./navigation/benchmarks/dynamic_dynabarn/run.sh frs_hard 0 0
+./navigation/benchmarks/dynamic_dynabarn/run.sh mppi 0 0
+# 全部入口、结果分组和协议见 navigation/benchmarks/README.txt

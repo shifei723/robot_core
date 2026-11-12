@@ -1,6 +1,19 @@
 closed_loop_controller:
   ros__parameters:
     use_sim_time: false
+    # 静态差速跟踪：横向误差纠偏与曲率转向前馈。
+    static_lateral_feedback: true
+    # 仅平面、差速、动态预测关闭且高度安全控制关闭时启用。
+    static_spatial_tracking: true
+    # 平面动态轨迹使用空间进度，候选以差速运动模型预测并检查 FRS。
+    frs_spatial_tracking: true
+    static_cruise_speed: 0.5
+    static_acceleration_limit: 0.5
+    static_progress_timeout: 2.5
+    static_body_radius: 0.30
+    static_body_offset: 0.18
+    static_map_resolution: 0.05
+    static_ground_height: 0.0
     time_forward: 0.8
     heading_error_threshold: 0.8
     kp_pos: 0.8

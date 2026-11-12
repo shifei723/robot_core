@@ -1,0 +1,32 @@
+/dynabarn_laser_perception
+  Subscribers:
+    /clock: rosgraph_msgs/msg/Clock
+    /front/scan: sensor_msgs/msg/LaserScan
+    /platform/odom/filtered: nav_msgs/msg/Odometry
+    /tf: tf2_msgs/msg/TFMessage
+    /tf_static: tf2_msgs/msg/TFMessage
+  Publishers:
+    /benchmark/anchor: std_msgs/msg/Float64MultiArray
+    /benchmark/body_pose: nav_msgs/msg/Odometry
+    /benchmark/sensor_pose: nav_msgs/msg/Odometry
+    /benchmark/static_cloud: sensor_msgs/msg/PointCloud2
+    /benchmark/static_map: nav_msgs/msg/OccupancyGrid
+    /dynamic_obstacles/perception_stats: std_msgs/msg/String
+    /dynamic_obstacles/static_prior: sensor_msgs/msg/PointCloud2
+    /dynamic_obstacles/tracks: scan_planner_msgs/msg/DynamicObstacleArray
+    /parameter_events: rcl_interfaces/msg/ParameterEvent
+    /rosout: rcl_interfaces/msg/Log
+    /tf_static: tf2_msgs/msg/TFMessage
+  Service Servers:
+    /dynabarn_laser_perception/describe_parameters: rcl_interfaces/srv/DescribeParameters
+    /dynabarn_laser_perception/get_parameter_types: rcl_interfaces/srv/GetParameterTypes
+    /dynabarn_laser_perception/get_parameters: rcl_interfaces/srv/GetParameters
+    /dynabarn_laser_perception/get_type_description: type_description_interfaces/srv/GetTypeDescription
+    /dynabarn_laser_perception/list_parameters: rcl_interfaces/srv/ListParameters
+    /dynabarn_laser_perception/set_parameters: rcl_interfaces/srv/SetParameters
+    /dynabarn_laser_perception/set_parameters_atomically: rcl_interfaces/srv/SetParametersAtomically
+  Service Clients:
+
+  Action Servers:
+
+  Action Clients:

@@ -58,6 +58,18 @@ install(PROGRAMS scripts/keypoint_recorder.py scripts/slash_leg_controller.py sc
   DESTINATION lib/${PROJECT_NAME} OPTIONAL)
 
 if(BUILD_TESTING)
+  add_executable(test_spatial_tracker test/test_spatial_tracker.cpp)
+  target_include_directories(test_spatial_tracker PRIVATE include)
+  target_link_libraries(test_spatial_tracker Eigen3::Eigen)
+  target_compile_options(test_spatial_tracker PRIVATE -UNDEBUG)
+  add_test(NAME test_spatial_tracker COMMAND test_spatial_tracker)
+  add_executable(test_wheel_timing test/test_wheel_timing.cpp)
+  target_include_directories(test_wheel_timing PRIVATE include)
+  ament_target_dependencies(test_wheel_timing bspline_opt)
+  target_link_libraries(test_wheel_timing Eigen3::Eigen)
+  # This standalone numerical test uses assertions even in Release builds.
+  target_compile_options(test_wheel_timing PRIVATE -UNDEBUG)
+  add_test(NAME test_wheel_timing COMMAND test_wheel_timing)
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(test_dynamic_controller test/test_dynamic_controller.py TIMEOUT 30 APPEND_ENV ROS_DOMAIN_ID=188)
   find_package(ament_cmake_gtest REQUIRED)

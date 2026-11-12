@@ -340,7 +340,8 @@ class Tracker:
 
     def retire(self, stamp, depth, K, T):
         """Delete missing tracks only with observed free-space or outside local scope.
-        Persistent unresolved occlusion makes the frame unhealthy; never 'healthy empty'.
+        Occlusion is a per-track prediction, not a sensor failure. Keep its state
+        and growing covariance until observed free-space or local-scope retirement.
         """
         c = self.cfg; healthy = True
         for identity,t in list(self.tracks.items()):
@@ -363,5 +364,6 @@ class Tracker:
                     measured = depth[v,u]
                     free = np.all(np.isfinite(measured)&(measured>optical[:,2]+.15)&(measured<=c.max_depth))
             if free: del self.tracks[identity]
-            elif stamp-t.last_seen > c.lost_timeout: healthy = False
+            elif not np.all(np.isfinite(t.x)) or not np.all(np.isfinite(t.P)):
+                healthy = False
         return healthy

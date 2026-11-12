@@ -1,0 +1,11 @@
+{
+  "planning_calls": 51,
+  "mean_planning_call_ms": 162.0748235294118,
+  "mean_planning_wall_ms_per_run": 918.4240000000001,
+  "mean_sampled_control_step_ms": 0.09530884642845379,
+  "old_mean_sim_time_s": 42.2333333333,
+  "new_mean_sim_time_s": 26.56666666666667,
+  "old_mean_stopped_s": 4.7333333333,
+  "new_mean_stopped_s": 3.0888888888888877,
+  "observed_time_reduction_percent": 37.09550118384932
+}

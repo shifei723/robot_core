@@ -133,3 +133,6 @@ SCAN-Planner 的实现借鉴了 EGO-Planner、ROG-Map、MARSIM、Mockamap 和 Le
 ## 许可证
 
 本仓库遵循 [Apache License 2.0](LICENSE)。分发或派生本项目时，请保留 [NOTICE](NOTICE) 中的原项目署名与许可证信息。
+
+静态 BARN 与动态 DynaBARN 的独立试验入口见
+[导航基准说明](../benchmarks/README.txt)。两类试验直接构建本目录的算法源码。

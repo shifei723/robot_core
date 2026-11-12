@@ -1,0 +1,33 @@
+{
+  "production_build": "PASS: native scan_planner build/ws_nav_frs, Release, BUILD_TESTING=ON",
+  "production_tests": "PASS: colcon scan_planner + geometric_obstacles; test-result summary 89 tests, zero errors/failures/skips",
+  "benchmark_build": "PASS: 9 packages built from canonical relative symlinks",
+  "live_ros_regression": [
+    "controller continuity / stale odometry hold / height-mode fallback",
+    "delayed exact-stamp laser TF recovery / real sensor dropout stop"
+  ],
+  "offline_tests": {
+    "static_protocol": 4,
+    "laser_geometry": 4,
+    "conversion": {
+      "passed": 3,
+      "optional_original_dataset_skipped": 1
+    }
+  },
+  "static_smoke": {
+    "status": "success",
+    "elapsed_sim_s": 22.0,
+    "configuration_sha256": "4fcc3c510b4ffb370ca14ef5f10e64ce74f13237b08de41ef24f24b803a4f433",
+    "world": 0
+  },
+  "dynamic_smoke": {
+    "status": "success",
+    "elapsed_sim_s": 48.8,
+    "collision": false,
+    "phase_s": 0,
+    "configuration_sha256": "cc1e04dd426efaa2829ff1675135e7496f9946e859fcbeefad2bf07a13324118",
+    "truth_input_to_perception": false
+  },
+  "scope": "Entry-point and canonical-code smoke checks only; archived formal comparison remains reference_results.",
+  "original_raw_results_retained": true
+}

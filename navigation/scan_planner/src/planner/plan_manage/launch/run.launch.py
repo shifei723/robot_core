@@ -190,6 +190,11 @@ def _setup(context):
         prior_acc=float(LaunchConfiguration("real_max_acc").perform(context))
         planner_overrides.update({"manager.max_vel":prior_speed,"manager.max_acc":prior_acc,
                                   "optimization.max_vel":prior_speed,"optimization.max_acc":prior_acc})
+    # These launch profiles use height-aware or dynamic tracking. Keep their
+    # existing corridor geometry; planar static tracking is tested separately.
+    if geometric or (robot_model == "slash" and not is_real):
+        planner_overrides.update({"manager.shortcut_wheel_path": False,
+                                  "manager.static_tracking_margin": 0.0})
     actions = [
         Node(
             package="scan_planner",

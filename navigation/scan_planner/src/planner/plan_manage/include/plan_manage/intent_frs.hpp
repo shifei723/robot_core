@@ -120,7 +120,7 @@ class SnapshotTracks {
       if(s.id.empty() || !ids.insert(s.id).second || !s.position.allFinite() ||
          !s.velocity.allFinite() || !std::isfinite(s.radius) || s.radius<=0 ||
          !std::isfinite(s.last_observed) || s.last_observed>time+1e-6 ||
-         time-s.last_observed>1.0 || !s.covariance.allFinite() ||
+         (s.observed && time-s.last_observed>1.0) || !s.covariance.allFinite() ||
          !s.covariance.isApprox(s.covariance.transpose(),1e-6)) return false;
       Eigen::SelfAdjointEigenSolver<Eigen::Matrix4d> es(s.covariance);
       if(es.info()!=Eigen::Success || es.eigenvalues().minCoeff() < -1e-9) return false;
@@ -131,11 +131,24 @@ class SnapshotTracks {
     }
     for(const auto& s:samples) {
       auto found=next.find(s.id);
-      // A predicted-only state cannot initialize a new acceleration history.
-      if(!s.observed && found==next.end()) return false;
+      // A complete healthy producer snapshot can include a coasting ID that
+      // this subscriber has never seen (startup or previously map-managed).
+      // Adopt its state/covariance without inventing an acceleration history.
       auto& t=next[s.id];
+      if(!s.observed && found!=next.end()) {
+        const double dt=time-t.stamp;
+        const double tolerance=3*std::sqrt(std::max(s.covariance(0,0),s.covariance(1,1)))+dt*dt+.1;
+        if(dt<=0 || (s.position-t.position-dt*t.velocity).norm()>tolerance) return false;
+      }
       t.windowed_acceleration=true;
       if(s.observed && !t.update(time,s.position,s.velocity)) return false;
+      if(!s.observed) {
+        // The tracker already predicts this state and covariance to snapshot time.
+        // Do not propagate the observation age twice or learn acceleration from
+        // predictions. A newly adopted ID retains the conservative default box.
+        t.position=s.position; t.velocity=s.velocity; t.stamp=time;
+        if(time-s.last_observed>.5) {t.center.setZero();t.half=t.half.cwiseMax(.2);}
+      }
       t.collision_radius=robot_radius+margin+s.radius;
       // 3-sigma engineering margins, not deterministic coverage guarantees.
       t.position_half=3*s.covariance.diagonal().head<2>().cwiseMax(0.).cwiseSqrt();

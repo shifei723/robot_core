@@ -1,0 +1,1323 @@
+{
+  "scope": "One official DynaBARN world, three preset motion phase variants; native ROS2/Gazebo/Jackal, common 5m lidar and static background. Not three independent maps or official leaderboard.",
+  "safety_metric": "Gazebo TouchPlugin contacts primary; radius .334+.5 circle clearance offline, interpolation never crosses original loop jumps.",
+  "tracking_metric": "Observed estimates matched offline to truth with 0.8m gate. Includes ego-odometry errors; unmatched points separately counted. No truth used for inference.",
+  "summary": {
+    "mppi": {
+      "runs": 3,
+      "successes": 0,
+      "collisions": 3,
+      "timeouts": 0,
+      "mean_success_arrival_s": null,
+      "mean_stopped_s_all_runs": 0.3333333333333304,
+      "min_dynamic_circle_clearance_m": -0.1402865193121433
+    },
+    "frs_soft": {
+      "runs": 3,
+      "successes": 2,
+      "collisions": 1,
+      "timeouts": 0,
+      "mean_success_arrival_s": 45.45,
+      "mean_stopped_s_all_runs": 1.9333333333333336,
+      "min_dynamic_circle_clearance_m": -0.12121337995759807
+    },
+    "frs_hard": {
+      "runs": 3,
+      "successes": 0,
+      "collisions": 2,
+      "timeouts": 1,
+      "mean_success_arrival_s": null,
+      "mean_stopped_s_all_runs": 37.364333333333335,
+      "min_dynamic_circle_clearance_m": -0.09809166612385978
+    }
+  },
+  "runs": [
+    {
+      "run": "frs_hard_phase_0_trial_0",
+      "method": "frs_hard",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 51.9,
+      "start_sim_s": 8.0,
+      "path_m": 14.099212273496384,
+      "stopped_s": 16.39999999999999,
+      "longest_stop_s": 6.0,
+      "min_dynamic_circle_clearance_m": -0.08411271226337669,
+      "terminal_odom_vx_mps": -9.18833655392739e-05,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 59.871,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -1.0601091246271654,
+        "chosen_clearance": -1.0601091246271654,
+        "decision_ms": 0.449311,
+        "before_v": 0.005,
+        "v": 0,
+        "x": 14.127940495947088,
+        "y": -1.1509488637824043e-06,
+        "soft_constraint": 0,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 3,
+        "nominal_obstacle": "obstacle_8",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 6.90093689503139,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 28.90000000000012,
+        "DYNAMIC_WAIT": 16.29999999999999,
+        "DYNAMIC_SLOW": 5.8999999999999915,
+        "DYNAMIC_SHIELD": 0.6999999999999957
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 8,
+      "frs_infeasible_decisions": 157,
+      "active_frs_decision_ms": {
+        "count": 451,
+        "mean": 0.2366865964523282,
+        "p95": 0.3914595,
+        "max": 0.449311
+      },
+      "perception_callback_ms": {
+        "count": 1493,
+        "mean": 2.4852585454508214,
+        "p95": 4.464190965518355,
+        "max": 5.779427010565996
+      },
+      "planner_call_ms": {
+        "count": 15,
+        "mean": 39.78,
+        "p95": 58.79599999999999,
+        "max": 63.199
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02832597179760088,
+        0.03187010375570651
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08409699024324166,
+        0.2099372456517255
+      ],
+      "matched_observations": 2048,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.030941549595225805,
+      "peak_frs_tracks": 4,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "f484b3207873f22fa2df592a4d85e05b126ad43e8fc5fd7d21eda1e0945e3cdd",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_hard_phase_0_trial_0/result.json"
+    },
+    {
+      "run": "frs_hard_phase_14_trial_0",
+      "method": "frs_hard",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 37.1,
+      "start_sim_s": 8.0,
+      "path_m": 11.488485375471996,
+      "stopped_s": 11.5,
+      "longest_stop_s": 6.700000000000003,
+      "min_dynamic_circle_clearance_m": -0.09809166612385978,
+      "terminal_odom_vx_mps": 6.76751225813972e-05,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 45.025,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -1.0675402519472303,
+        "chosen_clearance": -1.0675402519472303,
+        "decision_ms": 0.291749,
+        "before_v": 0.0045,
+        "v": 0,
+        "x": 11.503802077539415,
+        "y": -2.083676392589734e-06,
+        "soft_constraint": 0,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 3,
+        "nominal_obstacle": "obstacle_4",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 9.511529538911054,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "DYNAMIC_WAIT": 11.300000000000004,
+        "TRACKING": 25.100000000000136,
+        "DYNAMIC_SHIELD": 0.6000000000000014
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 6,
+      "frs_infeasible_decisions": 115,
+      "active_frs_decision_ms": {
+        "count": 293,
+        "mean": 0.22325227303754264,
+        "p95": 0.322635,
+        "max": 0.412777
+      },
+      "perception_callback_ms": {
+        "count": 955,
+        "mean": 1.8997159306232998,
+        "p95": 3.680947888642549,
+        "max": 6.399353034794331
+      },
+      "planner_call_ms": {
+        "count": 9,
+        "mean": 30.15488888888889,
+        "p95": 37.727799999999995,
+        "max": 41.073
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02578044500505947,
+        0.019993254912137513
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08485762548531521,
+        0.10471489313514364
+      ],
+      "matched_observations": 907,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 3,
+      "ego_position_rmse_m": 0.019732793162267004,
+      "peak_frs_tracks": 3,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "3e155e78fa0c39e319c0304d8f0c1ceae8bf48786b8369741d2246abdc56cb91",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_hard_phase_14_trial_0/result.json"
+    },
+    {
+      "run": "frs_hard_phase_7_trial_0",
+      "method": "frs_hard",
+      "phase_s": 7.0,
+      "status": "timeout",
+      "success": false,
+      "collision": false,
+      "arrival_s": null,
+      "termination_s": 120.0,
+      "start_sim_s": 8.0,
+      "path_m": 15.114852072619419,
+      "stopped_s": 84.19300000000001,
+      "longest_stop_s": 41.0,
+      "min_dynamic_circle_clearance_m": 0.054578469106628114,
+      "terminal_odom_vx_mps": 0.10988731561060765,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 127.983,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 0.10844869825311076,
+        "chosen_clearance": 0.10844869825311076,
+        "decision_ms": 0.366421,
+        "before_v": 0.17500000000000007,
+        "v": 0.17500000000000007,
+        "x": 15.13683890469717,
+        "y": -3.593975967698489e-06,
+        "soft_constraint": 0,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_18",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 5.885242046902189,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 33.99999999999861,
+        "DYNAMIC_WAIT": 15.699999999999903,
+        "DYNAMIC_SLOW": 0.8999999999999915,
+        "DYNAMIC_SHIELD": 69.2999999999981
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 690,
+      "frs_infeasible_decisions": 836,
+      "active_frs_decision_ms": {
+        "count": 1102,
+        "mean": 0.22345178402903812,
+        "p95": 0.3089095,
+        "max": 0.544776
+      },
+      "perception_callback_ms": {
+        "count": 5013,
+        "mean": 2.4673582634591527,
+        "p95": 4.675953416153788,
+        "max": 6.17387006059289
+      },
+      "planner_call_ms": {
+        "count": 13,
+        "mean": 35.498538461538466,
+        "p95": 44.974199999999996,
+        "max": 46.299
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.024287959701964228,
+        0.03359569825802381
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.07851800260966314,
+        0.19150164237487147
+      ],
+      "matched_observations": 7378,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 7,
+      "ego_position_rmse_m": 0.020517115510052877,
+      "peak_frs_tracks": 5,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "79f96c776a5bbc13228286b313ac753488ab64b8733b164470d2e703ee9e1987",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_hard_phase_7_trial_0/result.json"
+    },
+    {
+      "run": "frs_soft_phase_0_trial_0",
+      "method": "frs_soft",
+      "phase_s": 0.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 48.4,
+      "termination_s": 48.4,
+      "start_sim_s": 8.0,
+      "path_m": 20.748027507930473,
+      "stopped_s": 3.3000000000000007,
+      "longest_stop_s": 3.0,
+      "min_dynamic_circle_clearance_m": 0.2712439290849945,
+      "terminal_odom_vx_mps": 0.4849142158446754,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 56.32,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 3.659286258719199,
+        "chosen_clearance": 3.659286258719199,
+        "decision_ms": 0.072112,
+        "before_v": 0.46121573341603606,
+        "v": 0.46121573341603606,
+        "x": 20.739544086266203,
+        "y": -2.027933778831214e-09,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_7",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 0.25340724595314856,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 44.40000000000008,
+        "DYNAMIC_SLOW": 1.2000000000000028,
+        "DYNAMIC_WAIT": 1.7999999999999972,
+        "DYNAMIC_SHIELD": 0.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 10,
+      "frs_infeasible_decisions": 23,
+      "active_frs_decision_ms": {
+        "count": 415,
+        "mean": 0.2323075686746988,
+        "p95": 0.3361422,
+        "max": 0.385374
+      },
+      "perception_callback_ms": {
+        "count": 1362,
+        "mean": 2.274813311702398,
+        "p95": 4.69261733815074,
+        "max": 6.212488049641252
+      },
+      "planner_call_ms": {
+        "count": 20,
+        "mean": 30.93215,
+        "p95": 45.5282,
+        "max": 45.551
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.030277929010571428,
+        0.03247079776229889
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08277879761428458,
+        0.21742528389006724
+      ],
+      "matched_observations": 1708,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.029025164486575872,
+      "peak_frs_tracks": 4,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "25ebfa991fb74f660fb19ac13a165c6948199df9dfc2c5d72a4a51c3fd4c3db5",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_soft_phase_0_trial_0/result.json"
+    },
+    {
+      "run": "frs_soft_phase_14_trial_0",
+      "method": "frs_soft",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 36.9,
+      "start_sim_s": 8.0,
+      "path_m": 15.321632496637264,
+      "stopped_s": 2.1999999999999993,
+      "longest_stop_s": 1.8999999999999986,
+      "min_dynamic_circle_clearance_m": -0.12121337995759807,
+      "terminal_odom_vx_mps": 0.00026162110149765904,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 44.862,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -0.8238455117008034,
+        "chosen_clearance": 0,
+        "decision_ms": 0.150439,
+        "before_v": 0.005,
+        "v": 0,
+        "x": 15.342061339576208,
+        "y": 1.2480980113926443e-07,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 2,
+        "nominal_obstacle": "obstacle_4",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 5.678428968845603,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 32.50000000000017,
+        "DYNAMIC_SLOW": 2.4000000000000057,
+        "DYNAMIC_WAIT": 1.0,
+        "DYNAMIC_SHIELD": 0.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 9,
+      "frs_infeasible_decisions": 19,
+      "active_frs_decision_ms": {
+        "count": 290,
+        "mean": 0.23076055517241376,
+        "p95": 0.32431795,
+        "max": 0.347726
+      },
+      "perception_callback_ms": {
+        "count": 948,
+        "mean": 1.895648382116848,
+        "p95": 3.655347623862326,
+        "max": 4.442278994247317
+      },
+      "planner_call_ms": {
+        "count": 13,
+        "mean": 31.701307692307694,
+        "p95": 39.78419999999999,
+        "max": 41.544
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.022780319533837832,
+        0.01992194851962398
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.050717374826253624,
+        0.1185348288576301
+      ],
+      "matched_observations": 792,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 3,
+      "ego_position_rmse_m": 0.024019000406684053,
+      "peak_frs_tracks": 3,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "539f566c13ad7c68d753bc4f22ab3898c1d473f7cce74acf36d20d3aa71fb731",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_soft_phase_14_trial_0/result.json"
+    },
+    {
+      "run": "frs_soft_phase_7_trial_0",
+      "method": "frs_soft",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 42.5,
+      "termination_s": 42.5,
+      "start_sim_s": 8.0,
+      "path_m": 20.737082132601618,
+      "stopped_s": 0.3000000000000007,
+      "longest_stop_s": 0.3000000000000007,
+      "min_dynamic_circle_clearance_m": 0.9586264749295524,
+      "terminal_odom_vx_mps": 0.49528645234927166,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 50.441,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 3.6377949741253515,
+        "chosen_clearance": 3.6377949741253515,
+        "decision_ms": 0.0751,
+        "before_v": 0.47791974292861034,
+        "v": 0.47791974292861034,
+        "x": 20.725395480796678,
+        "y": -5.7729521765012285e-09,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_5",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 0.2631819856438328,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 41.50000000000019,
+        "DYNAMIC_SLOW": 0.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 379,
+        "mean": 0.2232512796833773,
+        "p95": 0.3365882,
+        "max": 0.4158
+      },
+      "perception_callback_ms": {
+        "count": 1080,
+        "mean": 1.9376092530028135,
+        "p95": 3.71409694198519,
+        "max": 8.441454963758588
+      },
+      "planner_call_ms": {
+        "count": 20,
+        "mean": 28.398799999999994,
+        "p95": 37.42540000000001,
+        "max": 45.356
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.022045898455209042,
+        0.028994929775971696
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09288552238203623,
+        0.24065364379595092
+      ],
+      "matched_observations": 1230,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.018350094275931976,
+      "peak_frs_tracks": 4,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "3f78185517fd82cfcd4fc9d6fe3355115e47e68c6ad7b3bf836fb93b453cb31c",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_soft_phase_7_trial_0/result.json"
+    },
+    {
+      "run": "mppi_phase_0_trial_0",
+      "method": "mppi",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 18.6,
+      "start_sim_s": 8.0,
+      "path_m": 7.556065470610244,
+      "stopped_s": 0.399999999999995,
+      "longest_stop_s": 0.1999999999999993,
+      "min_dynamic_circle_clearance_m": -0.06559285963305217,
+      "terminal_odom_vx_mps": 0.3661835961624792,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 13.626349537973745,
+      "state_duration_s": {
+        "": 18.600000000000065
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 635,
+        "mean": 2.4216628373109215,
+        "p95": 5.322162341326474,
+        "max": 6.117227021604776
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.08987990481314677,
+        0.05390547560329675
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08426148814579865,
+        0.14929569861164424
+      ],
+      "matched_observations": 933,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.06797426801674582,
+      "peak_frs_tracks": null,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "0defa75283694baf387e73cfe00d89632e421561137887f041bd40b1040966ce",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/mppi_phase_0_trial_0/result.json"
+    },
+    {
+      "run": "mppi_phase_14_trial_0",
+      "method": "mppi",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 36.8,
+      "start_sim_s": 8.0,
+      "path_m": 15.548396442398163,
+      "stopped_s": 0.2999999999999954,
+      "longest_stop_s": 0.19999999999999574,
+      "min_dynamic_circle_clearance_m": -0.1402865193121433,
+      "terminal_odom_vx_mps": 0.22178256440747435,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 5.7379006612130246,
+      "state_duration_s": {
+        "": 36.800000000000225
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 1027,
+        "mean": 1.9541395700717128,
+        "p95": 3.8502285722643133,
+        "max": 5.275215022265911
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.1929196329877988,
+        0.07980126631954647
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.06384209990905343,
+        0.12677225987169244
+      ],
+      "matched_observations": 873,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.10049831869398866,
+      "peak_frs_tracks": null,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "c466062e833d68c258ee87cbdd173428c2dfd3d678838a28cc21a5d555929d9f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/mppi_phase_14_trial_0/result.json"
+    },
+    {
+      "run": "mppi_phase_7_trial_0",
+      "method": "mppi",
+      "phase_s": 7.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 30.4,
+      "start_sim_s": 8.0,
+      "path_m": 13.560690781323162,
+      "stopped_s": 0.3000000000000007,
+      "longest_stop_s": 0.1999999999999993,
+      "min_dynamic_circle_clearance_m": -0.05554513674982964,
+      "terminal_odom_vx_mps": 0.4999682895849767,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 7.895529169983451,
+      "state_duration_s": {
+        "": 30.40000000000022
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 816,
+        "mean": 2.019618832170689,
+        "p95": 3.843017388135195,
+        "max": 5.4051741026341915
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.05949897047769973,
+        0.10782759195329332
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08882041367185824,
+        0.1640858357209364
+      ],
+      "matched_observations": 941,
+      "unmatched_observations": 2,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.11574031016908719,
+      "peak_frs_tracks": null,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "b78f1f087a5b487c24ba8e83bc0aeefe631bbc2ed736e138311baf7e9ed0dd52",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/mppi_phase_7_trial_0/result.json"
+    }
+  ],
+  "attempts": [
+    {
+      "run": "frs_hard_phase_0_trial_0",
+      "method": "frs_hard",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 51.9,
+      "start_sim_s": 8.0,
+      "path_m": 14.099212273496384,
+      "stopped_s": 16.39999999999999,
+      "longest_stop_s": 6.0,
+      "min_dynamic_circle_clearance_m": -0.08411271226337669,
+      "terminal_odom_vx_mps": -9.18833655392739e-05,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 59.871,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -1.0601091246271654,
+        "chosen_clearance": -1.0601091246271654,
+        "decision_ms": 0.449311,
+        "before_v": 0.005,
+        "v": 0,
+        "x": 14.127940495947088,
+        "y": -1.1509488637824043e-06,
+        "soft_constraint": 0,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 3,
+        "nominal_obstacle": "obstacle_8",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 6.90093689503139,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 28.90000000000012,
+        "DYNAMIC_WAIT": 16.29999999999999,
+        "DYNAMIC_SLOW": 5.8999999999999915,
+        "DYNAMIC_SHIELD": 0.6999999999999957
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 8,
+      "frs_infeasible_decisions": 157,
+      "active_frs_decision_ms": {
+        "count": 451,
+        "mean": 0.2366865964523282,
+        "p95": 0.3914595,
+        "max": 0.449311
+      },
+      "perception_callback_ms": {
+        "count": 1493,
+        "mean": 2.4852585454508214,
+        "p95": 4.464190965518355,
+        "max": 5.779427010565996
+      },
+      "planner_call_ms": {
+        "count": 15,
+        "mean": 39.78,
+        "p95": 58.79599999999999,
+        "max": 63.199
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02832597179760088,
+        0.03187010375570651
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08409699024324166,
+        0.2099372456517255
+      ],
+      "matched_observations": 2048,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.030941549595225805,
+      "peak_frs_tracks": 4,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "f484b3207873f22fa2df592a4d85e05b126ad43e8fc5fd7d21eda1e0945e3cdd",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_hard_phase_0_trial_0/result.json"
+    },
+    {
+      "run": "frs_hard_phase_14_trial_0",
+      "method": "frs_hard",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 37.1,
+      "start_sim_s": 8.0,
+      "path_m": 11.488485375471996,
+      "stopped_s": 11.5,
+      "longest_stop_s": 6.700000000000003,
+      "min_dynamic_circle_clearance_m": -0.09809166612385978,
+      "terminal_odom_vx_mps": 6.76751225813972e-05,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 45.025,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -1.0675402519472303,
+        "chosen_clearance": -1.0675402519472303,
+        "decision_ms": 0.291749,
+        "before_v": 0.0045,
+        "v": 0,
+        "x": 11.503802077539415,
+        "y": -2.083676392589734e-06,
+        "soft_constraint": 0,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 3,
+        "nominal_obstacle": "obstacle_4",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 9.511529538911054,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "DYNAMIC_WAIT": 11.300000000000004,
+        "TRACKING": 25.100000000000136,
+        "DYNAMIC_SHIELD": 0.6000000000000014
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 6,
+      "frs_infeasible_decisions": 115,
+      "active_frs_decision_ms": {
+        "count": 293,
+        "mean": 0.22325227303754264,
+        "p95": 0.322635,
+        "max": 0.412777
+      },
+      "perception_callback_ms": {
+        "count": 955,
+        "mean": 1.8997159306232998,
+        "p95": 3.680947888642549,
+        "max": 6.399353034794331
+      },
+      "planner_call_ms": {
+        "count": 9,
+        "mean": 30.15488888888889,
+        "p95": 37.727799999999995,
+        "max": 41.073
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02578044500505947,
+        0.019993254912137513
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08485762548531521,
+        0.10471489313514364
+      ],
+      "matched_observations": 907,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 3,
+      "ego_position_rmse_m": 0.019732793162267004,
+      "peak_frs_tracks": 3,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "3e155e78fa0c39e319c0304d8f0c1ceae8bf48786b8369741d2246abdc56cb91",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_hard_phase_14_trial_0/result.json"
+    },
+    {
+      "run": "frs_hard_phase_7_trial_0",
+      "method": "frs_hard",
+      "phase_s": 7.0,
+      "status": "timeout",
+      "success": false,
+      "collision": false,
+      "arrival_s": null,
+      "termination_s": 120.0,
+      "start_sim_s": 8.0,
+      "path_m": 15.114852072619419,
+      "stopped_s": 84.19300000000001,
+      "longest_stop_s": 41.0,
+      "min_dynamic_circle_clearance_m": 0.054578469106628114,
+      "terminal_odom_vx_mps": 0.10988731561060765,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 127.983,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 0.10844869825311076,
+        "chosen_clearance": 0.10844869825311076,
+        "decision_ms": 0.366421,
+        "before_v": 0.17500000000000007,
+        "v": 0.17500000000000007,
+        "x": 15.13683890469717,
+        "y": -3.593975967698489e-06,
+        "soft_constraint": 0,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_18",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 5.885242046902189,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 33.99999999999861,
+        "DYNAMIC_WAIT": 15.699999999999903,
+        "DYNAMIC_SLOW": 0.8999999999999915,
+        "DYNAMIC_SHIELD": 69.2999999999981
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 690,
+      "frs_infeasible_decisions": 836,
+      "active_frs_decision_ms": {
+        "count": 1102,
+        "mean": 0.22345178402903812,
+        "p95": 0.3089095,
+        "max": 0.544776
+      },
+      "perception_callback_ms": {
+        "count": 5013,
+        "mean": 2.4673582634591527,
+        "p95": 4.675953416153788,
+        "max": 6.17387006059289
+      },
+      "planner_call_ms": {
+        "count": 13,
+        "mean": 35.498538461538466,
+        "p95": 44.974199999999996,
+        "max": 46.299
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.024287959701964228,
+        0.03359569825802381
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.07851800260966314,
+        0.19150164237487147
+      ],
+      "matched_observations": 7378,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 7,
+      "ego_position_rmse_m": 0.020517115510052877,
+      "peak_frs_tracks": 5,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "79f96c776a5bbc13228286b313ac753488ab64b8733b164470d2e703ee9e1987",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_hard_phase_7_trial_0/result.json"
+    },
+    {
+      "run": "frs_soft_phase_0_trial_0",
+      "method": "frs_soft",
+      "phase_s": 0.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 48.4,
+      "termination_s": 48.4,
+      "start_sim_s": 8.0,
+      "path_m": 20.748027507930473,
+      "stopped_s": 3.3000000000000007,
+      "longest_stop_s": 3.0,
+      "min_dynamic_circle_clearance_m": 0.2712439290849945,
+      "terminal_odom_vx_mps": 0.4849142158446754,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 56.32,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 3.659286258719199,
+        "chosen_clearance": 3.659286258719199,
+        "decision_ms": 0.072112,
+        "before_v": 0.46121573341603606,
+        "v": 0.46121573341603606,
+        "x": 20.739544086266203,
+        "y": -2.027933778831214e-09,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_7",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 0.25340724595314856,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 44.40000000000008,
+        "DYNAMIC_SLOW": 1.2000000000000028,
+        "DYNAMIC_WAIT": 1.7999999999999972,
+        "DYNAMIC_SHIELD": 0.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 10,
+      "frs_infeasible_decisions": 23,
+      "active_frs_decision_ms": {
+        "count": 415,
+        "mean": 0.2323075686746988,
+        "p95": 0.3361422,
+        "max": 0.385374
+      },
+      "perception_callback_ms": {
+        "count": 1362,
+        "mean": 2.274813311702398,
+        "p95": 4.69261733815074,
+        "max": 6.212488049641252
+      },
+      "planner_call_ms": {
+        "count": 20,
+        "mean": 30.93215,
+        "p95": 45.5282,
+        "max": 45.551
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.030277929010571428,
+        0.03247079776229889
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08277879761428458,
+        0.21742528389006724
+      ],
+      "matched_observations": 1708,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.029025164486575872,
+      "peak_frs_tracks": 4,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "25ebfa991fb74f660fb19ac13a165c6948199df9dfc2c5d72a4a51c3fd4c3db5",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_soft_phase_0_trial_0/result.json"
+    },
+    {
+      "run": "frs_soft_phase_14_trial_0",
+      "method": "frs_soft",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 36.9,
+      "start_sim_s": 8.0,
+      "path_m": 15.321632496637264,
+      "stopped_s": 2.1999999999999993,
+      "longest_stop_s": 1.8999999999999986,
+      "min_dynamic_circle_clearance_m": -0.12121337995759807,
+      "terminal_odom_vx_mps": 0.00026162110149765904,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 44.862,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -0.8238455117008034,
+        "chosen_clearance": 0,
+        "decision_ms": 0.150439,
+        "before_v": 0.005,
+        "v": 0,
+        "x": 15.342061339576208,
+        "y": 1.2480980113926443e-07,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 2,
+        "nominal_obstacle": "obstacle_4",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 5.678428968845603,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 32.50000000000017,
+        "DYNAMIC_SLOW": 2.4000000000000057,
+        "DYNAMIC_WAIT": 1.0,
+        "DYNAMIC_SHIELD": 0.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 9,
+      "frs_infeasible_decisions": 19,
+      "active_frs_decision_ms": {
+        "count": 290,
+        "mean": 0.23076055517241376,
+        "p95": 0.32431795,
+        "max": 0.347726
+      },
+      "perception_callback_ms": {
+        "count": 948,
+        "mean": 1.895648382116848,
+        "p95": 3.655347623862326,
+        "max": 4.442278994247317
+      },
+      "planner_call_ms": {
+        "count": 13,
+        "mean": 31.701307692307694,
+        "p95": 39.78419999999999,
+        "max": 41.544
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.022780319533837832,
+        0.01992194851962398
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.050717374826253624,
+        0.1185348288576301
+      ],
+      "matched_observations": 792,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 3,
+      "ego_position_rmse_m": 0.024019000406684053,
+      "peak_frs_tracks": 3,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "539f566c13ad7c68d753bc4f22ab3898c1d473f7cce74acf36d20d3aa71fb731",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_soft_phase_14_trial_0/result.json"
+    },
+    {
+      "run": "frs_soft_phase_7_trial_0",
+      "method": "frs_soft",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 42.5,
+      "termination_s": 42.5,
+      "start_sim_s": 8.0,
+      "path_m": 20.737082132601618,
+      "stopped_s": 0.3000000000000007,
+      "longest_stop_s": 0.3000000000000007,
+      "min_dynamic_circle_clearance_m": 0.9586264749295524,
+      "terminal_odom_vx_mps": 0.49528645234927166,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 50.441,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 3.6377949741253515,
+        "chosen_clearance": 3.6377949741253515,
+        "decision_ms": 0.0751,
+        "before_v": 0.47791974292861034,
+        "v": 0.47791974292861034,
+        "x": 20.725395480796678,
+        "y": -5.7729521765012285e-09,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_5",
+        "spatial_tracking": 1
+      },
+      "final_goal_distance_m": 0.2631819856438328,
+      "state_duration_s": {
+        "IDLE": 0.09999999999999964,
+        "TRACKING": 41.50000000000019,
+        "DYNAMIC_SLOW": 0.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 379,
+        "mean": 0.2232512796833773,
+        "p95": 0.3365882,
+        "max": 0.4158
+      },
+      "perception_callback_ms": {
+        "count": 1080,
+        "mean": 1.9376092530028135,
+        "p95": 3.71409694198519,
+        "max": 8.441454963758588
+      },
+      "planner_call_ms": {
+        "count": 20,
+        "mean": 28.398799999999994,
+        "p95": 37.42540000000001,
+        "max": 45.356
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.022045898455209042,
+        0.028994929775971696
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09288552238203623,
+        0.24065364379595092
+      ],
+      "matched_observations": 1230,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.018350094275931976,
+      "peak_frs_tracks": 4,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "3f78185517fd82cfcd4fc9d6fe3355115e47e68c6ad7b3bf836fb93b453cb31c",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/frs_soft_phase_7_trial_0/result.json"
+    },
+    {
+      "run": "mppi_phase_0_trial_0",
+      "method": "mppi",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 18.6,
+      "start_sim_s": 8.0,
+      "path_m": 7.556065470610244,
+      "stopped_s": 0.399999999999995,
+      "longest_stop_s": 0.1999999999999993,
+      "min_dynamic_circle_clearance_m": -0.06559285963305217,
+      "terminal_odom_vx_mps": 0.3661835961624792,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 13.626349537973745,
+      "state_duration_s": {
+        "": 18.600000000000065
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 635,
+        "mean": 2.4216628373109215,
+        "p95": 5.322162341326474,
+        "max": 6.117227021604776
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.08987990481314677,
+        0.05390547560329675
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08426148814579865,
+        0.14929569861164424
+      ],
+      "matched_observations": 933,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.06797426801674582,
+      "peak_frs_tracks": null,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "0defa75283694baf387e73cfe00d89632e421561137887f041bd40b1040966ce",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/mppi_phase_0_trial_0/result.json"
+    },
+    {
+      "run": "mppi_phase_14_trial_0",
+      "method": "mppi",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 36.8,
+      "start_sim_s": 8.0,
+      "path_m": 15.548396442398163,
+      "stopped_s": 0.2999999999999954,
+      "longest_stop_s": 0.19999999999999574,
+      "min_dynamic_circle_clearance_m": -0.1402865193121433,
+      "terminal_odom_vx_mps": 0.22178256440747435,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 5.7379006612130246,
+      "state_duration_s": {
+        "": 36.800000000000225
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 1027,
+        "mean": 1.9541395700717128,
+        "p95": 3.8502285722643133,
+        "max": 5.275215022265911
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.1929196329877988,
+        0.07980126631954647
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.06384209990905343,
+        0.12677225987169244
+      ],
+      "matched_observations": 873,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.10049831869398866,
+      "peak_frs_tracks": null,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "c466062e833d68c258ee87cbdd173428c2dfd3d678838a28cc21a5d555929d9f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/mppi_phase_14_trial_0/result.json"
+    },
+    {
+      "run": "mppi_phase_7_trial_0",
+      "method": "mppi",
+      "phase_s": 7.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 30.4,
+      "start_sim_s": 8.0,
+      "path_m": 13.560690781323162,
+      "stopped_s": 0.3000000000000007,
+      "longest_stop_s": 0.1999999999999993,
+      "min_dynamic_circle_clearance_m": -0.05554513674982964,
+      "terminal_odom_vx_mps": 0.4999682895849767,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 7.895529169983451,
+      "state_duration_s": {
+        "": 30.40000000000022
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 816,
+        "mean": 2.019618832170689,
+        "p95": 3.843017388135195,
+        "max": 5.4051741026341915
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.05949897047769973,
+        0.10782759195329332
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08882041367185824,
+        0.1640858357209364
+      ],
+      "matched_observations": 941,
+      "unmatched_observations": 2,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.11574031016908719,
+      "peak_frs_tracks": null,
+      "protocol_sha256": "86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b",
+      "configuration_sha256": "b78f1f087a5b487c24ba8e83bc0aeefe631bbc2ed736e138311baf7e9ed0dd52",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison/results/final/mppi_phase_7_trial_0/result.json"
+    }
+  ],
+  "startup_failures": []
+}

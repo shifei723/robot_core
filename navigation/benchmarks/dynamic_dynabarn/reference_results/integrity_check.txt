@@ -1,0 +1,2 @@
+PASS: 9 complete fixed-protocol runs; same protocol SHA256; start=8s; no startup failures; truth not fed into perception; no plot warnings.
+Protocol SHA256: 86e3701f4293c033f91e2e8bbb666e464b28f527d7d86fcc5118b6204ac86f1b

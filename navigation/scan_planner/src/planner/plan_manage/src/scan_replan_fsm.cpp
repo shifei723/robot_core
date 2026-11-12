@@ -1,5 +1,6 @@
 
 #include <plan_manage/scan_replan_fsm.h>
+#include <plan_manage/spatial_tracker.hpp>
 #include <cmath>
 #include <stdexcept>
 
@@ -19,6 +20,7 @@ namespace scan_planner
   void SCANReplanFSM::init(rclcpp::Node *node)
   {
     node_ = node;
+    load_parameter<bool>(node_, "fsm.static_corridor_reuse", false);
     current_wp_ = 0;
     exec_state_ = FSM_EXEC_STATE::INIT;
     trigger_ = false;
@@ -71,6 +73,27 @@ namespace scan_planner
     planner_manager_.reset(new SCANPlannerManager);
     planner_manager_->initPlanModules(node_, visualization_);
 
+    // Only the spatial static controller publishes this feedback. Reject an
+    // old trajectory ID after replanning so stale feedback cannot move the clock.
+    execution_phase_sub_=node_->create_subscription<std_msgs::msg::Float64MultiArray>(
+        "planning/execution_phase",10,[this](std_msgs::msg::Float64MultiArray::ConstSharedPtr msg) {
+          auto &info=planner_manager_->local_data_;
+          if((msg->data.size()!=2 && msg->data.size()!=4) || msg->data[0]!=info.traj_id_ ||
+             !std::isfinite(msg->data[1]) || msg->data[1]<0. || msg->data[1]>info.duration_) return;
+          info.start_time_=node_->now()-rclcpp::Duration::from_seconds(msg->data[1]);
+          if(msg->data.size()==4 && std::isfinite(msg->data[2]) && msg->data[2]>=0. &&
+             std::isfinite(msg->data[3]) && msg->data[3]>0.) {
+            spatial_feedback_stamp_=node_->now().seconds();spatial_feedback_speed_=msg->data[2];
+            spatial_feedback_acceleration_=msg->data[3];spatial_feedback_id_=info.traj_id_;
+          }
+        });
+    replan_request_sub_=node_->create_subscription<std_msgs::msg::Bool>("planning/request_replan",10,
+      [this](std_msgs::msg::Bool::ConstSharedPtr msg){
+        const double now=node_->now().seconds();
+        if(msg->data && exec_state_==EXEC_TRAJ && now-last_controller_replan_>.5){
+          last_controller_replan_=now;changeFSMExecState(REPLAN_TRAJ,"CONTROLLER");
+        }
+      });
     /* callback */
     exec_timer_ = node_->create_wall_timer(std::chrono::milliseconds(10),
                                            std::bind(&SCANReplanFSM::execFSMCallback, this));
@@ -687,6 +710,16 @@ namespace scan_planner
         // cout << "near end" << endl;
         return;
       }
+      else if (node_->get_parameter("fsm.static_corridor_reuse").as_bool() &&
+               node_->has_parameter("manager.dynamic_frs_weight") &&
+               planner_manager_->canReuseStaticCorridor() &&
+               (local_target_pt_-odom_pos_).norm()>1.5 &&
+               info->duration_-t_cur>2.0 && !go2_execution_frozen_)
+      {
+        // Keep a safe static corridor until its endpoint approaches. New goals
+        // and the independent collision timer still trigger immediate replans.
+        return;
+      }
       else if ((info->start_pos_ - pos).norm() < replan_thresh_)
       {
         // cout << "near start" << endl;
@@ -833,6 +866,16 @@ namespace scan_planner
     double t_cur = (node_->now() - info->start_time_).seconds();
     double t_2_3 = info->duration_ * 2 / 3;
     const double check_end=collision_horizon_>0 ? std::min(info->duration_,t_cur+collision_horizon_) : info->duration_;
+    const bool spatial_execution=spatial_feedback_id_==info->traj_id_ &&
+        node_->now().seconds()-spatial_feedback_stamp_<.3;
+    const Eigen::Vector3d body_heading=odom_orient_*Eigen::Vector3d::UnitX();
+    if(spatial_execution && planner_manager_->trajectoryCollision(odom_pos_,std::atan2(body_heading.y(),body_heading.x()))) {
+      flag_escape_emergency_=true;
+      changeFSMExecState(EMERGENCY_STOP,"SPATIAL_BODY_SAFETY");
+      return;
+    }
+    double travelled=0.;
+    Eigen::Vector3d previous=info->position_traj_.evaluateDeBoorT(t_cur);
     for (double t = t_cur; t < check_end; t += time_step)
     {
       if (t_cur < t_2_3 && t >= t_2_3) // If t_cur < t_2_3, only the first 2/3 partition of the trajectory is considered valid and will get checked.
@@ -840,11 +883,15 @@ namespace scan_planner
 
       Eigen::Vector3d pos = info->position_traj_.evaluateDeBoorT(t);
       Eigen::Vector3d pos_next = info->position_traj_.evaluateDeBoorT(std::min(t + time_step, info->duration_));
+      travelled+=(pos-previous).head<2>().norm();previous=pos;
+      const double arrival=spatial_execution?
+          spatialCollisionArrival(std::min(travelled,(pos-odom_pos_).head<2>().norm()),
+              spatial_feedback_speed_,spatial_feedback_acceleration_):t-t_cur;
       if (planner_manager_->trajectoryCollision(pos, estimateYawFromSegment(pos, pos_next)))
       {
         // In bounded mode, planning runs only in the FSM, never inside this timer.
         if (collision_horizon_>0) {
-          if (t-t_cur<emergency_time_) {
+          if (arrival<emergency_time_) {
             flag_escape_emergency_=true;
             changeFSMExecState(EMERGENCY_STOP, "SAFETY");
           } else changeFSMExecState(REPLAN_TRAJ, "SAFETY");
@@ -857,9 +904,9 @@ namespace scan_planner
         }
         else
         {
-          if (t - t_cur < emergency_time_) // 0.8s of emergency time
+          if (arrival < emergency_time_)
           {
-            RCLCPP_WARN(node_->get_logger(), "Obstacle discovered; emergency stop in %.3fs", t - t_cur);
+            RCLCPP_WARN(node_->get_logger(), "Obstacle discovered; emergency stop in %.3fs", arrival);
             changeFSMExecState(EMERGENCY_STOP, "SAFETY");
           }
           else

@@ -1,0 +1,17 @@
+本次代码整理与同步验证
+
+1. robot_core原生导航编译通过。
+2. 规划+几何感知回归通过；colcon test-result报告89项、零失败。
+3. 新独立试验工作空间9个包编译通过，源码均通过相对链接指向robot_core。
+4. 真实ROS2空间控制连续性、里程计超时停车、高度回退测试通过。
+5. 真实ROS2延迟TF恢复及感知超时停车测试通过。
+6. 静态协议4项、激光几何4项通过；轨迹转换3项通过，可选原数据往返项跳过。
+7. 新入口静态Slash规划器/Jackal world_0：成功，22.0模拟秒，无接触碰撞。
+8. 新入口动态FRS软风险/Jackal world_2 phase_0：成功，48.8模拟秒，无接触碰撞。
+9. 原正式静态/动态汇总保留在各自reference_results，未用两轮smoke替换。
+10. navigation_source_sha256.json与当前生产源码一致；git diff --check通过。
+
+上述两轮仅验证整理后的运行链路，没有重新执行全部18轮静态和9轮动态。
+构建和实时回归日志位于logs/sync_validation；两轮运行日志与原始数据位于各自
+logs/sync_smoke和results/sync_smoke（运行产物不进入Git）。
+版本记录以 git log 为准。

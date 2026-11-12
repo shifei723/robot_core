@@ -10,6 +10,7 @@
 #include <nav_msgs/msg/path.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/float64_multi_array.hpp>
 #include <vector>
 #include <visualization_msgs/msg/marker.hpp>
 
@@ -27,6 +28,11 @@ namespace scan_planner
 
   class SCANReplanFSM
   {
+    rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr execution_phase_sub_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr replan_request_sub_;
+    double last_controller_replan_=-1.;
+    double spatial_feedback_stamp_=-1., spatial_feedback_speed_=0., spatial_feedback_acceleration_=.5;
+    int spatial_feedback_id_=-1;
 
   private:
     /* ---------- flag ---------- */

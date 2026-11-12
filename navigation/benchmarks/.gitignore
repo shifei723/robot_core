@@ -1,0 +1,16 @@
+.workspaces/
+**/results/
+**/logs/
+**/plot_fonts/
+**/derived/
+# Generated Clearpath runtime products; robot.yaml and nav2.yaml remain versioned.
+**/comparison_config/robot.urdf.xacro
+**/comparison_config/robot.srdf*
+**/config/robot.urdf.xacro
+**/config/robot.srdf*
+**/config/platform/
+**/config/sensors/
+**/config/manipulators/
+**/comparison_config/platform/
+**/comparison_config/sensors/
+**/comparison_config/manipulators/

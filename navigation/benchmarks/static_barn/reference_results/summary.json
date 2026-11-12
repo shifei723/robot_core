@@ -1,0 +1,58 @@
+{
+  "corridor_reuse": {
+    "runs": 3,
+    "successes": 3,
+    "collisions": 0,
+    "mean_success_time_s": 42.23333333333334,
+    "min_sampled_circle_clearance_m": 0.014865268137643994,
+    "mean_stopped_s": 4.733333333333326
+  },
+  "spatial": {
+    "runs": 9,
+    "successes": 9,
+    "collisions": 0,
+    "mean_success_time_s": 19.98888888888889,
+    "min_sampled_circle_clearance_m": 0.005732571528243358,
+    "mean_stopped_s": 0.4000000000000001
+  },
+  "spatial_safe": {
+    "runs": 3,
+    "successes": 2,
+    "collisions": 0,
+    "mean_success_time_s": 21.35,
+    "min_sampled_circle_clearance_m": 0.013672249409473258,
+    "mean_stopped_s": 20.03333333333333
+  },
+  "spatial_final": {
+    "runs": 3,
+    "successes": 2,
+    "collisions": 0,
+    "mean_success_time_s": 23.5,
+    "min_sampled_circle_clearance_m": -0.003855706188844843,
+    "mean_stopped_s": 30.96666666666667
+  },
+  "spatial_guard": {
+    "runs": 9,
+    "successes": 8,
+    "collisions": 0,
+    "mean_success_time_s": 27.175000000000004,
+    "min_sampled_circle_clearance_m": 0.036971798879973095,
+    "mean_stopped_s": 13.988888888888887
+  },
+  "spatial_release": {
+    "runs": 9,
+    "successes": 9,
+    "collisions": 0,
+    "mean_success_time_s": 26.56666666666667,
+    "min_sampled_circle_clearance_m": 0.07502249550397727,
+    "mean_stopped_s": 3.0888888888888877
+  },
+  "spatial_mppi": {
+    "runs": 9,
+    "successes": 9,
+    "collisions": 0,
+    "mean_success_time_s": 26.744444444444444,
+    "min_sampled_circle_clearance_m": 0.06457953231909846,
+    "mean_stopped_s": 0.788888888888889
+  }
+}

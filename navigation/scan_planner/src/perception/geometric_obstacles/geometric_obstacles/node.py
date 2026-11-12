@@ -229,7 +229,9 @@ class GeometricObstacles(Node):
     def publish(self, source, info, depth, T, transform, points, pixels, healthy):
         out = DynamicObstacleArray(); out.header.stamp = source.header.stamp
         out.header.frame_id = self.world; out.epoch = self.epoch
-        out.healthy = healthy; out.status = 'ok' if healthy else 'unresolved occlusion'
+        coasting = any(not t.observed for t in self.tracker.tracks.values())
+        out.healthy = healthy
+        out.status = ('coasting predictions' if coasting else 'ok') if healthy else 'invalid track prediction'
         mask = np.zeros(depth.shape,np.uint8); unknown = np.zeros_like(mask)
         markers = MarkerArray(); clear = Marker(); clear.action = Marker.DELETEALL; markers.markers.append(clear)
         for t in self.tracker.tracks.values():

@@ -1,0 +1,521 @@
+{
+  "source_world": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_docker/official/worlds/world_2.world",
+  "source_sha256": "5a16bd394ed8356bdf87e4ac012297ae1223038fed9667ca73ae640dd327b187",
+  "runtime": "ROS 2 Jazzy + Gazebo Harmonic; no ROS 1 or Classic shared libraries",
+  "motion": "Absolute world PoseAnimation keyframes; original looping including endpoint jumps is retained",
+  "xml_repairs": [
+    "quote empty frame attributes",
+    "remove stray backslash text"
+  ],
+  "objects": [
+    {
+      "duration": 41.32,
+      "keyframes": [
+        [
+          0.0,
+          -10.0,
+          8.43,
+          0.0
+        ],
+        [
+          5.62,
+          -7.78,
+          5.89,
+          0.0
+        ],
+        [
+          7.99,
+          -7.0,
+          5.0,
+          0.0
+        ],
+        [
+          11.64,
+          -5.56,
+          3.35,
+          0.0
+        ],
+        [
+          17.27,
+          -3.33,
+          0.81,
+          0.0
+        ],
+        [
+          22.89,
+          -1.11,
+          -1.73,
+          0.0
+        ],
+        [
+          26.27,
+          0.0,
+          -3.0,
+          0.0
+        ],
+        [
+          29.64,
+          1.11,
+          -4.27,
+          0.0
+        ],
+        [
+          34.46,
+          3.33,
+          -6.81,
+          0.0
+        ],
+        [
+          40.09,
+          5.56,
+          -9.35,
+          0.0
+        ],
+        [
+          41.32,
+          6.12,
+          -10.0,
+          0.0
+        ]
+      ],
+      "extraction": "elf64_constant_dataflow_no_execution",
+      "source": "temp/mythesis/tmp/dynabarn_docker/official/plugins/easylibobs_180.so",
+      "sha256": "7caca6ce2cd990e7b1edce0ab4a49da98e313e799fad32e967ecd518172a3175",
+      "name": "easylibobs_180",
+      "radius": 0.5,
+      "length": 1.0
+    },
+    {
+      "duration": 40.88,
+      "keyframes": [
+        [
+          0.0,
+          10.0,
+          -7.33,
+          0.0
+        ],
+        [
+          4.68,
+          7.78,
+          -6.59,
+          0.0
+        ],
+        [
+          9.37,
+          5.56,
+          -5.85,
+          0.0
+        ],
+        [
+          14.05,
+          3.33,
+          -5.11,
+          0.0
+        ],
+        [
+          18.74,
+          1.11,
+          -4.37,
+          0.0
+        ],
+        [
+          21.08,
+          0.0,
+          -4.0,
+          0.0
+        ],
+        [
+          23.03,
+          -1.11,
+          -3.63,
+          0.0
+        ],
+        [
+          27.02,
+          -3.0,
+          -3.0,
+          0.0
+        ],
+        [
+          27.6,
+          -3.33,
+          -2.89,
+          0.0
+        ],
+        [
+          32.29,
+          -5.56,
+          -2.15,
+          0.0
+        ],
+        [
+          36.97,
+          -7.78,
+          -1.41,
+          0.0
+        ],
+        [
+          40.88,
+          -10.0,
+          -0.67,
+          0.0
+        ]
+      ],
+      "extraction": "elf64_constant_dataflow_no_execution",
+      "source": "temp/mythesis/tmp/dynabarn_docker/official/plugins/easylibobs_40.so",
+      "sha256": "ceab6838b055901b945e0899e2f6f68c2e5c03169175f1e4c6dc8b4510f0c2e9",
+      "name": "easylibobs_40",
+      "radius": 0.5,
+      "length": 1.0
+    },
+    {
+      "duration": 43.51,
+      "keyframes": [
+        [
+          0.0,
+          -1.75,
+          10.0,
+          0.0
+        ],
+        [
+          5.87,
+          -1.11,
+          6.54,
+          0.0
+        ],
+        [
+          6.78,
+          -1.0,
+          6.0,
+          0.0
+        ],
+        [
+          18.89,
+          1.11,
+          -0.95,
+          0.0
+        ],
+        [
+          21.18,
+          2.0,
+          -2.0,
+          0.0
+        ],
+        [
+          23.56,
+          3.33,
+          -1.5,
+          0.0
+        ],
+        [
+          34.83,
+          5.56,
+          4.89,
+          0.0
+        ],
+        [
+          38.42,
+          6.0,
+          7.0,
+          0.0
+        ],
+        [
+          43.51,
+          6.55,
+          10.0,
+          0.0
+        ]
+      ],
+      "extraction": "elf64_constant_dataflow_no_execution",
+      "source": "temp/mythesis/tmp/dynabarn_docker/official/plugins/easylibobs_177.so",
+      "sha256": "79e9a09a76cf1da7c7e6d7d0166a476f66bf9c644207eb38457829c04b7db3f9",
+      "name": "easylibobs_177",
+      "radius": 0.5,
+      "length": 1.0
+    },
+    {
+      "duration": 22.22,
+      "keyframes": [
+        [
+          0.0,
+          -10.0,
+          -7.0,
+          0.0
+        ],
+        [
+          2.22,
+          -8.0,
+          -7.0,
+          0.0
+        ],
+        [
+          2.47,
+          -7.78,
+          -7.0,
+          0.0
+        ],
+        [
+          4.94,
+          -5.56,
+          -7.0,
+          0.0
+        ],
+        [
+          7.41,
+          -3.33,
+          -7.0,
+          0.0
+        ],
+        [
+          9.88,
+          -1.11,
+          -7.0,
+          0.0
+        ],
+        [
+          12.35,
+          1.11,
+          -7.0,
+          0.0
+        ],
+        [
+          14.81,
+          3.33,
+          -7.0,
+          0.0
+        ],
+        [
+          17.28,
+          5.56,
+          -7.0,
+          0.0
+        ],
+        [
+          18.89,
+          7.0,
+          -7.0,
+          0.0
+        ],
+        [
+          19.75,
+          7.78,
+          -7.0,
+          0.0
+        ],
+        [
+          22.22,
+          10.0,
+          -7.0,
+          0.0
+        ]
+      ],
+      "extraction": "elf64_constant_dataflow_no_execution",
+      "source": "temp/mythesis/tmp/dynabarn_docker/official/plugins/easylibobs_83.so",
+      "sha256": "2413d59ec626cfffe65b669395e54f8a489e6d3a62fd3528dadb46b3de888468",
+      "name": "easylibobs_83",
+      "radius": 0.5,
+      "length": 1.0
+    },
+    {
+      "duration": 34.85,
+      "keyframes": [
+        [
+          0.0,
+          0.52,
+          10.0,
+          0.0
+        ],
+        [
+          4.48,
+          0.0,
+          6.0,
+          0.0
+        ],
+        [
+          13.72,
+          -1.11,
+          -1.31,
+          0.0
+        ],
+        [
+          20.54,
+          -2.0,
+          -6.0,
+          0.0
+        ],
+        [
+          28.4,
+          -9.0,
+          -7.0,
+          0.0
+        ],
+        [
+          34.85,
+          -10.0,
+          -1.94,
+          0.0
+        ]
+      ],
+      "extraction": "elf64_constant_dataflow_no_execution",
+      "source": "temp/mythesis/tmp/dynabarn_docker/official/plugins/easylibobs_18.so",
+      "sha256": "5deec22150c9e2dd52880771c3f20695bcf64083195d4cd1b5c0fcf7a051f04c",
+      "name": "easylibobs_18",
+      "radius": 0.5,
+      "length": 1.0
+    },
+    {
+      "duration": 33.67,
+      "keyframes": [
+        [
+          0.0,
+          7.71,
+          -10.0,
+          0.0
+        ],
+        [
+          8.42,
+          7.0,
+          -5.0,
+          0.0
+        ],
+        [
+          20.2,
+          6.0,
+          2.0,
+          0.0
+        ],
+        [
+          25.44,
+          5.56,
+          5.11,
+          0.0
+        ],
+        [
+          33.67,
+          4.86,
+          10.0,
+          0.0
+        ]
+      ],
+      "extraction": "elf64_constant_dataflow_no_execution",
+      "source": "temp/mythesis/tmp/dynabarn_docker/official/plugins/easylibobs_149.so",
+      "sha256": "566370e6fcdc5002ef5656f19917612a57f4dfbe328cda6d172483e316a54566",
+      "name": "easylibobs_149",
+      "radius": 0.5,
+      "length": 1.0
+    },
+    {
+      "duration": 25.38,
+      "keyframes": [
+        [
+          0.0,
+          -0.0,
+          -10.0,
+          0.0
+        ],
+        [
+          2.85,
+          1.11,
+          -9.11,
+          0.0
+        ],
+        [
+          8.54,
+          3.33,
+          -7.33,
+          0.0
+        ],
+        [
+          12.81,
+          5.0,
+          -6.0,
+          0.0
+        ],
+        [
+          13.99,
+          5.56,
+          -5.56,
+          0.0
+        ],
+        [
+          19.68,
+          7.78,
+          -3.78,
+          0.0
+        ],
+        [
+          25.38,
+          10.0,
+          -2.0,
+          0.0
+        ]
+      ],
+      "extraction": "elf64_constant_dataflow_no_execution",
+      "source": "temp/mythesis/tmp/dynabarn_docker/official/plugins/easylibobs_150.so",
+      "sha256": "69b2ef548267e8d208ffbb5ae83de1ff78bd887277805de8e48e1b179d619b59",
+      "name": "easylibobs_150",
+      "radius": 0.5,
+      "length": 1.0
+    },
+    {
+      "duration": 42.7,
+      "keyframes": [
+        [
+          0.0,
+          10.0,
+          3.0,
+          0.0
+        ],
+        [
+          7.94,
+          7.78,
+          7.21,
+          0.0
+        ],
+        [
+          12.43,
+          5.56,
+          7.53,
+          0.0
+        ],
+        [
+          13.71,
+          5.0,
+          7.0,
+          0.0
+        ],
+        [
+          18.67,
+          3.33,
+          3.95,
+          0.0
+        ],
+        [
+          31.67,
+          1.11,
+          -3.52,
+          0.0
+        ],
+        [
+          32.48,
+          1.0,
+          -4.0,
+          0.0
+        ],
+        [
+          42.7,
+          -0.25,
+          -10.0,
+          0.0
+        ]
+      ],
+      "extraction": "elf64_constant_dataflow_no_execution",
+      "source": "temp/mythesis/tmp/dynabarn_docker/official/plugins/easylibobs_119.so",
+      "sha256": "e9291e4364b69cc5107d7284dae8f0b11fdca1b72cbabbd8ba9892a5dbf8cd74",
+      "name": "easylibobs_119",
+      "radius": 0.5,
+      "length": 1.0
+    }
+  ],
+  "converted_world_sha256": "be4cec656fdb01b105079f683bd1323b9ca2ec256916a6066a7c8f083cafc922"
+}

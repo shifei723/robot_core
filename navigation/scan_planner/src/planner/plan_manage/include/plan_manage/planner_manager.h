@@ -39,6 +39,10 @@ namespace scan_planner
 
     void initPlanModules(rclcpp::Node *node, PlanningVisualization::Ptr vis = nullptr);
 
+    bool canReuseStaticCorridor() const {
+      return dynamic_spatial_weight_<=0. ||
+          (dynamic_tracks_.fresh(node_->now().seconds()) && dynamic_tracks_.bank.tracks.empty());
+    }
     PlanParameters pp_;
     LocalTrajData local_data_;
     GlobalTrajData global_data_;

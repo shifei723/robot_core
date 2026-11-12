@@ -180,7 +180,7 @@ def main():
        '--params-file',str(paramfile),'-r','body_pose:=/sim/odom','-r','sensor_pose:=/dynamic_obstacles/camera_pose',
        '-r','depth:=/dynamic_obstacles/depth_static'])
     launch('scan_planner','closed_loop_controller',['-p',f'static_prior_required:={str(args.static_prior).lower()}','-p',f'dynamic_soft_constraint:={str(args.timing_policy=="soft").lower()}','-p',f'dynamic_frs_weight:={args.frs_weight}','-p','dynamic_horizon:=3.0','-p','dynamic_input:=array','-p',f'dynamic_prediction:={args.prediction}',
-       '-p','height_safety_enabled:=true','-r','cloud:=/dynamic_obstacles/cloud_static','-p','max_vx:=0.3','-p','max_vyaw:=0.5',
+       '-p','height_safety_enabled:=true','-p','odom_twist_in_world:=true','-r','cloud:=/dynamic_obstacles/cloud_static','-p','max_vx:=0.3','-p','max_vyaw:=0.5',
        '-r','body_pose:=/sim/odom','-r','cmd_vel:=/sim/cmd_vel',
        '-r','leg_height_cmd:=/sim/leg_height_cmd','-r','planning/go2_execution_frozen:=/planning/go2_execution_frozen'])
     def moving(t):

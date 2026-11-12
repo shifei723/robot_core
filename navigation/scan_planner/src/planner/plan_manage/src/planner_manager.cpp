@@ -1,5 +1,7 @@
 // #include <fstream>
 #include <plan_manage/planner_manager.h>
+#include <plan_manage/wheel_timing.hpp>
+#include <plan_manage/wheel_shortcut.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -72,6 +74,10 @@ namespace scan_planner
       return node->get_parameter(name).as_double();
     };
     wheel_grid_trajectory_ = node_->declare_parameter<bool>("manager.wheel_grid_trajectory", false);
+    node_->declare_parameter<bool>("manager.local_wheel_timing", false);
+    node_->declare_parameter<bool>("manager.shortcut_wheel_path",false);
+    node_->declare_parameter<double>("manager.execution_radius", 0.30);
+    node_->declare_parameter<double>("manager.execution_offset", 0.18);
     wheel_search_timeout_ = node_->declare_parameter<double>("manager.wheel_search_timeout", 1.0);
     dynamic_spatial_weight_ = get_double("manager.dynamic_frs_weight",0.0);
     if(dynamic_spatial_weight_>0) dynamic_sub_=node_->create_subscription<scan_planner_msgs::msg::DynamicObstacleArray>(
@@ -95,6 +101,22 @@ namespace scan_planner
     pp_.ctrl_pt_dist = get_double("manager.control_points_distance", -1.0);
     pp_.planning_horizon_ = get_double("manager.planning_horizon", 5.0);
 
+    const double tracking_margin=get_double("manager.static_tracking_margin",0.0);
+    if(wheel_grid_trajectory_ && dynamic_spatial_weight_<=0. && tracking_margin>0. &&
+       node_->get_parameter("manager.shortcut_wheel_path").as_bool()) {
+      const double physical_radius=node_->has_parameter("manager.execution_radius")?
+          node_->get_parameter("manager.execution_radius").as_double():.30;
+      const double physical_offset=node_->has_parameter("manager.execution_offset")?
+          node_->get_parameter("manager.execution_offset").as_double():.18;
+      const double radius=get_double("grid_map.double_cylinder_radius",.25);
+      const double offset=get_double("grid_map.double_cylinder_offset",.18);
+      const double required=physical_radius+std::abs(physical_offset)+tracking_margin;
+      if(radius+std::abs(offset)<required) {
+        node_->set_parameters({rclcpp::Parameter("grid_map.double_cylinder_radius",required),
+                               rclcpp::Parameter("grid_map.double_cylinder_offset",0.0)});
+        RCLCPP_INFO(node_->get_logger(),"Static tracking search radius %.3f m",required);
+      }
+    }
     local_data_.traj_id_ = 0;
     grid_map_.reset(new GridMap);
     grid_map_->initMap(node_);
@@ -367,8 +389,11 @@ namespace scan_planner
   bool SCANPlannerManager::trajectoryCollision(const Eigen::Vector3d &p, double yaw)
   {
     if (!wheel_grid_trajectory_) return grid_map_->getInflateOccupancyAdaptive(p,yaw)!=0;
-    const double ceiling=grid_map_->queryCeilingHeight(p,yaw,nullptr,0.30,0.18);
-    return !grid_map_->isInMap(p) || !grid_map_->isInWorldBound(p) ||
+    const double ceiling=grid_map_->queryCeilingHeight(p,yaw,nullptr,
+        node_->get_parameter("manager.execution_radius").as_double(),
+        node_->get_parameter("manager.execution_offset").as_double());
+    return !grid_map_->isInMap(p) ||
+           (node_->get_parameter("grid_map.world_bound_enable").as_bool() && !grid_map_->isInWorldBound(p)) ||
            p.z()<0.1722-1e-6 || p.z()>0.3922+1e-6 ||
            (std::isfinite(ceiling) && p.z()+0.328+0.05>ceiling+1e-6);
   }
@@ -376,11 +401,17 @@ namespace scan_planner
   bool SCANPlannerManager::planWheelTrajectory(const Eigen::Vector3d &start,
                                                const Eigen::Vector3d &goal)
   {
+    struct Profile {
+      rclcpp::Logger logger;
+      std::chrono::steady_clock::time_point begin=std::chrono::steady_clock::now();
+      ~Profile(){RCLCPP_INFO(logger,"WHEEL_PLAN_MS %.3f",
+        std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-begin).count());}
+    } profile{node_->get_logger()};
     auto search = bspline_optimizer_rebound_->a_star_;
     search->soft_cost={};
     // Weighted A* bounds search work after adding a positive risk field.
     // Collision checking is unchanged; the result is not the minimum-cost path.
-    search->heuristic_weight=dynamic_spatial_weight_>0 ? 1.8 : 1.0;
+    search->heuristic_weight=canReuseStaticCorridor() ? 1.0 : 1.8;
     if(dynamic_spatial_weight_>0 && dynamic_tracks_.fresh(node_->now().seconds())) {
       const auto views=dynamic_tracks_.bank.views(node_->now().seconds());
       // Spatial risk field over the near future. Timing is checked again by the controller.
@@ -399,6 +430,21 @@ namespace scan_planner
       std::reverse(path.begin(), path.end());
     path.insert(path.begin(), start);
     path.push_back(goal);
+    const auto raw_path=path;
+    bool planar=true;
+    for(const auto &p:path) if(std::abs(p.z()-start.z())>.005) planar=false;
+    if(node_->get_parameter("manager.shortcut_wheel_path").as_bool() &&
+       (dynamic_spatial_weight_<=0. || (dynamic_tracks_.fresh(node_->now().seconds()) && dynamic_tracks_.bank.tracks.empty())) && planar) {
+      path=shortcutWheelPath(path,grid_map_->getResolution()*.4,
+        [this](const Eigen::Vector3d &p,double yaw){return grid_map_->getInflateOccupancyAdaptive(p,yaw)==0;});
+    }
+    UniformBspline spline;
+    if (node_->get_parameter("manager.local_wheel_timing").as_bool()) {
+      if (!makeLocallyTimedWheelSpline(path,pp_.max_vel_,pp_.max_acc_,0.06,spline)) {
+        RCLCPP_WARN(node_->get_logger(), "Wheel time allocation failed feasibility bounds");
+        return false;
+      }
+    } else {
     const double dt = 0.20;
     const double speed = std::min(pp_.max_vel_, 0.30);
     const double height_rate = 0.06;
@@ -414,10 +460,23 @@ namespace scan_planner
     points.push_back(goal); points.push_back(goal);
     Eigen::MatrixXd controls(3, points.size());
     for (size_t i=0; i<points.size(); ++i) controls.col(i)=points[i];
-    UniformBspline spline(controls, 3, dt);
+    spline=UniformBspline(controls, 3, dt);
     spline.setPhysicalLimits(pp_.max_vel_, pp_.max_acc_, 0.0);
     double ratio=1.0;
     if (!spline.checkFeasibility(ratio, false)) spline.lengthenTime(ratio * 1.05);
+    }
+    if(path.size()<raw_path.size() && node_->get_parameter("manager.local_wheel_timing").as_bool()) {
+      bool safe=true;
+      for(double t=0;t<=spline.getTimeSum();t+=.02) {
+        const Eigen::Vector3d p=spline.evaluateDeBoorT(t);
+        const Eigen::Vector3d v=spline.getDerivative().evaluateDeBoorT(t);
+        if(trajectoryCollision(p,std::atan2(v.y(),v.x()))) {safe=false;break;}
+      }
+      if(!safe) {
+        path=raw_path;
+        if(!makeLocallyTimedWheelSpline(path,pp_.max_vel_,pp_.max_acc_,.06,spline)) return false;
+      }
+    }
     const double duration=spline.getTimeSum();
     for (double t=0; t<=duration; t+=0.02) {
       const Eigen::Vector3d p=spline.evaluateDeBoorT(t);
@@ -426,7 +485,8 @@ namespace scan_planner
       // Search uses a circumscribed turning envelope; validate the smoothed
       // curve with the tighter execution envelope plus 5 cm geometric padding.
       if (trajectoryCollision(p,yaw)) {
-        RCLCPP_WARN(node_->get_logger(), "Wheel corridor smoothing failed collision check");
+        RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
+            "Wheel corridor collision at (%.3f, %.3f, %.3f)",p.x(),p.y(),p.z());
         return false;
       }
     }

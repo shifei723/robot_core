@@ -1,0 +1,1045 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.9">
+  <world name="default">
+    <physics name="default_physics" default="0" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <model name="ground_plane">
+      <static>1</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+              <torsional>
+                <ode />
+              </torsional>
+            </friction>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <visual name="visual">
+          <cast_shadows>0</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+    </model>
+    <light name="sun" type="directional">
+      <cast_shadows>1</cast_shadows>
+      <pose>0 0 10 0 -0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.5 -1</direction>
+    </light>
+    <plugin filename="gz-sim-navsat-system" name="gz::sim::systems::NavSat" />
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu" />
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact" />
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
+    <model name="easylibobs_180">
+      <static>1</static>
+      <pose>-10.0 8.43 0.0 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="libdynabarn_motion.so" name="dynabarn::Motion">
+        <duration>41.32</duration>
+        <keyframe>
+          <time>0.0</time>
+          <position>-10.0 8.43 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>5.62</time>
+          <position>-7.78 5.89 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>7.99</time>
+          <position>-7.0 5.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>11.64</time>
+          <position>-5.56 3.35 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>17.27</time>
+          <position>-3.33 0.81 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>22.89</time>
+          <position>-1.11 -1.73 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>26.27</time>
+          <position>0.0 -3.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>29.64</time>
+          <position>1.11 -4.27 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>34.46</time>
+          <position>3.33 -6.81 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>40.09</time>
+          <position>5.56 -9.35 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>41.32</time>
+          <position>6.12 -10.0 0.0</position>
+        </keyframe>
+      </plugin>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="easylibobs_40">
+      <static>1</static>
+      <pose>10.0 -7.33 0.0 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="libdynabarn_motion.so" name="dynabarn::Motion">
+        <duration>40.88</duration>
+        <keyframe>
+          <time>0.0</time>
+          <position>10.0 -7.33 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>4.68</time>
+          <position>7.78 -6.59 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>9.37</time>
+          <position>5.56 -5.85 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>14.05</time>
+          <position>3.33 -5.11 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>18.74</time>
+          <position>1.11 -4.37 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>21.08</time>
+          <position>0.0 -4.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>23.03</time>
+          <position>-1.11 -3.63 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>27.02</time>
+          <position>-3.0 -3.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>27.6</time>
+          <position>-3.33 -2.89 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>32.29</time>
+          <position>-5.56 -2.15 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>36.97</time>
+          <position>-7.78 -1.41 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>40.88</time>
+          <position>-10.0 -0.67 0.0</position>
+        </keyframe>
+      </plugin>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="easylibobs_177">
+      <static>1</static>
+      <pose>-1.75 10.0 0.0 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="libdynabarn_motion.so" name="dynabarn::Motion">
+        <duration>43.51</duration>
+        <keyframe>
+          <time>0.0</time>
+          <position>-1.75 10.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>5.87</time>
+          <position>-1.11 6.54 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>6.78</time>
+          <position>-1.0 6.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>18.89</time>
+          <position>1.11 -0.95 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>21.18</time>
+          <position>2.0 -2.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>23.56</time>
+          <position>3.33 -1.5 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>34.83</time>
+          <position>5.56 4.89 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>38.42</time>
+          <position>6.0 7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>43.51</time>
+          <position>6.55 10.0 0.0</position>
+        </keyframe>
+      </plugin>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="easylibobs_83">
+      <static>1</static>
+      <pose>-10.0 -7.0 0.0 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="libdynabarn_motion.so" name="dynabarn::Motion">
+        <duration>22.22</duration>
+        <keyframe>
+          <time>0.0</time>
+          <position>-10.0 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>2.22</time>
+          <position>-8.0 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>2.47</time>
+          <position>-7.78 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>4.94</time>
+          <position>-5.56 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>7.41</time>
+          <position>-3.33 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>9.88</time>
+          <position>-1.11 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>12.35</time>
+          <position>1.11 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>14.81</time>
+          <position>3.33 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>17.28</time>
+          <position>5.56 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>18.89</time>
+          <position>7.0 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>19.75</time>
+          <position>7.78 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>22.22</time>
+          <position>10.0 -7.0 0.0</position>
+        </keyframe>
+      </plugin>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="easylibobs_18">
+      <static>1</static>
+      <pose>0.52 10.0 0.0 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="libdynabarn_motion.so" name="dynabarn::Motion">
+        <duration>34.85</duration>
+        <keyframe>
+          <time>0.0</time>
+          <position>0.52 10.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>4.48</time>
+          <position>0.0 6.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>13.72</time>
+          <position>-1.11 -1.31 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>20.54</time>
+          <position>-2.0 -6.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>28.4</time>
+          <position>-9.0 -7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>34.85</time>
+          <position>-10.0 -1.94 0.0</position>
+        </keyframe>
+      </plugin>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="easylibobs_149">
+      <static>1</static>
+      <pose>7.71 -10.0 0.0 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="libdynabarn_motion.so" name="dynabarn::Motion">
+        <duration>33.67</duration>
+        <keyframe>
+          <time>0.0</time>
+          <position>7.71 -10.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>8.42</time>
+          <position>7.0 -5.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>20.2</time>
+          <position>6.0 2.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>25.44</time>
+          <position>5.56 5.11 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>33.67</time>
+          <position>4.86 10.0 0.0</position>
+        </keyframe>
+      </plugin>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="easylibobs_150">
+      <static>1</static>
+      <pose>-0.0 -10.0 0.0 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="libdynabarn_motion.so" name="dynabarn::Motion">
+        <duration>25.38</duration>
+        <keyframe>
+          <time>0.0</time>
+          <position>-0.0 -10.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>2.85</time>
+          <position>1.11 -9.11 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>8.54</time>
+          <position>3.33 -7.33 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>12.81</time>
+          <position>5.0 -6.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>13.99</time>
+          <position>5.56 -5.56 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>19.68</time>
+          <position>7.78 -3.78 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>25.38</time>
+          <position>10.0 -2.0 0.0</position>
+        </keyframe>
+      </plugin>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="easylibobs_119">
+      <static>1</static>
+      <pose>10.0 3.0 0.0 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5000</radius>
+              <length> 1 </length>
+            </cylinder>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="libdynabarn_motion.so" name="dynabarn::Motion">
+        <duration>42.7</duration>
+        <keyframe>
+          <time>0.0</time>
+          <position>10.0 3.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>7.94</time>
+          <position>7.78 7.21 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>12.43</time>
+          <position>5.56 7.53 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>13.71</time>
+          <position>5.0 7.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>18.67</time>
+          <position>3.33 3.95 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>31.67</time>
+          <position>1.11 -3.52 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>32.48</time>
+          <position>1.0 -4.0 0.0</position>
+        </keyframe>
+        <keyframe>
+          <time>42.7</time>
+          <position>-0.25 -10.0 0.0</position>
+        </keyframe>
+      </plugin>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="back_wall">
+      <static>1</static>
+      <pose>-10 0 .5 0 0 0</pose>
+      <link name="box_link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>.5 20 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>.5 20 1</size>
+            </box>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="top_wall">
+      <static>1</static>
+      <pose>0 10 .5 0 0 0</pose>
+      <link name="box_link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>20 .5 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>20 .5 1</size>
+            </box>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <model name="bottom_wall">
+      <static>1</static>
+      <pose>0 -10 .5 0 0 0</pose>
+      <link name="box_link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>20 .5 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <contact>
+              <ode />
+            </contact>
+            <bounce />
+            <friction>
+              <torsional>
+                <ode />
+              </torsional>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>20 .5 1</size>
+            </box>
+          </geometry>
+          <material>
+            <diffuse>.8 .15 .1 1</diffuse>
+            <ambient>.6 .1 .05 1</ambient>
+          </material>
+        </visual>
+        <sensor name="dynabarn_contact" type="contact">
+          <contact>
+            <collision>collision</collision>
+          </contact>
+          <always_on>true</always_on>
+        </sensor>
+      </link>
+      <plugin filename="gz-sim-touchplugin-system" name="gz::sim::systems::TouchPlugin">
+        <target>robot</target>
+        <namespace>robot</namespace>
+        <time>0.001</time>
+        <enabled>true</enabled>
+      </plugin>
+    </model>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+  </world>
+</sdf>

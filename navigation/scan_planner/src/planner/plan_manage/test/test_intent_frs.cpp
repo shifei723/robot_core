@@ -85,12 +85,26 @@ TEST(SnapshotTracks, RejectCorruptArrayAtomically) {
 }
 TEST(SnapshotTracks, CoastingPreservesObservedHistoryAndEpochResets) {
   SnapshotTracks b; auto s=sample(); ASSERT_TRUE(b.accept(1,1,true,{s},1));
-  s.observed=false; s.position.x()=100;
+  s.observed=false; s.position.x()=2.01;
   ASSERT_TRUE(b.accept(1.1,1,true,{s},1.1));
-  EXPECT_DOUBLE_EQ(b.bank.tracks.at(s.id).position.x(),2);
-  EXPECT_DOUBLE_EQ(b.bank.tracks.at(s.id).stamp,1);
+  EXPECT_DOUBLE_EQ(b.bank.tracks.at(s.id).position.x(),2.01);
+  EXPECT_DOUBLE_EQ(b.bank.tracks.at(s.id).stamp,1.1);
   ASSERT_TRUE(b.accept(1.2,2,true,{},1.2));EXPECT_TRUE(b.bank.tracks.empty());
-  EXPECT_FALSE(b.accept(1.3,2,true,{s},1.3));
+  ASSERT_TRUE(b.accept(1.3,2,true,{s},1.3));
+  EXPECT_TRUE(b.fresh(1.3));
+  EXPECT_DOUBLE_EQ(b.bank.tracks.at(s.id).center.norm(),0.);
+}
+TEST(SnapshotTracks, LongOcclusionRetainsLocalHardThreatAndRejectsPredictionJump) {
+  SnapshotTracks b; auto s=sample();s.position={.5,0};
+  ASSERT_TRUE(b.accept(1,1,true,{s},1));
+  s.observed=false;s.covariance*=4;
+  ASSERT_TRUE(b.accept(3,1,true,{s},3));
+  ASSERT_TRUE(b.fresh(3));
+  EXPECT_FALSE(chooseSoftTiming(b.bank.views(3),"frs",
+    [](double,double){return Eigen::Vector2d::Zero();},3.,1.,2.).feasible);
+  s.position.x()=100;
+  EXPECT_FALSE(b.accept(3.1,1,true,{s},3.1));
+  EXPECT_FALSE(b.fresh(3.1));
 }
 TEST(SnapshotTracks, ExtentAndMeasurementUncertaintyEnlargeCollisionRegion) {
   SnapshotTracks b; auto s=sample(); ASSERT_TRUE(b.accept(1,1,true,{s},1));

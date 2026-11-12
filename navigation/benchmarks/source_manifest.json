@@ -1,0 +1,17 @@
+{
+  "source_static": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/barn_ros2_benchmark",
+  "source_dynamic": "/home/robotx-2/ws_tianji_sharpa/temp/mythesis/tmp/dynabarn_ros2_comparison",
+  "canonical_navigation": "navigation/scan_planner/src",
+  "upstream_url": "https://github.com/Saadmaghani/The-Barn-Challenge-Ros2.git",
+  "upstream_revision": "d6c575b51e477bd524d634e12cffeb34036fcd1e",
+  "vendored_static_worlds": [
+    0,
+    6,
+    12
+  ],
+  "dynamic_world": 2,
+  "original_raw_results_preserved": true,
+  "backup": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/navigation_sync_backup_20261112",
+  "validation_group": "sync_smoke",
+  "source_copy_policy": "Algorithm packages are relative symlinks to canonical robot_core source; original thesis/tmp experiments retained as historical records."
+}

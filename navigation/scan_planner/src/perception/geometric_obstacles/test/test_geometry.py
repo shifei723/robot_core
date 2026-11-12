@@ -74,10 +74,22 @@ def test_invalid_depth_is_not_a_measurement():
 def test_occlusion_does_not_delete_but_visible_free_space_does():
     t=Tracker();t.tracks[0]=Track(0,np.array([0.,0.,0.,0.]),np.eye(4)*1e-4,1.5,.1,0.,observed=False)
     K=np.array([[30.,0,50],[0,30.,50],[0,0,1.]])
-    assert not t.retire(1.1,np.ones((100,100)),K,np.eye(4))
+    assert t.retire(1.1,np.ones((100,100)),K,np.eye(4))
     assert 0 in t.tracks
     assert t.retire(1.2,np.full((100,100),2.5),K,np.eye(4))
     assert not t.tracks
+
+
+def test_occluded_track_keeps_uncertainty_without_poisoning_sensor_health():
+    t=Tracker(Config(accel_sigma=.2))
+    t.tracks[0]=Track(0,np.array([0.,0.,.1,0.]),np.eye(4)*.001,1.5,.1,0.,observed=False)
+    t.time=0.
+    initial=t.tracks[0].P.copy()
+    for stamp in np.arange(.1,2.,.1):
+        t.step(stamp,[])
+        assert t.retire(stamp,np.ones((100,100)),np.array([[30.,0,50],[0,30.,50],[0,0,1.]]),np.eye(4))
+    assert 0 in t.tracks and not t.tracks[0].observed
+    assert t.tracks[0].P[0,0]>initial[0,0]
 
 
 def test_sparse_oblique_face_fragments_share_one_target():

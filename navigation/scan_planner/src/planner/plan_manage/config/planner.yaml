@@ -3,6 +3,8 @@ scan_planner_node:
     use_sim_time: false
 
     fsm.navi_mode: 1
+    # 静态走廊复用；FRS 空间风险权重大于 0 时自动保留原重规划逻辑。
+    fsm.static_corridor_reuse: true
     fsm.thresh_replan: 1.0
     fsm.thresh_no_replan: 0.1
     fsm.planning_horizon: 7.5
@@ -78,6 +80,14 @@ scan_planner_node:
     grid_map.world_size_x: 20.0
     grid_map.world_size_y: 20.0
 
+    # 轮式轨迹采用局部时间分配；速度、加速度及碰撞检查沿用本工程配置。
+    # 实机 Slash 执行包络；Jackal 基准由各自 launch 覆盖。
+    manager.execution_radius: 0.30
+    manager.execution_offset: 0.18
+    manager.local_wheel_timing: true
+    # 固定高度静态跟踪：保留实体包络并增加执行跟踪裕量。
+    manager.shortcut_wheel_path: true
+    manager.static_tracking_margin: 0.125
     manager.max_vel: 0.75
     manager.max_acc: 0.5
     manager.max_jerk: 4.0
