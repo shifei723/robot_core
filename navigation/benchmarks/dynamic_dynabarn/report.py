@@ -69,12 +69,12 @@ def run(path):
   'stopped_s':float(dt[stopped].sum()),'longest_stop_s':longest,'min_dynamic_circle_clearance_m':float(min(gaps)) if gaps else None,
   'terminal_odom_vx_mps':float(a[-1,4]) if len(a) else None,'terminal_state':states[-1]['state'] if states else None,'terminal_frs_decision':{k:v for k,v in decisions[-1].items() if k not in ['boxes','tracks','nominal_path','chosen_path']} if decisions else None,
   'final_goal_distance_m':float(np.linalg.norm(a[-1,1:3]-[-9,0])) if len(a) else None,
-  'state_duration_s':durations,'frs_stale_decisions':sum(bool(z['stale']) for z in decisions),'frs_shield_decisions':sum(bool(z['shield']) for z in decisions),'frs_infeasible_decisions':sum(not bool(z['feasible']) for z in decisions),'active_frs_decision_ms':stats([z['decision_ms'] for z in decisions if z['track_count']>0 and not z['stale']]),
+  'state_duration_s':durations,'frs_stale_decisions':sum(bool(z['stale']) for z in decisions),'frs_shield_decisions':sum(bool(z['shield']) for z in decisions),'frs_infeasible_decisions':sum(not bool(z['feasible']) for z in decisions),'active_frs_decision_ms':stats([z['decision_ms'] for z in decisions if z.get('moving_track_count',z['track_count'])>0 and not z['stale']]),
   'perception_callback_ms':stats([z['filter_and_tracking_ms'] for z in perception]),'planner_call_ms':stats(ms),
   'matched_observed_position_rmse_xy_m':np.sqrt(np.mean(np.square(errors),axis=0)).tolist() if errors else None,
   'matched_velocity_rmse_xy_mps':np.sqrt(np.mean(np.square(velocity_errors),axis=0)).tolist() if velocity_errors else None,
   'matched_observations':matched,'unmatched_observations':unmatched,'velocity_samples_excluded_at_loop_wrap':discontinuities,
-  'ego_position_rmse_m':ego_error,'peak_frs_tracks':max((z['track_count'] for z in decisions),default=None),'protocol_sha256':d.get('protocol_sha256'),
+  'ego_position_rmse_m':ego_error,'peak_frs_tracks':max((z.get('moving_track_count',z['track_count']) for z in decisions),default=None),'peak_unknown_regions':max((z.get('unknown_region_count',0) for z in decisions),default=0),'protocol_sha256':d.get('protocol_sha256'),
   'configuration_sha256':d.get('configuration_sha256'),'source_result':str(path/'result.json')}
 
 attempts=[run(p.parent) for p in sorted((R/'results/final').glob('*/result.json'))]

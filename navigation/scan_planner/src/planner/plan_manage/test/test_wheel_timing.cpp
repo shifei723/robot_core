@@ -31,4 +31,27 @@ int main() {
     std::cout<<"PASS duration="<<s.getTimeSum()<<" s\n";
     if(path.size()==201) assert(s.getTimeSum()<25.);
   }
+  // A 1 cm feasible ceiling band must not be cut by cubic smoothing.
+  UniformBspline low;
+  assert(makeCornerPreservingWheelSpline({{0,0,.2822},{0,0,.1622},
+                                          {1,0,.1622},{1,0,.2822}},.5,.5,.06,low));
+  for(double t=0;t<=low.getTimeSum();t+=.001) {
+    const auto p=low.evaluateDeBoorT(t);
+    if(p.x()>.02 && p.x()<.98) assert(p.z()<=.1722);
+    assert(low.getDerivative().evaluateDeBoorT(t).head<2>().norm()<=.500001);
+    assert(std::abs(low.getDerivative().evaluateDeBoorT(t).z())<=.060001);
+  }
+  assert((low.evaluateDeBoorT(0)-Eigen::Vector3d(0,0,.2822)).norm()<1e-8);
+  assert((low.evaluateDeBoorT(low.getTimeSum())-Eigen::Vector3d(1,0,.2822)).norm()<1e-8);
+  // Global fallback preserves geometry and bounds all derivative controls.
+  auto shape=low;
+  low.setKnot((low.getKnot()*.05).eval());
+  assert(globallyRetimeWheelSpline(low,.5,.5,.06));
+  for(int k=0;k<=1000;++k) {
+    const double t=low.getTimeSum()*k/1000.;
+    assert(low.getDerivative().evaluateDeBoorT(t).head<2>().norm()<=.500001);
+    assert(std::abs(low.getDerivative().evaluateDeBoorT(t).z())<=.060001);
+    assert(low.getDerivative().getDerivative().evaluateDeBoorT(t).norm()<=.500001);
+    assert((low.evaluateDeBoorT(t)-shape.evaluateDeBoorT(shape.getTimeSum()*k/1000.)).norm()<1e-8);
+  }
 }

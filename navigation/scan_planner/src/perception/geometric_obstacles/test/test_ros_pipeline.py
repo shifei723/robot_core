@@ -133,3 +133,48 @@ def test_prebuilt_background_and_new_obstacle_transport():
         print('Prior/online layers verified: promotion, resumed motion, clearing, immutable fixed map')
     finally:
         executor.shutdown();perception.destroy_node();driver.destroy_node();rclpy.shutdown()
+
+
+def test_unknown_region_transport_reactivation_and_free_space_clearance():
+    """Seed a track; exercise real stamped depth/TF and published UNKNOWN state."""
+    from geometric_obstacles.core import Track
+    rclpy.init();perception=GeometricObstacles();driver=Node('unknown_region_depth_source')
+    perception.cfg.lost_timeout=.2
+    executor=SingleThreadedExecutor();executor.add_node(perception);executor.add_node(driver)
+    arrays=[];driver.create_subscription(DynamicObstacleArray,'/dynamic_obstacles/tracks',arrays.append,10)
+    pub=driver.create_publisher(Image,'/camera/camera/aligned_depth_to_color/image_raw',qos_profile_sensor_data)
+    camera=driver.create_publisher(CameraInfo,'/camera/camera/color/camera_info',qos_profile_sensor_data)
+    tf=StaticTransformBroadcaster(driver);tr=TransformStamped();tr.header.frame_id='world';tr.child_frame_id='unknown_optical';tr.transform.rotation.w=1.;tf.sendTransform(tr)
+    info=CameraInfo();info.header.frame_id='unknown_optical';info.width=160;info.height=120
+    info.k=[100.,0.,80.,0.,100.,60.,0.,0.,1.];info.d=[0.]*5;info.distortion_model='plumb_bob'
+    def spin(seconds):
+        end=time.monotonic()+seconds
+        while time.monotonic()<end:executor.spin_once(timeout_sec=.003)
+    def send(mode):
+        d=np.full((120,160),3000,np.uint16)
+        if mode=='occluded':d[35:85,55:105]=0
+        elif mode=='visible':d[48:72,68:92]=1500
+        msg=perception.bridge.cv2_to_imgmsg(d,'16UC1');msg.header.frame_id='unknown_optical';msg.header.stamp=driver.get_clock().now().to_msg()
+        info.header.stamp=msg.header.stamp;camera.publish(info);pub.publish(msg);spin(.07)
+    try:
+        spin(.25);send('occluded')
+        now=driver.get_clock().now().nanoseconds*1e-9
+        perception.tracker.tracks={0:Track(0,np.array([0.,0.,.1,0.]),np.eye(4)*.001,1.5,.1,now,state='dynamic')}
+        perception.tracker.next_id=1;perception.tracker.time=now
+        for _ in range(9):send('occluded')
+        assert arrays[-1].healthy
+        unknown=[o for o in arrays[-1].obstacles if o.state==o.UNKNOWN]
+        assert len(unknown)==1 and not unknown[0].observed
+        center=(unknown[0].position.x,unknown[0].position.y);cov=list(unknown[0].covariance)
+        for _ in range(3):send('occluded')
+        o=arrays[-1].obstacles[0]
+        np.testing.assert_allclose([o.position.x,o.position.y],center);np.testing.assert_allclose(o.covariance,cov)
+        assert o.velocity.x==0. and o.velocity.y==0.
+        send('visible')
+        assert any(o.id=='obstacle_0' and o.observed and o.state!=o.UNKNOWN for o in arrays[-1].obstacles)
+        for _ in range(9):send('occluded')
+        assert any(o.state==o.UNKNOWN for o in arrays[-1].obstacles)
+        for _ in range(4):send('free')
+        assert arrays[-1].healthy and not arrays[-1].obstacles
+    finally:
+        executor.shutdown();perception.destroy_node();driver.destroy_node();rclpy.shutdown()

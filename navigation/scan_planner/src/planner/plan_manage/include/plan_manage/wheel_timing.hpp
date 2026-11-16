@@ -37,6 +37,21 @@ inline bool locallyRetimeWheelSpline(UniformBspline &s, double vmax, double amax
   return false; // Never publish an unverified time allocation.
 }
 
+// A finite global time dilation is a verified last resort when local knot
+// updates do not converge. It changes timing only, never geometry or limits.
+inline bool globallyRetimeWheelSpline(UniformBspline& s,double vmax,double amax,double height_rate) {
+  if(vmax<=0 || amax<=0 || height_rate<=0) return false;
+  auto velocity=s.getDerivative();
+  auto acceleration=velocity;acceleration=acceleration.getDerivative();
+  const auto v=velocity.getControlPoint(),a=acceleration.getControlPoint();
+  double ratio=1.;
+  for(int i=0;i<v.cols();++i) ratio=std::max(ratio,std::max(v.col(i).head<2>().norm()/vmax,std::abs(v(2,i))/height_rate));
+  for(int i=0;i<a.cols();++i) ratio=std::max(ratio,std::sqrt(a.col(i).norm()/amax));
+  if(!std::isfinite(ratio)) return false;
+  s.setKnot((s.getKnot()*std::max(1.,ratio*1.01)).eval());
+  return true;
+}
+
 inline bool makeLocallyTimedWheelSpline(const std::vector<Eigen::Vector3d> &path,
                                         double vmax,double amax,double height_rate,
                                         UniformBspline &s) {
@@ -62,6 +77,29 @@ inline bool makeLocallyTimedWheelSpline(const std::vector<Eigen::Vector3d> &path
   Eigen::MatrixXd controls(3,points.size());
   for(size_t i=0;i<points.size();++i) controls.col(i)=points[i];
   s=UniformBspline(controls,3,dt);
-  return locallyRetimeWheelSpline(s,vmax,amax,height_rate);
+  return locallyRetimeWheelSpline(s,vmax,amax,height_rate) || globallyRetimeWheelSpline(s,vmax,amax,height_rate);
+}
+}
+
+namespace scan_planner {
+// A certified polyline fallback: three equal controls at every corner prevent
+// a cubic knot span from mixing points on opposite sides of that corner.
+// Each span stays on a single segment, including height-only transitions.
+inline bool makeCornerPreservingWheelSpline(const std::vector<Eigen::Vector3d>& path,
+    double vmax,double amax,double height_rate,UniformBspline& spline) {
+  if(path.empty() || vmax<=0 || amax<=0 || height_rate<=0) return false;
+  std::vector<Eigen::Vector3d> points(3,path.front());
+  for(size_t i=1;i<path.size();++i) {
+    const Eigen::Vector3d delta=path[i]-path[i-1];
+    if(!delta.allFinite()) return false;
+    const double duration=std::max(delta.head<2>().norm()/vmax,std::abs(delta.z())/height_rate);
+    const int steps=std::max(1,static_cast<int>(std::ceil(duration/.10)));
+    for(int k=1;k<steps;++k) points.push_back(path[i-1]+delta*(double(k)/steps));
+    for(int k=0;k<3;++k) points.push_back(path[i]);
+  }
+  Eigen::MatrixXd controls(3,points.size());
+  for(size_t i=0;i<points.size();++i) controls.col(i)=points[i];
+  spline=UniformBspline(controls,3,.10);
+  return locallyRetimeWheelSpline(spline,vmax,amax,height_rate) || globallyRetimeWheelSpline(spline,vmax,amax,height_rate);
 }
 }

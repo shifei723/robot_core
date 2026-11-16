@@ -31,3 +31,8 @@ reference_results/保留此前9轮汇总及中文图，原始完整记录位置�
 延迟TF真实ROS2回归在安装并source工作空间后执行：
   python3 dynabarn_ros2/test/test_delayed_laser_tf.py
 原始官方插件往返转换测试需要可选原数据，其余测试使用包内独立夹具。
+
+长期失观生命周期已更新：默认仅1 s运动预测，之后固定为UNKNOWN区域；
+未知区域参与局部硬碰撞检查，观测自由空间后清除，重新观测可恢复跟踪。
+轨迹消息UNKNOWN=3；决策日志unknown_regions与运动FRS tracks分开。
+详见 ../../scan_planner/FRS_NAVIGATION.md 文末。该更新不自动修复所有主动脱离问题。

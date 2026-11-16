@@ -5,7 +5,7 @@ source "$here/../common.sh"
 bench_require_build
 method=${1:-slash};world=${2:-0};trial=${3:-0}
 [[ "$method" == mppi || "$method" == slash ]] || exit 2
-[[ "$world" == 0 || "$world" == 6 || "$world" == 12 ]] || { echo '当前随代码提供的场景为 0、6、12';exit 2; }
+[[ "$world" == 0 || "$world" == 6 || "$world" == 12 || "$world" == 18 || "$world" == 36 || "$world" == 54 ]] || { echo '当前随代码提供的场景为 0、6、12、18、36、54';exit 2; }
 [[ "$trial" =~ ^[0-9]+$ ]] || exit 2
 if [[ "$method" == mppi ]];then default_group=spatial_mppi;else default_group=spatial_release;fi
 group=${BARN_RUN_SET:-$default_group}
@@ -21,5 +21,5 @@ here=/repo/navigation/benchmarks/static_barn
 ros2 launch "$here/benchmark.launch.py" method:="$1" world_idx:="$2" > "$here/logs/$4/${1}_${2}_${3}_launch.log" 2>&1 &
 pid=$!
 trap '\''kill -TERM "$pid" 2>/dev/null || true;wait "$pid" || true'\'' EXIT
-python3 "$here/evaluate.py" --method "$1" --world "$2" --trial "$3" --launch-pid "$pid" --output "$here/results/$4" --ros-args -p use_sim_time:=true
-' bash "$method" "$world" "$trial" "$group" 2>&1 | tee "$here/logs/$group/${method}_${world}_${trial}_evaluation.log"
+python3 "$here/evaluate.py" --method "$1" --world "$2" --trial "$3" --launch-pid "$pid" --output "$here/results/$4" --goal-tolerance "$5" --ros-args -p use_sim_time:=true
+' bash "$method" "$world" "$trial" "$group" "${BARN_GOAL_TOLERANCE:-1.0}" 2>&1 | tee "$here/logs/$group/${method}_${world}_${trial}_evaluation.log"

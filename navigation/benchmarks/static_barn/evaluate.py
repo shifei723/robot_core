@@ -110,13 +110,14 @@ class Evaluation(Node):
         if now-self.last_row>=.09:
             self.rows.append([elapsed,x,y,yaw(self.truth.rotation),self.odom.twist.twist.linear.x,self.odom.twist.twist.angular.z]);self.last_row=now
         if self.collided:self.status='collision'
-        elif math.hypot(x+2.25,y-13)<1.:self.status='success'
+        elif math.hypot(x+2.25,y-13)<self.args.goal_tolerance:self.status='success'
         elif elapsed>=self.args.timeout:self.status='timeout'
         elif self.goal_future and self.goal_future.done():
             handle=self.goal_future.result()
             if not handle.accepted:self.status='goal_rejected'
             elif self.result_future is None:self.result_future=handle.get_result_async()
             elif self.result_future.done() and self.result_future.result().status in (5,6):self.status='navigation_aborted'
+            elif self.result_future.done() and self.result_future.result().status==4:self.status='estimated_goal_only'
         if self.status:self.save()
     def save(self):
         dest=Path(self.args.output);dest.mkdir(parents=True,exist_ok=True)
@@ -134,10 +135,10 @@ class Evaluation(Node):
         result={'method':self.args.method,'world':self.args.world,'trial':self.args.trial,'status':self.status,
                 'elapsed_sim_s':elapsed,'path_length_m':driven,'reference_path_length_m':length,
                 'upstream_runner_score':metric,'speed_cap_mps':.5,'yaw_rate_cap_radps':1.,
-                'collision_signal':'Gazebo TouchPlugin','goal_tolerance_m':1.,'timeout_sim_s':self.args.timeout,
+                'collision_signal':'Gazebo TouchPlugin','goal_tolerance_m':self.args.goal_tolerance,'timeout_sim_s':self.args.timeout,
                 'configuration_sha256':hashlib.sha256(
                     Path(__file__).resolve().with_name('benchmark.launch.py').read_bytes()+
-                    Path(__file__).resolve().read_bytes()+
+                    Path(__file__).resolve().read_bytes()+str([self.args.goal_tolerance,self.args.timeout]).encode()+
                     (Path(os.environ['BENCH_WS'])/'src/The-Barn-Challenge-Ros2/jackal_helper/config/nav2.yaml').read_bytes()+
                     (Path(os.environ['BENCH_WS'])/'src/slash_planner/plan_manage/src/planner_manager.cpp').read_bytes()+
                     (Path(os.environ['BENCH_WS'])/'src/slash_planner/plan_manage/include/plan_manage/wheel_timing.hpp').read_bytes()+
@@ -155,9 +156,11 @@ class Evaluation(Node):
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--method',choices=['mppi','slash'],required=True)
     parser.add_argument('--world',type=int,default=0);parser.add_argument('--trial',type=int,default=0)
-    parser.add_argument('--timeout',type=float,default=120);parser.add_argument('--wall-timeout',type=float,default=600)
+    parser.add_argument('--goal-tolerance',type=float,default=1.);parser.add_argument('--timeout',type=float,default=120);parser.add_argument('--wall-timeout',type=float,default=600)
     parser.add_argument('--output',default=str(Path(__file__).resolve().parent/'results'));parser.add_argument('--launch-pid',type=int)
-    args,ros=parser.parse_known_args();rclpy.init(args=ros);node=Evaluation(args);last_health=0.
+    args,ros=parser.parse_known_args();
+    if not math.isfinite(args.goal_tolerance) or args.goal_tolerance<=0:parser.error('goal tolerance must be finite and positive')
+    rclpy.init(args=ros);node=Evaluation(args);last_health=0.
     try:
         while rclpy.ok() and not node.status:
             rclpy.spin_once(node,timeout_sec=.2)

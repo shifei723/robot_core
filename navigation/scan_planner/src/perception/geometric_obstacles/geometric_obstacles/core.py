@@ -30,8 +30,10 @@ class Config:
     novelty_distance: float = .06
     novelty_fraction: float = .15
     assoc_distance: float = .65
+    # Trusted motion-coasting duration, then freeze as an unknown local region.
     lost_timeout: float = 1.0
     retire_distance: float = 6.0
+    unknown_cell_size: float = .25
     measurement_sigma: float = .06
     accel_sigma: float = .8
     max_points: int = 15000
@@ -52,7 +54,7 @@ class Config:
         if min(self.measurement_sigma,self.accel_sigma,self.assoc_distance,self.lost_timeout,
                self.motion_frames,self.static_frames,self.max_cluster_extent,self.novelty_distance,
                self.geometry_mean_distance,self.geometry_relative_variance,
-               self.visibility_extent_tolerance) <= 0:
+               self.visibility_extent_tolerance,self.unknown_cell_size) <= 0:
             raise ValueError('tracking scales/counts must be positive')
 
 
@@ -79,10 +81,13 @@ class Track:
     moving: int = 0
     stopped: int = 0
     observed: bool = True
+    unknown: bool = False
     pixels: np.ndarray = field(default_factory=lambda: np.empty((0, 2), int))
     support_extent: np.ndarray | None = None
     visibility_corrected: bool = False
     observation_history: list = field(default_factory=list)
+    grounded_support: bool = False
+    unknown_cells: dict | None = None
 
 
 
@@ -268,11 +273,25 @@ class Tracker:
             raise ValueError('out-of-order frame or perception gap')
         dt = 0 if self.time is None else stamp-self.time
         self.time = stamp
-        F = np.eye(4); F[0,2] = F[1,3] = dt
-        G = np.vstack((np.eye(2)*dt*dt/2,np.eye(2)*dt))
+        # A tentative velocity prior is needed for association/filter updates,
+        # but is not evidence of motion. Retain its last measured posterior so
+        # an unmatched frame cannot turn that prior into a large moving ghost.
+        tentative_support = {identity: (t.x.copy(), t.P.copy())
+                             for identity,t in self.tracks.items()
+                             if t.state == 'tentative' and not t.unknown}
         for t in self.tracks.values():
-            t.x = F @ t.x
-            t.P = F @ t.P @ F.T + G @ G.T * c.accel_sigma**2
+            if not t.unknown:
+                # Propagate only up to the trusted-loss boundary, even if this
+                # frame arrives just after it. Thereafter freeze the local region.
+                h = min(dt,max(0.,t.last_seen+c.lost_timeout-(stamp-dt)))
+                A=np.eye(4); A[0,2]=A[1,3]=h
+                B=np.vstack((np.eye(2)*h*h/2,np.eye(2)*h))
+                t.x = A @ t.x
+                t.P = A @ t.P @ A.T + B @ B.T * c.accel_sigma**2
+                if stamp-t.last_seen > c.lost_timeout+1e-9:
+                    t.unknown=True; t.x[2:]=0.
+                    t.P[2:,:]=0.; t.P[:,2:]=0.
+                    t.observation_history=[]
             t.observed = False; t.pixels = np.empty((0,2),int)
         ids = list(self.tracks)
         cost = np.full((len(ids),len(clusters)),1e6)
@@ -283,12 +302,17 @@ class Tracker:
                 z, observation_R, _, shift = self.observation(t, cl, stamp)
                 delta = z-(t.x[:2]+shift)
                 mahal = float(delta @ np.linalg.solve(t.P[:2,:2]+observation_R,delta))
-                if np.linalg.norm(delta) <= c.assoc_distance and mahal < 16 and abs(cl.center[2]-t.z) < .6:
+                if np.linalg.norm(delta) <= (max(c.assoc_distance,3*np.sqrt(max(t.P[0,0],t.P[1,1]))) if t.unknown else c.assoc_distance) and mahal < 16 and abs(cl.center[2]-t.z) < .6:
                     cost[i,j] = mahal + abs(cl.radius-t.radius)
         assigned = set()
         for i,j in zip(*linear_sum_assignment(cost)):
             if cost[i,j] >= 1e6: continue
             assigned.add(j); cl = clusters[j]; t = self.tracks[ids[i]]
+            if t.unknown:
+                # Reactivation is a new velocity-estimation window, not a
+                # finite difference over the entire missing interval.
+                t.unknown=False; t.unknown_cells=None; t.x[2:]=0.; t.P[2:,2:]=np.eye(2)*.4**2
+                t.observation_history=[];t.moving=t.stopped=0;t.state='tentative'
             z, R, t.visibility_corrected, shift = self.observation(t, cl, stamp)
             t.x[:2] += shift
             t.observation_history = [(tt, pp+shift) for tt,pp in t.observation_history]
@@ -302,6 +326,8 @@ class Tracker:
                 furthest = np.maximum(np.abs(cl.bounds[0,:2]-t.x[:2]),np.abs(cl.bounds[1,:2]-t.x[:2]))
                 t.radius = max(t.radius,float(np.linalg.norm(furthest)+.08))
             self.remember_extent(t, cl, stamp)
+            if cl.bounds is not None and cl.bounds[0,2]<=c.ground_z+c.ground_band+.12:
+                t.grounded_support=True
             t.observed = True; t.last_seen = stamp; t.pixels = cl.pixels
             speed = np.linalg.norm(t.x[2:])
             coherent = (cl.geometry_mean is None or
@@ -317,17 +343,33 @@ class Tracker:
             sustained = (span>=.3 and np.linalg.norm(displacement_velocity)>c.motion_on and
                          np.linalg.norm(displacement_velocity-t.x[2:])<.12)
             evidence = (cl.novelty >= c.novelty_fraction and coherent) or sustained
+            # Static confirmation is no longer valid once the velocity estimate
+            # leaves the stationary band. Do not keep writing a departing object
+            # into static occupancy while waiting for full dynamic confirmation.
+            if t.state == 'static' and speed > c.motion_off:
+                t.state = 'tentative'
             # Established motion survives an ambiguous partial face, while new
             # motion needs geometric evidence in addition to a velocity estimate.
             t.moving = t.moving+1 if speed > c.motion_on and (evidence or t.state == 'dynamic') else 0
             t.stopped = t.stopped+1 if speed < c.motion_off else 0
             if t.moving >= c.motion_frames: t.state = 'dynamic'
             elif t.stopped >= c.static_frames: t.state = 'static'
+        for identity,(position,covariance) in tentative_support.items():
+            t = self.tracks[identity]
+            if not t.observed:
+                # Unconfirmed residuals become fixed unknown support immediately.
+                # Keep measured positional uncertainty, never coast the .4 m/s
+                # initialization prior. Free-space evidence still controls removal.
+                t.x = position; t.P = covariance
+                t.x[2:] = 0.; t.P[2:,:] = 0.; t.P[:,2:] = 0.
+                t.unknown = True; t.observation_history = []
         for j,cl in enumerate(clusters):
             if j in assigned: continue
             identity = self.next_id; self.next_id += 1
             self.tracks[identity] = Track(identity,np.r_[cl.center[:2],0.,0.],np.diag([c.measurement_sigma**2]*2+[.4**2]*2),cl.center[2],cl.radius,stamp,pixels=cl.pixels)
             self.remember_extent(self.tracks[identity], cl, stamp)
+            if cl.bounds is not None and cl.bounds[0,2]<=c.ground_z+c.ground_band+.12:
+                self.tracks[identity].grounded_support=True
         return list(self.tracks.values())
 
     def process(self, points, pixels, stamp):
@@ -338,10 +380,41 @@ class Tracker:
             self.reference_time = stamp
         return tracks
 
+    def carve_unknown(self, track, depth, K, T):
+        """Evidence-only carving of possible centres of ground-supported objects.
+
+        Contact with the observed ground band is required. A connected grounded
+        object must intersect that band; a centre cell is eliminated only when
+        its whole object-radius-expanded contact patch has valid rays beyond it.
+        Cells not seen, occluded, or covered by invalid/no-return depth persist.
+        The parent posterior remains frozen for association. Each published cell
+        has a fixed ID/geometry and vanishes only after this depth certificate.
+        """
+        c=self.cfg; size=c.unknown_cell_size; half=size/2
+        if track.unknown_cells is None:
+            sigma=3*np.sqrt(max(track.P[0,0],track.P[1,1]))
+            lo=np.floor((track.x[:2]-sigma-half)/size).astype(int)
+            hi=np.floor((track.x[:2]+sigma+half)/size).astype(int)
+            if np.prod(hi-lo+1)>256:
+                track.grounded_support=False  # Fall back to the unchanged whole-region guard.
+                return
+            track.unknown_cells={}
+            for ix in range(lo[0],hi[0]+1):
+                for iy in range(lo[1],hi[1]+1):
+                    centre=(np.array([ix,iy])+.5)*size
+                    if np.linalg.norm(np.maximum(np.abs(centre-track.x[:2])-half,0))<=sigma+1e-9:
+                        track.unknown_cells[(ix,iy)]=centre
+        # Include the object's measured support radius when proving a possible
+        # centre empty: seeing a gap under an overhang must not remove its body.
+        for key,centre in list(track.unknown_cells.items()):
+            if ground_patch_free(centre,half+track.radius,
+                    c.ground_z+c.ground_band+.02,depth,K,T,c.min_depth,c.max_depth):
+                del track.unknown_cells[key]
+
     def retire(self, stamp, depth, K, T):
         """Delete missing tracks only with observed free-space or outside local scope.
-        Occlusion is a per-track prediction, not a sensor failure. Keep its state
-        and growing covariance until observed free-space or local-scope retirement.
+        Short occlusions predict; long losses freeze as unknown local regions.
+        Unknown regions need actual free-space evidence or leave local scope.
         """
         c = self.cfg; healthy = True
         for identity,t in list(self.tracks.items()):
@@ -352,6 +425,10 @@ class Tracker:
                 del self.tracks[identity]; continue
             if np.linalg.norm(t.x[:2]-T[:2,3]) > c.retire_distance:
                 del self.tracks[identity]; continue
+            if t.unknown and t.grounded_support:
+                self.carve_unknown(t,depth,K,T)
+                if t.unknown_cells == {}: del self.tracks[identity]
+                continue
             sigma = 3*np.sqrt(max(t.P[0,0],t.P[1,1]))
             r = t.radius+sigma
             world = np.array([[t.x[0]+dx,t.x[1]+dy,t.z+dz] for dx in [-r,0,r] for dy in [-r,0,r] for dz in [-.1,.1]])
@@ -361,9 +438,57 @@ class Tracker:
                 uv = (optical[:,:2]/optical[:,2,None]) * [K[0,0],K[1,1]] + [K[0,2],K[1,2]]
                 u,v = np.rint(uv).astype(int).T
                 if np.all((u>=0)&(v>=0)&(u<depth.shape[1])&(v<depth.shape[0])):
-                    measured = depth[v,u]
-                    free = np.all(np.isfinite(measured)&(measured>optical[:,2]+.15)&(measured<=c.max_depth))
+                    if t.unknown:
+                        # Check every pixel in the enclosing projected region;
+                        # sparse support samples can miss a thin occluding object.
+                        measured=depth[v.min():v.max()+1,u.min():u.max()+1]
+                        free=np.all(np.isfinite(measured)&(measured>optical[:,2].max()+.15)&(measured<=c.max_depth))
+                    else:
+                        measured = depth[v,u]
+                        free = np.all(np.isfinite(measured)&(measured>optical[:,2]+.15)&(measured<=c.max_depth))
             if free: del self.tracks[identity]
             elif not np.all(np.isfinite(t.x)) or not np.all(np.isfinite(t.P)):
                 healthy = False
         return healthy
+
+
+def laser_region_free(center, radius, origin, angles, ranges, max_range=5., margin=.15):
+    """Clear a disc only when its entire angular support has valid free rays.
+    No-return is free only to max_range; NaN/zero/occlusion are not evidence.
+    Angles are monotone unwrapped world-frame beam angles (at most one turn).
+    """
+    c=np.asarray(center)-np.asarray(origin);d=float(np.linalg.norm(c))
+    angles=np.asarray(angles);ranges=np.asarray(ranges)
+    if len(angles)<2 or not np.isfinite(radius) or radius<=0 or d<=radius:return False
+    bearing=np.arctan2(c[1],c[0]);bearing+=2*np.pi*round((np.mean(angles)-bearing)/(2*np.pi))
+    half=np.arcsin(min(1.,radius/d))
+    if bearing-half<angles[0] or bearing+half>angles[-1]:return False
+    selected=(angles>=bearing-half)&(angles<=bearing+half)
+    if selected.sum()<2:return False
+    a=angles[selected];raw=ranges[selected];along=c[0]*np.cos(a)+c[1]*np.sin(a)
+    exit_distance=along+np.sqrt(np.maximum(0.,radius**2-d*d+along**2))
+    valid=(np.isfinite(raw)&(raw>0))|np.isposinf(raw)
+    return bool(np.all(valid & (np.minimum(raw,max_range)>exit_distance+margin)))
+
+
+def ground_patch_free(center, half, height, depth, K, T, min_depth=.3, max_depth=3., margin=.15):
+    """Conservative per-pixel contact-plane certificate; invalid is never free.
+
+    Check the entire enclosing image rectangle, comparing each depth against its
+    own ray/plane intersection rather than a global farthest-corner depth.
+    Full footprint visibility and finite ranges are mandatory.
+    """
+    if T[2,3]<=height or half<=0:return False
+    corners=np.array([[center[0]+dx,center[1]+dy,height]
+                      for dx in [-half,half] for dy in [-half,half]])
+    optical=(corners-T[:3,3])@T[:3,:3]
+    if np.any(optical[:,2]<min_depth) or np.any(optical[:,2]+margin>max_depth):return False
+    uv=optical[:,:2]/optical[:,2,None]*[K[0,0],K[1,1]]+[K[0,2],K[1,2]]
+    lo=np.floor(uv.min(axis=0)).astype(int);hi=np.ceil(uv.max(axis=0)).astype(int)
+    if np.any(lo<0) or hi[0]>=depth.shape[1] or hi[1]>=depth.shape[0]:return False
+    vv,uu=np.mgrid[lo[1]:hi[1]+1,lo[0]:hi[0]+1]
+    rays=np.stack(((uu-K[0,2])/K[0,0],(vv-K[1,2])/K[1,1],np.ones_like(uu)),axis=-1)@T[:3,:3].T
+    if np.any(rays[:,:,2]>=-1e-8):return False
+    expected=(height-T[2,3])/rays[:,:,2]
+    measured=depth[lo[1]:hi[1]+1,lo[0]:hi[0]+1]
+    return bool(np.all(np.isfinite(measured)&(measured>expected+margin)&(measured<=max_depth)))

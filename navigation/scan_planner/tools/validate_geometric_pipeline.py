@@ -6,6 +6,7 @@ Actual geometric_obstacles, grid_map, planner and controller binaries consume RO
 import argparse
 import hashlib
 import json
+import gzip
 import math
 import os
 from pathlib import Path
@@ -22,6 +23,20 @@ def main():
     parser.add_argument('--static-prior',action='store_true')
     parser.add_argument('--shifted-map-frame',action='store_true')
     parser.add_argument('--duration',type=float,default=40)
+    parser.add_argument('--coast-timeout',type=float,default=1.0)
+    parser.add_argument('--robot-speed',type=float,default=.3)
+    parser.add_argument('--robot-yaw-rate',type=float,default=.5)
+    parser.add_argument('--robot-acceleration',type=float,default=None)
+    parser.add_argument('--robot-braking',type=float,default=.3)
+    parser.add_argument('--height-spatial-tracking',action='store_true')
+    parser.add_argument('--indoor-scenario',choices=['crossings','follow_exit','dual_crossing'],default='crossings')
+    parser.add_argument('--beam-clearance',type=float,default=None)
+    parser.add_argument('--goal-height-tolerance',type=float,default=None)
+    parser.add_argument('--record-period',type=float,default=0.)
+    parser.add_argument('--compress-trace',action='store_true',help='Losslessly compress recorded trace after simulation')
+    parser.add_argument('--search-budget',type=float,default=None)
+    parser.add_argument('--minimum-leg-height',type=float,default=None)
+    parser.add_argument('--search-heuristic',type=float,default=None)
     parser.add_argument('--domain',type=int,default=191)
     parser.add_argument('--timing-policy',choices=['soft','hard'],default='soft')
     parser.add_argument('--prediction',choices=['cv','frs'],default='frs')
@@ -36,11 +51,27 @@ def main():
     parser.add_argument('--encounter-speed',type=float,default=.22)
     parser.add_argument('--encounter-side',type=float,default=1.1)
     args=parser.parse_args()
+    if not math.isfinite(args.record_period) or args.record_period<0:
+        parser.error('record period must be finite and nonnegative')
+    for value in [args.beam_clearance,args.goal_height_tolerance,args.search_budget]:
+        if value is not None and (not math.isfinite(value) or value<=0):parser.error('invalid height experiment setting')
+    if args.minimum_leg_height is not None and not (.13<=args.minimum_leg_height<.25):
+        parser.error('minimum leg height must lie in [0.13,0.25) m')
+    if args.search_heuristic is not None and (not math.isfinite(args.search_heuristic) or args.search_heuristic<1):
+        parser.error('search heuristic must be finite and >=1')
+    # Preserve the previous default: planner .3, tracker .5 m/s^2.
+    tracking_acceleration=.5 if args.robot_acceleration is None else args.robot_acceleration
+    if args.robot_acceleration is None:args.robot_acceleration=.3
+    if not all(math.isfinite(x) and x>0 for x in
+               [args.robot_speed,args.robot_yaw_rate,args.robot_acceleration,args.robot_braking]):
+        parser.error('robot motion limits must be finite and positive')
+    if args.robot_yaw_rate>1.:
+        parser.error('robot yaw rate exceeds controller limit of 1 rad/s')
     if min(args.frs_weight,args.spatial_weight)<0 or min(args.encounter_speed,args.encounter_side)<=0:
         parser.error('weights must be nonnegative and encounter scales positive')
     if args.encounter_end_y is None:args.encounter_end_y=args.encounter_side
-    numeric=[args.camera_focal,args.measurement_sigma,args.accel_sigma,args.frs_weight,args.spatial_weight,args.encounter_speed,args.encounter_side,args.encounter_end_y,args.encounter_x,args.encounter_trigger_x]
-    if not all(math.isfinite(x) for x in numeric) or min(args.camera_focal,args.measurement_sigma,args.accel_sigma)<=0 or args.encounter_end_y<=-args.encounter_side:
+    numeric=[args.coast_timeout,args.camera_focal,args.measurement_sigma,args.accel_sigma,args.frs_weight,args.spatial_weight,args.encounter_speed,args.encounter_side,args.encounter_end_y,args.encounter_x,args.encounter_trigger_x]
+    if not all(math.isfinite(x) for x in numeric) or min(args.coast_timeout,args.camera_focal,args.measurement_sigma,args.accel_sigma)<=0 or args.encounter_end_y<=-args.encounter_side:
         parser.error('invalid camera, uncertainty, or encounter parameters')
     encounter_started=None
     multi_specs=[{'id':'truth_0','x':1.8,'start_y':-1.1,'end_y':.8,'speed':.22,'trigger_x':.6},
@@ -52,11 +83,15 @@ def main():
     reference_path=Path(__file__).resolve().parents[1]/'src/planner/plan_manage/config/simulator.yaml'
     reference=yaml.safe_load(reference_path.read_text())['mockamap_node']['ros__parameters']
     indoor=args.case=='indoor_turn_height'
+    if args.beam_clearance is not None:reference['indoor.beam_clearance']=args.beam_clearance
     if indoor:
         goal_xy=np.array([4.,4.7])
         multi_specs=[{'id':'truth_0','start':[1.8,-1.1],'end':[1.8,.8],'speed':args.encounter_speed,'trigger_axis':0,'trigger_value':.5},
                      {'id':'truth_1','start':[2.9,1.5],'end':[4.85,1.5],'speed':args.encounter_speed,'trigger_axis':1,'trigger_value':.2},
                      {'id':'truth_2','start':[2.9,3.6],'end':[4.85,3.6],'speed':args.encounter_speed,'trigger_axis':1,'trigger_value':2.25}]
+        if args.indoor_scenario in ('follow_exit','dual_crossing'):
+            from indoor_scenario import indoor_actors,actor_state
+            multi_specs=indoor_actors(args.encounter_speed,args.indoor_scenario)
     static=[([-2.,-1.65,0.],[8.,-1.55,2.]),([-2.,1.55,0.],[8.,1.65,2.]),([7.9,-1.65,0.],[8.,1.65,2.])]
     if indoor:
         static=[([-2.,-1.65,0.],[5.65,-1.55,2.]),
@@ -88,7 +123,7 @@ def main():
     optical_to_body=np.array([[0.,0.,1.],[-1.,0.,0.],[0.,-1.,0.]])
     state=np.array([0.,0.,0.]);base_z=.2822
     command=np.zeros(2);last_command=0.;start=None
-    data={'tracks':None,'decision':None,'map':np.empty((0,3)),'plans':0,'filtered':None,'status':'','height_target':.2822}
+    data={'tracks':None,'decision':None,'map':np.empty((0,3)),'plans':0,'filtered':None,'filtered_stamp':None,'status':'','height_target':.2822,'clouds':{}}
     histories={'poses':[],'tracks':[],'decisions':[],'maps':[],'plans':[],'sensors':[],'perception_stats':[]}
     snapshots=[];processes=[];logs=[]
     pubs={
@@ -101,8 +136,8 @@ def main():
         nonlocal last_command
         command[:]=m.linear.x,m.angular.z;last_command=time.monotonic()
     def on_tracks(m):
-        row={'t':elapsed(),'healthy':m.healthy,'status':m.status,'age':(node.get_clock().now().nanoseconds-(m.header.stamp.sec*10**9+m.header.stamp.nanosec))*1e-9,
-             'objects':[{'id':o.id,'state':o.state,'observed':o.observed,'p':[o.position.x,o.position.y],
+        row={'t':elapsed(),'stamp':m.header.stamp.sec+m.header.stamp.nanosec*1e-9,'healthy':m.healthy,'status':m.status,'age':(node.get_clock().now().nanoseconds-(m.header.stamp.sec*10**9+m.header.stamp.nanosec))*1e-9,
+             'objects':[{'id':o.id,'state':o.state,'observed':o.observed,'last_observed':o.last_observed.sec+o.last_observed.nanosec*1e-9,'p':[o.position.x,o.position.y],
                          'v':[o.velocity.x,o.velocity.y],'radius':o.radius,'covariance':list(o.covariance)} for o in m.obstacles]}
         data['tracks']=row;histories['tracks'].append(row)
     def on_decision(m):
@@ -112,7 +147,12 @@ def main():
         data['map']=pts;histories['maps'].append({'t':elapsed(),'points':len(pts)})
     def on_plan(m):
         data['plans']+=1;histories['plans'].append({'t':elapsed(),'points':[[p.x,p.y,p.z] for p in m.pos_pts]})
-    def on_filtered(m):data['filtered']=bridge.imgmsg_to_cv2(m).copy()
+    def on_filtered(m):
+        data['filtered']=bridge.imgmsg_to_cv2(m).copy()
+        data['filtered_stamp']=m.header.stamp.sec+m.header.stamp.nanosec*1e-9
+    def on_cloud(name,m):
+        pts=np.asarray(point_cloud2.read_points_numpy(m,field_names=('x','y','z'),skip_nans=True)).reshape(-1,3)
+        data['clouds'][name]={'stamp':m.header.stamp.sec+m.header.stamp.nanosec*1e-9,'points':pts}
     subs=[node.create_subscription(String,'/dynamic_obstacles/perception_stats',lambda m:histories['perception_stats'].append({'t':elapsed(),**json.loads(m.data)}),10),
           node.create_subscription(Float32,'/sim/leg_height_cmd',lambda m:data.update(height_target=m.data+.0322),10),
           node.create_subscription(Twist,'/sim/cmd_vel',on_cmd,10),
@@ -122,6 +162,9 @@ def main():
           node.create_subscription(PointCloud2,'/grid_map/occupancy',on_map,qos_profile_sensor_data),
           node.create_subscription(Bspline,'/planning/bspline',on_plan,10),
           node.create_subscription(Image,'/dynamic_obstacles/depth_static',on_filtered,10)]
+    if args.indoor_scenario in ('follow_exit','dual_crossing'):
+        for name in ['static','dynamic','unknown']:
+            subs.append(node.create_subscription(PointCloud2,'/dynamic_obstacles/cloud_'+name,lambda m,n=name:on_cloud(n,m),qos_profile_sensor_data))
     params={'grid_map.static_prior_enabled':args.static_prior,'grid_map.sensor_type':'depth','grid_map.need_extrinsic':False,
       'grid_map.require_camera_info':True,'grid_map.dynamic_mask_sentinel':65535,
       'grid_map.skip_invalid_depth':True,'grid_map.k_depth_scaling_factor':1000.,
@@ -129,15 +172,23 @@ def main():
       'grid_map.double_cylinder_radius':.43,'grid_map.double_cylinder_offset':0.,
       'grid_map.sliding_map_size_x':10.,'grid_map.sliding_map_size_y':6.,'grid_map.sliding_map_size_z':3.,
       'grid_map.skip_pixel':2,'grid_map.local_update_range_y':3.,'grid_map.local_update_range_z':1.5,
+      'manager.execution_radius':.25,'manager.execution_offset':.18,
       'manager.wheel_grid_trajectory':True,'manager.wheel_search_timeout':.25,'manager.dynamic_frs_weight':args.spatial_weight,
       'fsm.collision_horizon':3.,'fsm.collision_step':.05,'fsm.replan_interval':.4,
-      'manager.max_vel':.3,'manager.max_acc':.3,'optimization.max_vel':.3,'optimization.max_acc':.3,
+      'manager.max_vel':args.robot_speed,'manager.max_acc':args.robot_acceleration,
+      'optimization.max_vel':args.robot_speed,'optimization.max_acc':args.robot_acceleration,
       'fsm.max_replan_fail_count':1000}
     if indoor:
         params.update({'manager.wheel_search_timeout':1.0,'grid_map.sliding_map_size_y':12.,'grid_map.sliding_map_size_x':12.,
                        'grid_map.local_update_range_y':5.,'grid_map.body_height':.328,
                        'grid_map.obstacles_inflation_z_down':.328,'grid_map.double_cylinder_radius':.50,
                        'grid_map.ceiling_margin':.05,'grid_map.height_min':.1722})
+    if args.search_budget is not None:params['manager.wheel_search_timeout']=args.search_budget
+    if args.search_heuristic is not None:params['manager.wheel_search_heuristic']=args.search_heuristic
+    if args.minimum_leg_height is not None:
+        params.update({'grid_map.height_min':args.minimum_leg_height+.0322,
+                       'manager.execution_height_min':args.minimum_leg_height+.0322,
+                       'manager.height_lattice_anchor':args.minimum_leg_height+.0322})
     paramfile=args.output/'planner_override.yaml';paramfile.write_text(yaml.safe_dump({'scan_planner_node':{'ros__parameters':params}}))
     def launch(package,exe,arguments):
         path=Path(get_package_prefix(package))/'lib'/package/exe
@@ -175,12 +226,16 @@ def main():
         launch('map_generator','map_pub',['-p',f'file_name:={prior_file}','-p',f'frame_id:={prior_frame}',
                '-p','downsample_res:=0.04','-r','global_cloud:=/sim/static_prior'])
     launch('geometric_obstacles','geometric_obstacles_node',['-p',f'static_prior_enabled:={str(args.static_prior).lower()}',
-        '-p','static_prior_topic:=/sim/static_prior','-p',f'measurement_sigma:={args.measurement_sigma}','-p',f'accel_sigma:={args.accel_sigma}','-p','depth_topic:=/sim/depth','-p','camera_info_topic:=/sim/camera_info'])
+        '-p','static_prior_topic:=/sim/static_prior','-p',f'lost_timeout:={args.coast_timeout}','-p',f'measurement_sigma:={args.measurement_sigma}','-p',f'accel_sigma:={args.accel_sigma}','-p','depth_topic:=/sim/depth','-p','camera_info_topic:=/sim/camera_info'])
     launch('scan_planner','scan_planner_node',['--params-file',str(Path(get_package_share_directory('scan_planner'))/'config/planner.yaml'),
        '--params-file',str(paramfile),'-r','body_pose:=/sim/odom','-r','sensor_pose:=/dynamic_obstacles/camera_pose',
        '-r','depth:=/dynamic_obstacles/depth_static'])
     launch('scan_planner','closed_loop_controller',['-p',f'static_prior_required:={str(args.static_prior).lower()}','-p',f'dynamic_soft_constraint:={str(args.timing_policy=="soft").lower()}','-p',f'dynamic_frs_weight:={args.frs_weight}','-p','dynamic_horizon:=3.0','-p','dynamic_input:=array','-p',f'dynamic_prediction:={args.prediction}',
-       '-p','height_safety_enabled:=true','-p','odom_twist_in_world:=true','-r','cloud:=/dynamic_obstacles/cloud_static','-p','max_vx:=0.3','-p','max_vyaw:=0.5',
+       '-p','height_safety_enabled:=true','-p','odom_twist_in_world:=true','-r','cloud:=/dynamic_obstacles/cloud_static',
+       '-p',f'max_vx:={args.robot_speed}','-p',f'max_vyaw:={args.robot_yaw_rate}',
+       '-p',f'static_cruise_speed:={args.robot_speed}','-p',f'static_acceleration_limit:={tracking_acceleration}',
+       '-p',f'dynamic_braking_deceleration:={args.robot_braking}',
+       '-p',f'height_spatial_tracking:={str(args.height_spatial_tracking).lower()}',
        '-r','body_pose:=/sim/odom','-r','cmd_vel:=/sim/cmd_vel',
        '-r','leg_height_cmd:=/sim/leg_height_cmd','-r','planning/go2_execution_frozen:=/planning/go2_execution_frozen'])
     def moving(t):
@@ -190,8 +245,10 @@ def main():
                 start_t=multi_onsets.get(spec['id'],{}).get('t')
                 age=0. if start_t is None else max(0.,t-start_t)
                 if indoor:
-                    a=np.array(spec['start']);b=np.array(spec['end']);length=np.linalg.norm(b-a)
-                    point=a+(b-a)*min(1.,spec['speed']*age/length)
+                    if args.indoor_scenario in ('follow_exit','dual_crossing'):point,_=actor_state(spec,age)
+                    else:
+                        a=np.array(spec['start']);b=np.array(spec['end']);length=np.linalg.norm(b-a)
+                        point=a+(b-a)*min(1.,spec['speed']*age/length)
                     objects.append((np.r_[point,0.],np.array([.22,.22,.9])))
                     continue
                 direction=np.sign(spec['end_y']-spec['start_y'])
@@ -232,7 +289,21 @@ def main():
       'arrival_criterion':'distance < 0.16 m AND speed < 0.01 m/s AND controller GOAL_REACHED',
       'goal':goal_xy.tolist(),'camera_intrinsics':[fx,fy,cx,cy],'sensor_size':[width,height],'static_boxes':static}
     if indoor:summary['scene_reference']={'path':str(reference_path),'sha256':hashlib.sha256(reference_path.read_bytes()).hexdigest(),'beam_clearance':reference['indoor.beam_clearance'],'beam_depth':reference['indoor.beam_depth'],'motion':'Ground-plane linear segments, alternating crossings as in combined experiment; deterministic progress triggers; geometry adapted to L corridor.'}
-    summary['experiment_parameters']={'timing_policy':args.timing_policy,'prediction':args.prediction,'frs_weight':args.frs_weight,
+    if indoor and args.indoor_scenario in ('follow_exit','dual_crossing'):
+        summary['scene_reference']['motion']='Bounded stop-to-stop motion; simultaneous opposing crossings at the turn' if args.indoor_scenario=='dual_crossing' else 'Bounded stop-to-stop polyline motion, actor 2 follows then exits before lintel'
+        summary['scenario_sha256']=hashlib.sha256(Path(__file__).with_name('indoor_scenario.py').read_bytes()).hexdigest()
+        summary['actor_motion']={'acceleration':.4,'corner_pause':.25}
+    if args.goal_height_tolerance is not None:
+        summary['arrival_criterion']+=f' AND abs(base_z-0.2822) <= {args.goal_height_tolerance}'
+    summary['experiment_parameters']={'height_spatial_tracking':args.height_spatial_tracking,
+      'indoor_scenario':args.indoor_scenario,'beam_clearance':reference['indoor.beam_clearance'],
+      'goal_height_tolerance':args.goal_height_tolerance,'record_period':args.record_period,
+      'search_budget':params['manager.wheel_search_timeout'],
+      'minimum_leg_height':args.minimum_leg_height,
+      'search_heuristic':args.search_heuristic,
+      'robot_speed':args.robot_speed,'robot_yaw_rate':args.robot_yaw_rate,
+      'robot_acceleration':args.robot_acceleration,'tracking_acceleration':tracking_acceleration,'robot_braking':args.robot_braking,
+      'coast_timeout':args.coast_timeout,'timing_policy':args.timing_policy,'prediction':args.prediction,'frs_weight':args.frs_weight,
       'spatial_weight':args.spatial_weight,'camera_focal':args.camera_focal,'encounter_end_y':args.encounter_end_y,'measurement_sigma':args.measurement_sigma,'accel_sigma':args.accel_sigma,'encounter_trigger_x':args.encounter_trigger_x,
       'encounter_x':args.encounter_x,'encounter_speed':args.encounter_speed,'encounter_side':args.encounter_side}
     if args.case=='multi_encounter' or indoor:summary['multi_specs']=multi_specs;summary['multi_onsets']=multi_onsets
@@ -252,6 +323,7 @@ def main():
     summary['route_waypoints']=[p.tolist() for p in route]
     summary['waypoint_events']=[]
     goal_sent=False;next_frame=0.;next_snapshot=0.;last=time.monotonic();minimum=float('inf')
+    last_record=-1.;last_record_key=None
     try:
         start=time.monotonic()
         while elapsed()<args.duration:
@@ -294,11 +366,13 @@ def main():
                     info=CameraInfo();info.header.frame_id='sim_optical';info.header.stamp=stamp;info.width=width;info.height=height
                     info.k=[fx,0.,cx,0.,fy,cy,0.,0.,1.];pubs['info'].publish(info)
                     img=bridge.cv2_to_imgmsg(depth,'16UC1');img.header=info.header;pubs['depth'].publish(img)
-                histories['sensors'].append({'t':t,'published':not dropped})
+                histories['sensors'].append({'t':t,'stamp':stamp.sec+stamp.nanosec*1e-9,'published':not dropped})
                 if t>=next_snapshot:
                     next_snapshot=t+.4
                     snapshots.append({'t':t,'pose':state.copy(),'base_z':base_z,'depth':depth,'map':data['map'][::3].copy(),
-                                      'filtered':data['filtered'],'decision':data['decision'],'tracks':data['tracks']})
+                                      'filtered':data['filtered'],'filtered_stamp':data['filtered_stamp'],'source_stamp':stamp.sec+stamp.nanosec*1e-9,
+                                      'camera_R':R.copy(),'camera_origin':origin.copy(),'decision':data['decision'],'tracks':data['tracks'],
+                                      'clouds':{name:{'stamp':x['stamp'],'points':x['points'].copy()} for name,x in data['clouds'].items()}})
             if t>3 and not goal_sent and data['tracks'] is not None and data['tracks']['healthy'] and len(data['map'])>20:
                 goal=PoseStamped();goal.header.frame_id='world';goal.header.stamp=stamp;goal.pose.position.x=float(route[route_index][0]);goal.pose.position.y=float(route[route_index][1]);goal.pose.position.z=.2822;goal.pose.orientation.w=1.
                 pubs['goal'].publish(goal);goal_sent=True;summary.setdefault('goal_sent_at',t)
@@ -312,8 +386,11 @@ def main():
                     if base_z+.328>lo[2]:clearance.append(horizontal)
                 else:clearance.append(horizontal)
             gap=min(clearance);minimum=min(minimum,gap)
-            histories['poses'].append({'t':t,'pose':state.tolist(),'base_z':base_z,'v':float(speed),'w':float(yawrate),'clearance':gap,'status':data['status'],'height_target':data['height_target'],'beam_margin':beam_margin,
-                'truth':[{'id':multi_specs[i]['id'] if args.case=='multi_encounter' or indoor else 'truth_0','p':c[:2].tolist(),'half':s[:2].tolist()} for i,(c,s) in enumerate(moving(t))]})
+            record_key=(data['status'],abs(speed)<.01,abs(speed)<.03)
+            if t-last_record>=args.record_period or record_key!=last_record_key or np.linalg.norm(state[:2]-goal_xy)<.16:
+                histories['poses'].append({'t':t,'pose':state.tolist(),'base_z':base_z,'v':float(speed),'w':float(yawrate),'clearance':gap,'status':data['status'],'height_target':data['height_target'],'beam_margin':beam_margin,
+                    'truth':[{'id':multi_specs[i]['id'] if args.case=='multi_encounter' or indoor else 'truth_0','p':c[:2].tolist(),'half':s[:2].tolist()} for i,(c,s) in enumerate(moving(t))]})
+                last_record=t;last_record_key=record_key
             if gap<0:summary['collision']=True
             if route_index<len(route)-1 and goal_sent and np.linalg.norm(state[:2]-route[route_index])<.16 and abs(speed)<.01 and data['status']=='GOAL_REACHED':
                 summary['waypoint_events'].append({'t':t,'index':route_index,'pose':state.tolist()})
@@ -321,7 +398,9 @@ def main():
             if route_index==len(route)-1 and np.linalg.norm(state[:2]-goal_xy)<.16:
                 summary.setdefault('goal_region_time',t)
                 if abs(speed)<.01 and data['status']=='GOAL_REACHED':
-                    summary['reached']=True;summary['arrival_time']=t;break
+                    summary.setdefault('position_stop_time',t)
+                    if args.goal_height_tolerance is None or abs(base_z-.2822)<=args.goal_height_tolerance:
+                        summary['reached']=True;summary['arrival_time']=t;break
             rclpy.spin_once(node,timeout_sec=.005)
         summary.update(duration=elapsed(),final_pose=state.tolist(),min_clearance=minimum,plans=data['plans'],
             map_messages=len(histories['maps']),track_messages=len(histories['tracks']),decision_messages=len(histories['decisions']),
@@ -346,7 +425,9 @@ def main():
             try:proc.wait(timeout=5)
             except subprocess.TimeoutExpired:os.killpg(proc.pid,signal.SIGKILL);proc.wait()
         for f in logs:f.close()
-        (args.output/'trace.json').write_text(json.dumps(histories,ensure_ascii=False))
+        if args.compress_trace:
+            with gzip.open(args.output/'trace.json.gz','wt',encoding='utf-8',compresslevel=3) as f:json.dump(histories,f,ensure_ascii=False)
+        else:(args.output/'trace.json').write_text(json.dumps(histories,ensure_ascii=False))
         np.savez_compressed(args.output/'snapshots.npz',frames=np.array(snapshots,dtype=object))
         (args.output/'summary.json').write_text(json.dumps(summary,indent=2,ensure_ascii=False))
         node.destroy_node();rclpy.shutdown()

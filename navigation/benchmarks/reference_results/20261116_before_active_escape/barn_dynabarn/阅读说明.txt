@@ -1,0 +1,43 @@
+当前算法 BARN / DynaBARN 统一复测（2026-11-16）
+
+先看 report/benchmark_review.pdf。全部21次完成，未修改论文、未提交Git。
+静态：BARN18/36/54×两方法×每图两次，共12次；本文6/6、MPPI6/6。
+成功运行平均到达时间：本文22.88秒，MPPI26.00秒；全组最小采样净距分别
+0.0528米、0.1708米。因此需同时呈现效率与净距，不仅描述速度更快。
+动态：DynaBARN world_2，8个圆柱；0/7/14秒初相位×三方法，共9次。
+软FRS 2/3，成功均值45.85秒，1次碰撞；硬FRS 1/3，70.60秒，2次碰撞；
+MPPI 0/3，3次碰撞，没有可定义的成功到达时间。本批无超时、启动或基础设施异常。
+
+结果范围：同一动态地图的三个初相位，不是三个独立地图，也不是官方排行榜。
+同速限0.5m/s、角速1rad/s，真值到达容差0.3m，120模拟秒超时。
+原生Jackal/激光/融合里程计；不等同于Slash深度感知及可变高度任务。
+规划源码与室内v3的218个共同导航文件一致。Jackal几何适配保留，
+新配置显式使用0.1秒搜索预算、启发式1.8、动态制动参数0.5m/s²。
+完整参数、方法差异及启动条件见PROTOCOL.txt，冻结顺序及版本见manifest.json。
+
+诊断：初相位0秒软FRS碰撞前已连续低速停车3.2秒，硬FRS为5.4秒；
+初相位14秒硬FRS碰撞前停车4.9秒。末端保护输出为零速，障碍仍在靠近。
+这支持优先检查停车后的主动脱离/侧向绕行与可恢复规划，不足以把碰撞全部归因
+于速度估计或FRS膨胀。failure_diagnostics.json含接触目标、轨迹、末端状态及估计。
+失观超过1秒后的未知区与运动FRS没有重叠；不存在将同一UNKNOWN继续作为运动
+FRS输出的记录。源码/二进制/参数及数据完整性208项检查全部通过；
+导航8组回归测试通过。这些是工程和数据一致性检查，不是全部导航成功保证。
+
+文件：汇总对照表.csv、逐次结果.csv为UTF-8 BOM；results.json保存结构化结果。
+figures/含矢量PDF与PNG：静态全部轨迹及时间/净距，动态逐条件结果与全部轨迹，
+初相位0秒三方法速度/净距。圆点表示到达，叉号表示失败；失败时刻不当作到达时间。
+原始结果路径由source_result记录，正式记录位于
+navigation/benchmarks/static_barn/results/retest_20261116_current和
+navigation/benchmarks/dynamic_dynabarn/results/retest_20261116_current。
+相应logs/retest_20261116_current保留节点日志，旧批次不覆盖、不混合统计。
+
+本机重新分析：python3 output/benchmark_retest_20261116_current/analyze.py
+诊断：python3 output/benchmark_retest_20261116_current/diagnose.py
+核验：python3 output/benchmark_retest_20261116_current/verify.py
+绘图/报告：python3 output/benchmark_retest_20261116_current/build_report.py
+绘图需要numpy/scipy/matplotlib/XeLaTeX及Fandol/TeX Gyre Termes字体。
+源码快照source_snapshot.tar.gz、镜像ID及环境在本目录保存。
+重跑须新建结果组和输出目录，避免覆盖；run_experiments.py为本轮冻结执行器，
+不能直接在已有结果组上重复执行。source_manifest内绝对路径保留本机追溯语义。
+分享ZIP保持robot_core相对目录布局，含本轮原始数据及日志；解包到独立目录，
+切勿覆盖用户工作树。离线脚本的旧绝对source_result路径跨机器须先映射到解包位置。

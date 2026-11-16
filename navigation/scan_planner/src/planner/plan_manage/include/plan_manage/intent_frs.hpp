@@ -28,11 +28,16 @@ class IntentFrs {
   Eigen::Vector2d position{0,0}, velocity{0,0}, center{0,0}, half{0.2,0.2};
   double stamp{-1};
   bool windowed_acceleration{false};
+  bool coasting{false};
+  bool unknown{false};
+  double observed_since{-1};
+  bool acceleration_learning_ready{false};
   double collision_radius{0};
   Eigen::Vector2d position_half{0,0}, velocity_half{0,0};
   bool update(double time, const Eigen::Vector2d &p, const Eigen::Vector2d &v) {
     if (!std::isfinite(time)||!p.allFinite()||!v.allFinite()||time<=stamp) return false;
-    if (stamp>=0 && time-stamp<=0.5) {
+    const bool continuous=stamp>=0 && time-stamp<=0.5;
+    if (continuous) {
       const double dt=time-stamp;
       // Least-squares inverse B, including both position and velocity residuals.
       const double b=0.5*dt*dt;
@@ -46,7 +51,9 @@ class IntentFrs {
       if(history_.size()>10) history_.pop_front();
     } else { history_.clear(); velocity_history_.clear(); velocity_history_.push_back({time,v}); }
     position=p; velocity=v; stamp=time;
-    center.setZero(); half.setConstant(0.2);
+    // A warm-up window has no new acceleration evidence. Preserve the last
+    // learned input set instead of jumping back to a wider prior on reacquisition.
+    if(!continuous) {center.setZero(); half.setConstant(0.2);}
     if(history_.size()>=2) {
       Eigen::Vector2d lo=history_.front(),hi=lo;
       for(const auto &a:history_) { lo=lo.cwiseMin(a); hi=hi.cwiseMax(a); }
@@ -54,7 +61,13 @@ class IntentFrs {
     }
     return true;
   }
+  void restartObservationWindow(double time, const Eigen::Vector2d& velocity) {
+    // Filter corrections after occlusion are measurements, not target acceleration.
+    history_.clear(); velocity_history_.clear();
+    velocity_history_.push_back({time,velocity});
+  }
   ReachBox predict(double horizon, const std::string &mode) const {
+    if(unknown) return {position,Eigen::Vector2d::Zero()};
     const bool learned=mode=="frs";
     Eigen::Vector2d a=Eigen::Vector2d::Zero(), width=Eigen::Vector2d::Zero();
     if(learned) { a=center; width=half; }
@@ -101,6 +114,7 @@ struct ObstacleSample {
   Eigen::Matrix4d covariance;
   double radius, last_observed;
   bool observed;
+  bool unknown{false};
 };
 class SnapshotTracks {
  public:
@@ -117,7 +131,7 @@ class SnapshotTracks {
        (generation==epoch && time<=stamp)) return false;
     std::set<std::string> ids;
     for(const auto& s:samples) {
-      if(s.id.empty() || !ids.insert(s.id).second || !s.position.allFinite() ||
+      if((s.unknown && s.observed) || s.id.empty() || !ids.insert(s.id).second || !s.position.allFinite() ||
          !s.velocity.allFinite() || !std::isfinite(s.radius) || s.radius<=0 ||
          !std::isfinite(s.last_observed) || s.last_observed>time+1e-6 ||
          (s.observed && time-s.last_observed>1.0) || !s.covariance.allFinite() ||
@@ -140,19 +154,47 @@ class SnapshotTracks {
         const double tolerance=3*std::sqrt(std::max(s.covariance(0,0),s.covariance(1,1)))+dt*dt+.1;
         if(dt<=0 || (s.position-t.position-dt*t.velocity).norm()>tolerance) return false;
       }
+      if(t.unknown && !s.unknown && !s.observed) return false;
+      // An unknown region is immutable until actual observation or retirement.
+      if(t.unknown && s.unknown) {t.stamp=time;continue;}
+      t.unknown=s.unknown;
       t.windowed_acceleration=true;
-      if(s.observed && !t.update(time,s.position,s.velocity)) return false;
+      if(s.observed) {
+        if(t.observed_since<0) t.observed_since=time;
+        // A new/reacquired KF first estimates velocity from initially unknown
+        // motion. Learning its convergence transient as physical acceleration
+        // generates metre-scale false FRS. Keep the existing input prior until
+        // 0.6 s of uninterrupted observations and sigma_v <= 0.15 m/s; its
+        // covariance is still propagated below, never clipped or hidden.
+        const bool acceleration_reliable=time-t.observed_since>=0.6 &&
+          s.covariance.diagonal().tail<2>().maxCoeff()<=0.15*0.15;
+        if(t.coasting || !acceleration_reliable || !t.acceleration_learning_ready)
+          t.restartObservationWindow(time,s.velocity);
+        t.acceleration_learning_ready=acceleration_reliable;
+        if(!t.update(time,s.position,s.velocity)) return false;
+        t.coasting=false;
+      }
       if(!s.observed) {
         // The tracker already predicts this state and covariance to snapshot time.
         // Do not propagate the observation age twice or learn acceleration from
         // predictions. A newly adopted ID retains the conservative default box.
         t.position=s.position; t.velocity=s.velocity; t.stamp=time;
-        if(time-s.last_observed>.5) {t.center.setZero();t.half=t.half.cwiseMax(.2);}
+        // Loss of visibility is not evidence of a different acceleration set.
+        // Current-time KF covariance already represents increasing uncertainty;
+        // adding a second discontinuous prior here causes the disappearing-target
+        // envelope jump and can abruptly rotate its nominal prediction.
+        t.coasting=true; t.observed_since=-1; t.acceleration_learning_ready=false;
       }
       t.collision_radius=robot_radius+margin+s.radius;
       // 3-sigma engineering margins, not deterministic coverage guarantees.
       t.position_half=3*s.covariance.diagonal().head<2>().cwiseMax(0.).cwiseSqrt();
       t.velocity_half=3*s.covariance.diagonal().tail<2>().cwiseMax(0.).cwiseSqrt();
+      if(t.unknown) {
+        // Frozen physical disc + position uncertainty. Add the robot/Minkowski
+        // margin once; do not invent a future trajectory for an unknown area.
+        t.collision_radius+=t.position_half.maxCoeff();
+        t.velocity.setZero();t.position_half.setZero();t.velocity_half.setZero();
+      }
     }
     bank.tracks=std::move(next); stamp=time; epoch=generation; healthy=true;
     return true;

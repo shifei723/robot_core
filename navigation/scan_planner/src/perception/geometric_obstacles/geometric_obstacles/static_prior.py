@@ -1,4 +1,5 @@
 """Immutable prebuilt obstacle map, indexed in its own TF frame."""
+import itertools
 import numpy as np
 from scipy.spatial import cKDTree
 
@@ -40,6 +41,29 @@ class StaticPrior:
                 normal=eigenvectors[:,:,0]
                 residual=np.abs(np.einsum('ni,ni->n',p[ambiguous]-center,normal))
                 confident[ambiguous] |= planar & local & (residual<=min(.02,self.distance*.25))
+            # At lintel/wall edges a PCA neighbourhood mixes two planes and
+            # rejects both. Fit bounded local surface hypotheses instead of
+            # inflating the point-distance ball (which would hide foreground).
+            edge=np.flatnonzero(known & guard & ~confident)
+            if len(edge) and len(self.points)>=8:
+                d,idx=self.tree.query(p[edge],k=min(12,len(self.points)))
+                neighbours=self.points[idx]
+                base=neighbours[:,0,:]
+                delta=neighbours-base[:,None,:]
+                query=p[edge]-base
+                accepted=np.zeros(len(edge),bool)
+                # Every triangle contains the nearest sample. A hypothesis needs
+                # four supporting map samples and a nondegenerate local patch.
+                for i,j in itertools.combinations(range(1,neighbours.shape[1]),2):
+                    normal=np.cross(delta[:,i],delta[:,j]);area=np.linalg.norm(normal,axis=1)
+                    unit=normal/np.maximum(area[:,None],1e-12)
+                    residual=np.abs(np.einsum('ni,ni->n',query,unit))
+                    signed=np.einsum('nki,ni->nk',delta,unit)
+                    distances=np.abs(signed)
+                    supporting=(signed.min(axis=1)>=-.005)|(signed.max(axis=1)<=.005)
+                    support=((distances<=.005)&(d<=max(3*self.voxel,self.distance))).sum(axis=1)
+                    accepted|=(area>=self.voxel**2*.15)&(support>=4)&supporting&(residual<=min(.02,self.distance*.25))
+                confident[edge]|=accepted
             known &= ~guard | confident
         return known
 

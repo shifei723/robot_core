@@ -40,6 +40,8 @@ namespace scan_planner
     void initPlanModules(rclcpp::Node *node, PlanningVisualization::Ptr vis = nullptr);
 
     bool canReuseStaticCorridor() const {
+      if(dynamic_tracks_.fresh(node_->now().seconds()))
+        for(const auto& [id,t]:dynamic_tracks_.bank.tracks) if(t.unknown) return false;
       return dynamic_spatial_weight_<=0. ||
           (dynamic_tracks_.fresh(node_->now().seconds()) && dynamic_tracks_.bank.tracks.empty());
     }

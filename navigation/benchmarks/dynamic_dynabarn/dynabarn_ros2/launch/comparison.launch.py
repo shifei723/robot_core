@@ -6,6 +6,7 @@ from launch.actions import DeclareLaunchArgument,IncludeLaunchDescription,Opaque
 from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 
 def setup(c):
@@ -14,7 +15,7 @@ def setup(c):
  actions=[IncludeLaunchDescription(PythonLaunchDescriptionSource(str(pkg/'launch/dynabarn.launch.py')),
   launch_arguments={'navigation':'mppi' if method=='mppi' else 'none','evaluate':'false','gui':'false',
    'motion_phase':LaunchConfiguration('motion_phase'),'setup_path':str(pkg/'comparison_config')}.items()),
-  Node(package='dynabarn_ros2',executable='laser_perception.py',parameters=[{'use_sim_time':True,'world_file':str(world)}])]
+  Node(package='dynabarn_ros2',executable='laser_perception.py',parameters=[{'use_sim_time':True,'world_file':str(world),'lost_timeout':ParameterValue(LaunchConfiguration('lost_timeout'),value_type=float)}])]
  if method!='mppi':
   planner=Path(get_package_share_directory('scan_planner'))
   p=yaml.safe_load((planner/'config/planner.yaml').read_text())['scan_planner_node']['ros__parameters']
@@ -27,7 +28,7 @@ def setup(c):
    'manager.static_tracking_margin':.125,'manager.shortcut_wheel_path':True,'manager.local_wheel_timing':True,
    'manager.dynamic_frs_weight':.5,'manager.max_vel':.5,'optimization.max_vel':.5,
    'fsm.static_corridor_reuse':True,'fsm.planning_horizon':4.5,'manager.planning_horizon':4.5,
-   'fsm.replan_interval':.4,'manager.wheel_search_timeout':.5})
+   'fsm.replan_interval':.4,'manager.wheel_search_timeout':.1,'manager.wheel_search_heuristic':1.8})
   actions.extend([Node(package='scan_planner',executable='scan_planner_node',parameters=[p],
     remappings=[('body_pose','/benchmark/body_pose'),('sensor_pose','/benchmark/sensor_pose'),('cloud','/benchmark/static_cloud')]),
    Node(package='scan_planner',executable='closed_loop_controller',parameters=[{
@@ -36,10 +37,11 @@ def setup(c):
     'static_cruise_speed':.5,'max_vx':.5,'max_vy':0.,'max_vyaw':1.,'finish_dist':.10,
     'leg_height_min':.2178,'leg_height_max':.2178,'leg_height_default':.2178,
     'dynamic_prediction':'frs','dynamic_input':'array','dynamic_soft_constraint':method=='frs_soft',
-    'dynamic_frs_weight':2.,'dynamic_horizon':3.,'dynamic_safety_margin':.20}],
+    'dynamic_frs_weight':2.,'dynamic_horizon':3.,'dynamic_safety_margin':.20,
+    'dynamic_braking_deceleration':.5}],
     remappings=[('body_pose','/benchmark/body_pose'),('cmd_vel','/benchmark/cmd_vel')])])
  return actions
 
 def generate_launch_description():
- return LaunchDescription([DeclareLaunchArgument('method',default_value='mppi',choices=['mppi','frs_soft','frs_hard']),
+ return LaunchDescription([DeclareLaunchArgument('lost_timeout',default_value='1.0'),DeclareLaunchArgument('method',default_value='mppi',choices=['mppi','frs_soft','frs_hard']),
   DeclareLaunchArgument('motion_phase',default_value='0'),OpaqueFunction(function=setup)])

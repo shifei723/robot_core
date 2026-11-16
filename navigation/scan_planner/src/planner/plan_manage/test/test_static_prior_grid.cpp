@@ -40,3 +40,42 @@ TEST(StaticPriorGrid, CannotBeClearedByLiveEvidenceAndReplacesAtomically) {
   EXPECT_EQ(map.getOccupancy(Eigen::Vector3d(.51,0,.21)),1);
   node.reset();rclcpp::shutdown();
 }
+
+#include <path_searching/dyn_a_star.h>
+
+TEST(StaticPriorGrid, AnchoredHeightLatticeRetainsNarrowLowPassage) {
+  rclcpp::init(0,nullptr);
+  rclcpp::NodeOptions options;
+  options.parameter_overrides({
+    {"grid_map.static_prior_enabled",true},{"grid_map.resolution",.05},
+    {"grid_map.sliding_map_size_x",4.},{"grid_map.sliding_map_size_y",4.},{"grid_map.sliding_map_size_z",1.2},
+    {"grid_map.double_cylinder_radius",.05},{"grid_map.double_cylinder_offset",0.},
+    {"grid_map.world_bound_enable",false},{"grid_map.height_min",.1622},{"grid_map.height_max",.4},
+    {"grid_map.body_top_offset",.328},{"grid_map.ceiling_margin",.05},
+    {"grid_map.allow_unverified_ceiling_clearance",true},
+    {"grid_map.p_hit",.85},{"grid_map.p_miss",.3},{"grid_map.p_min",.12},{"grid_map.p_max",.98},{"grid_map.p_occ",.8},
+    {"grid_map.skip_pixel",2},{"grid_map.depth_filter_margin",0}
+  });
+  auto node=std::make_shared<rclcpp::Node>("height_lattice_grid_test",options);
+  auto map=std::make_shared<GridMap>();map->initMap(node.get());
+  auto pub=node->create_publisher<sensor_msgs::msg::PointCloud2>("/dynamic_obstacles/static_prior",rclcpp::QoS(1).transient_local());
+  std::vector<Eigen::Vector3f> points;
+  for(int x=-8;x<=8;++x)for(int y=-39;y<=39;++y)points.emplace_back(x*.05f,y*.05f,.575f);
+  sensor_msgs::msg::PointCloud2 msg;msg.header.frame_id="world";msg.header.stamp=node->now();
+  sensor_msgs::PointCloud2Modifier mod(msg);mod.setPointCloud2FieldsByString(1,"xyz");mod.resize(points.size());
+  sensor_msgs::PointCloud2Iterator<float> ix(msg,"x"),iy(msg,"y"),iz(msg,"z");
+  for(const auto& p:points){*ix=p.x();*iy=p.y();*iz=p.z();++ix;++iy;++iz;}
+  pub->publish(msg);
+  for(int i=0;i<25;++i){rclcpp::spin_some(node);std::this_thread::sleep_for(std::chrono::milliseconds(10));}
+  EXPECT_NEAR(map->queryCeilingHeight({0,0,.28},0),.55,1e-6);
+  AStar search;search.initGridMap(map,{60,60,16});
+  // Midpoint-origin layers are .2822,.2322,.1822,.1322: none lie in
+  // [.1622,.1720], although that entire interval is physically feasible.
+  EXPECT_NE(search.AstarSearch(.05,{- .8,0,.2822},{.8,0,.2822},.2),ASTAR_RET::SUCCESS);
+  search.height_lattice_anchor=.1622;
+  ASSERT_EQ(search.AstarSearch(.05,{-.8,0,.2822},{.8,0,.2822},.5),ASTAR_RET::SUCCESS);
+  auto path=search.getPath();ASSERT_FALSE(path.empty());double minimum=1.;
+  for(const auto& p:path){minimum=std::min(minimum,p.z());EXPECT_GE(p.z(),.1622-1e-9);EXPECT_EQ(map->getInflateOccupancyAdaptive(p,0),0);}
+  EXPECT_NEAR(minimum,.1622,1e-6);
+  node.reset();rclcpp::shutdown();
+}

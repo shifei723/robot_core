@@ -1,6 +1,8 @@
 uint8 TENTATIVE=0
 uint8 DYNAMIC=1
 uint8 COASTING=2
+# Frozen local region after trusted coasting expires. No motion FRS.
+uint8 UNKNOWN=3
 string id
 uint8 state
 bool observed

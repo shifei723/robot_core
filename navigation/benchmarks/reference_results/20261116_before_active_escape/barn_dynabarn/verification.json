@@ -1,0 +1,1051 @@
+{
+  "purpose": "Data/protocol integrity only; passing does not mean every navigation trial succeeded.",
+  "passed": 208,
+  "total": 208,
+  "all_passed": true,
+  "checks": [
+    {
+      "name": "all_planned_runs_completed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "all_runs_analyzed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "frozen_sources_unchanged",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "binary_scan_planner_node",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "binary_closed_loop_controller",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "same_navigation_sources_as_indoor_v3",
+      "pass": true,
+      "detail": {
+        "compared_files": 218,
+        "changed": []
+      }
+    },
+    {
+      "name": "('static', 'mppi', 18, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 1) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 1) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 1) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 1) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 1) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 1) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 18, 1) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 1) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 1) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 1) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 1) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 1) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 1) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 18, 1) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) no_truth_to_perception",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) eight_moving_entities",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) sensor_range",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) scheduled_start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) no_unknown_motion_overlap",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) finite_coast_duration",
+      "pass": true,
+      "detail": 1.0
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 0, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) no_truth_to_perception",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) eight_moving_entities",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) sensor_range",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) scheduled_start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) no_unknown_motion_overlap",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) finite_coast_duration",
+      "pass": true,
+      "detail": 1.0
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 0, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) no_truth_to_perception",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) eight_moving_entities",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) sensor_range",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) scheduled_start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) no_unknown_motion_overlap",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) finite_coast_duration",
+      "pass": true,
+      "detail": 1.0000000009999965
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 0, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 1) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 1) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 1) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 1) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 1) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 1) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 36, 1) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 1) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 1) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 1) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 1) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 1) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 1) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 36, 1) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) no_truth_to_perception",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) eight_moving_entities",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) sensor_range",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) scheduled_start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) no_unknown_motion_overlap",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) finite_coast_duration",
+      "pass": true,
+      "detail": 1.0
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 7, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) no_truth_to_perception",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) eight_moving_entities",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) sensor_range",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) scheduled_start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) no_unknown_motion_overlap",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) finite_coast_duration",
+      "pass": true,
+      "detail": 1.0
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 7, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) no_truth_to_perception",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) eight_moving_entities",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) sensor_range",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) scheduled_start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) no_unknown_motion_overlap",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) finite_coast_duration",
+      "pass": true,
+      "detail": 1.0
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 7, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 1) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 1) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 1) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 1) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 1) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 1) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'slash', 54, 1) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 1) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 1) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 1) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 1) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 1) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 1) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('static', 'mppi', 54, 1) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) no_truth_to_perception",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) eight_moving_entities",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) sensor_range",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) scheduled_start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) no_unknown_motion_overlap",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) finite_coast_duration",
+      "pass": true,
+      "detail": 1.0
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_soft', 14, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) no_truth_to_perception",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) eight_moving_entities",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) sensor_range",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) scheduled_start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) no_unknown_motion_overlap",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) finite_coast_duration",
+      "pass": true,
+      "detail": 1.0
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'frs_hard', 14, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) raw_result_exists",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) goal_tolerance",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) success_has_true_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) failed_duration_not_arrival",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) no_truth_to_perception",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) eight_moving_entities",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) sensor_range",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) scheduled_start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) no_unknown_motion_overlap",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) finite_coast_duration",
+      "pass": true,
+      "detail": 0.9000000000000057
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) finite_path_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) finite_min_clearance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "('dynamic', 'mppi', 14, 0) finite_final_goal_distance_m",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "no_source_replacements",
+      "pass": true,
+      "detail": null
+    }
+  ]
+}

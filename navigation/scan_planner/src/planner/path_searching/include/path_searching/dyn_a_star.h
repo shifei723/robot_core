@@ -97,6 +97,8 @@ public:
 	std::vector<Eigen::Vector3d> getPath();
     std::function<double(const Eigen::Vector3d&)> soft_cost;
     double heuristic_weight{1.0};
+    // Optional wheel-height lattice origin. Generic searches keep midpoint anchoring.
+    double height_lattice_anchor{std::numeric_limits<double>::quiet_NaN()};
 };
 
 inline double AStar::getHeu(GridNodePtr node1, GridNodePtr node2)

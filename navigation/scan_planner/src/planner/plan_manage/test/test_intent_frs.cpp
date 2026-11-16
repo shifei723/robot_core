@@ -161,3 +161,103 @@ TEST(IntentFrs, HardTimingRetainsFastestSafeQuarterStep) {
   EXPECT_DOUBLE_EQ(decision.scale,.75);
   EXPECT_GE(decision.chosen_clearance,0);
 }
+
+TEST(SnapshotTracks, VisibilityLossDoesNotJumpOrRotateLearnedInputSet) {
+  SnapshotTracks b; auto s=sample();
+  // Real acceleration must remain intact through the loss-of-visibility boundary.
+  for(int i=0;i<20;++i) {
+    double time=1+i*.1;s.position={.5*time*time,0};s.velocity={time,0};s.last_observed=time;
+    ASSERT_TRUE(b.accept(time,1,true,{s},time));
+  }
+  const auto previous=b.bank.tracks.at(s.id);
+  ASSERT_NEAR(previous.center.x(),1,1e-8);
+  ASSERT_NEAR(previous.half.x(),.05,1e-8);
+  s.observed=false;
+  for(int i=1;i<=15;++i) {
+    const double time=2.9+i*.1;
+    s.position=previous.position+(time-2.9)*previous.velocity;
+    ASSERT_TRUE(b.accept(time,1,true,{s},time));
+    const auto& t=b.bank.tracks.at(s.id);
+    EXPECT_TRUE(t.coasting);
+    EXPECT_TRUE(t.center.isApprox(previous.center,1e-12));
+    EXPECT_TRUE(t.half.isApprox(previous.half,1e-12));
+    EXPECT_TRUE(t.predict(3,"frs").half.isApprox(previous.predict(3,"frs").half,1e-12));
+  }
+}
+TEST(SnapshotTracks, ReacquisitionCorrectionIsNotAccelerationEvidence) {
+  SnapshotTracks b; auto s=sample();
+  for(int i=0;i<20;++i) {
+    double time=1+i*.1;s.position={time,0};s.velocity={1,0};s.last_observed=time;
+    ASSERT_TRUE(b.accept(time,1,true,{s},time));
+  }
+  const auto input=b.bank.tracks.at(s.id).half;
+  s.observed=false;
+  for(int i=1;i<=8;++i) {
+    double time=2.9+i*.1;s.position={time,0};
+    ASSERT_TRUE(b.accept(time,1,true,{s},time));
+  }
+  // A velocity correction at rediscovery must not train a fake huge acceleration.
+  s.observed=true;s.velocity={4,0};
+  for(int i=0;i<9;++i) {
+    double time=3.8+i*.1;s.position={3.8+4*(time-3.8),0};s.last_observed=time;
+    ASSERT_TRUE(b.accept(time,1,true,{s},time));
+    const auto& t=b.bank.tracks.at(s.id);
+    EXPECT_FALSE(t.coasting);
+    EXPECT_NEAR(t.center.norm(),0,1e-10);
+    EXPECT_TRUE(t.half.isApprox(input,1e-10));
+  }
+}
+TEST(SnapshotTracks, OcclusionCovarianceStillExpandsAndProtectsNearBody) {
+  SnapshotTracks b;auto s=sample();s.position={.5,0};
+  ASSERT_TRUE(b.accept(1,1,true,{s},1));
+  auto width=b.bank.tracks.at(s.id).predict(3,"frs").half;
+  s.observed=false;s.covariance*=9;
+  ASSERT_TRUE(b.accept(1.1,1,true,{s},1.1));
+  EXPECT_GT(b.bank.tracks.at(s.id).predict(3,"frs").half.x(),width.x());
+  EXPECT_FALSE(chooseSoftTiming(b.bank.views(1.1),"frs",[](double,double){return Eigen::Vector2d::Zero();},3,1,2).feasible);
+}
+TEST(SnapshotTracks, UncertainFilterVelocityCannotTrainFalseAcceleration) {
+  SnapshotTracks b;auto s=sample();
+  s.covariance(2,2)=s.covariance(3,3)=.16;
+  for(int i=0;i<25;++i) {
+    const double time=1+i*.1;s.position={time,0};s.velocity={double(i%2),0};s.last_observed=time;
+    ASSERT_TRUE(b.accept(time,1,true,{s},time));
+    const auto& t=b.bank.tracks.at(s.id);
+    EXPECT_DOUBLE_EQ(t.center.norm(),0);
+    EXPECT_DOUBLE_EQ(t.half.x(),.2);
+    EXPECT_DOUBLE_EQ(t.velocity_half.x(),1.2);
+  }
+  // Reliable, sustained acceleration is still learned after the KF settles.
+  s.covariance=Eigen::Matrix4d::Identity()*.001;
+  for(int i=25;i<45;++i) {
+    const double time=1+i*.1;s.position={.5*time*time,0};s.velocity={time,0};s.last_observed=time;
+    ASSERT_TRUE(b.accept(time,1,true,{s},time));
+    if(i<28) EXPECT_DOUBLE_EQ(b.bank.tracks.at(s.id).center.norm(),0);
+  }
+  EXPECT_NEAR(b.bank.tracks.at(s.id).center.x(),1,1e-8);
+}
+
+TEST(SnapshotTracks, UnknownRegionIsFixedProtectedAndRetiredBySnapshot) {
+  SnapshotTracks b;auto s=sample();s.position={2,0};s.velocity={1,0};
+  ASSERT_TRUE(b.accept(1,1,true,{s},1));
+  s.observed=false;s.unknown=true;s.position={3,0};s.velocity.setZero();s.covariance.diagonal().tail<2>().setZero();
+  ASSERT_TRUE(b.accept(2,1,true,{s},2));
+  const auto frozen=b.bank.tracks.at(s.id);
+  ASSERT_TRUE(frozen.unknown);
+  EXPECT_TRUE(frozen.predict(0,"frs").center.isApprox(frozen.predict(100,"frs").center));
+  EXPECT_TRUE(frozen.predict(100,"frs").half.isZero());
+  auto outside=[](double,double){return Eigen::Vector2d(0,0);};
+  EXPECT_TRUE(chooseSoftTiming(b.bank.views(2),"frs",outside,3,1,2).feasible);
+  EXPECT_FALSE(chooseSoftTiming(b.bank.views(2),"frs",[](double,double){return Eigen::Vector2d(3,0);},3,1,2).feasible);
+  s.position={3.001,0};s.covariance*=10;
+  ASSERT_TRUE(b.accept(2.1,1,true,{s},2.1));
+  const auto& fixed=b.bank.tracks.at(s.id);
+  EXPECT_DOUBLE_EQ(fixed.collision_radius,frozen.collision_radius);
+  EXPECT_TRUE(fixed.position.isApprox(frozen.position));
+  s.unknown=false;
+  EXPECT_FALSE(b.accept(2.2,1,true,{s},2.2)); // cannot silently revert to coasting
+  s.observed=true;s.last_observed=2.3;
+  ASSERT_TRUE(b.accept(2.3,1,true,{s},2.3));
+  EXPECT_FALSE(b.bank.tracks.at(s.id).unknown);
+  ASSERT_TRUE(b.accept(2.4,1,true,{},2.4));EXPECT_TRUE(b.bank.tracks.empty());
+}

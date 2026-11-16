@@ -33,7 +33,7 @@ class Comparison(Eval):
  def on_tracks(self,m):
   self.tracks=m
   self.estimates.append({'stamp':m.header.stamp.sec+m.header.stamp.nanosec/1e9,'healthy':m.healthy,'status':m.status,
-    'objects':[{'id':o.id,'p':[o.position.x,o.position.y],'v':[o.velocity.x,o.velocity.y],'r':o.radius,'observed':o.observed,'state':o.state} for o in m.obstacles]})
+    'objects':[{'id':o.id,'p':[o.position.x,o.position.y],'v':[o.velocity.x,o.velocity.y],'r':o.radius,'observed':o.observed,'state':o.state,'last_observed':o.last_observed.sec+o.last_observed.nanosec*1e-9,'position_sigma':[math.sqrt(max(0.,o.covariance[i])) for i in [0,5]]} for o in m.obstacles]})
  def tick(self):
   if self.done:return
   now=self.now_s()
@@ -73,10 +73,10 @@ class Comparison(Eval):
  def save(self,status):
   super().save(status)
   result=json.loads((self.dest/'result.json').read_text())
-  result.update(method=self.a.method,motion_phase_s=self.a.motion_phase,protocol='dynabarn_ros2_shared_lidar_static_map_v1',
+  result.update(method=self.a.method,motion_phase_s=self.a.motion_phase,protocol='dynabarn_ros2_unknown_region_lifecycle_v2',
     navigation_anchor=list(self.anchor) if self.anchor is not None else None,timeout_sim_s=self.a.timeout,scheduled_start_sim_s=8.,sensor_range_m=5.,static_background='static wall boxes only; shared with MPPI',truth_input_to_perception=False)
   pkg=Path(os.environ['BENCH_WS'])/'src/dynabarn_ros2';core=Path(os.environ['BENCH_WS'])/'src/slash_planner'
-  files=[pkg/'src/motion.cpp',pkg/'launch/comparison.launch.py',pkg/'launch/dynabarn.launch.py',pkg/'scripts/laser_perception.py',pkg/'scripts/map_geometry.py',pkg/'scripts/compare_evaluate.py',pkg/'comparison_config/nav2.yaml',pkg/'worlds/official_world_2.world',core/'geometric_obstacles/geometric_obstacles/core.py',core/'plan_manage/src/closed_loop_controller.cpp',core/'plan_manage/src/planner_manager.cpp',core/'plan_manage/include/plan_manage/intent_frs.hpp',core/'plan_manage/include/plan_manage/spatial_tracker.hpp']
+  files=[pkg/'src/motion.cpp',pkg/'launch/comparison.launch.py',pkg/'launch/dynabarn.launch.py',pkg/'scripts/laser_perception.py',pkg/'scripts/map_geometry.py',pkg/'scripts/compare_evaluate.py',pkg/'comparison_config/nav2.yaml',pkg/'worlds/official_world_2.world',core/'geometric_obstacles/geometric_obstacles/core.py',core/'plan_manage/src/closed_loop_controller.cpp',core/'plan_manage/src/planner_manager.cpp',core/'plan_manage/include/plan_manage/intent_frs.hpp',core/'plan_manage/include/plan_manage/spatial_tracker.hpp',core/'scan_planner_msgs/msg/DynamicObstacle.msg',core/'path_searching/src/dyn_a_star.cpp']
   protocol_hash=hashlib.sha256(b''.join(p.read_bytes() for p in files)).hexdigest()
   result['protocol_sha256']=protocol_hash
   result['configuration_sha256']=hashlib.sha256((protocol_hash+json.dumps([self.a.method,self.a.motion_phase,self.a.timeout])).encode()).hexdigest()

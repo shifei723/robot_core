@@ -32,11 +32,12 @@ def setup(context):
                   'grid_map.double_cylinder_radius':0.459, 'grid_map.double_cylinder_offset':0.0,
                   'optimization.height_min':0.25, 'optimization.height_max':0.25,
                   'optimization.height_nominal':0.25, 'manager.wheel_grid_trajectory':True,
+                  'manager.wheel_search_timeout':.1, 'manager.wheel_search_heuristic':1.8,
                   'manager.static_tracking_margin':.125, 'manager.shortcut_wheel_path':True, 'manager.local_wheel_timing':True, 'manager.execution_radius':0.334, 'manager.execution_offset':0.0, 'manager.max_vel':0.5, 'optimization.max_vel':0.5})
         actions += [Node(package='scan_planner', executable='scan_planner_node', parameters=[p],
                          remappings=[('body_pose','/benchmark/body_pose'),('sensor_pose','/benchmark/sensor_pose'),('cloud','/benchmark/cloud')]),
                     Node(package='scan_planner', executable='closed_loop_controller', parameters=[{
-                        'use_sim_time':True,'static_body_radius':.334,'static_body_offset':0.,'static_spatial_tracking':True,'static_acceleration_limit':.5,'static_lateral_feedback':True,'max_vx':0.5,'max_vy':0.0,'max_vyaw':1.0,'dynamic_prediction':'off',
+                        'use_sim_time':True,'static_body_radius':.334,'static_body_offset':0.,'static_spatial_tracking':True,'static_acceleration_limit':.5,'static_lateral_feedback':True,'max_vx':0.5,'max_vy':0.0,'max_vyaw':1.0,'finish_dist':0.1,'dynamic_prediction':'off',
                         'leg_height_min':0.2178,'leg_height_max':0.2178,'leg_height_default':0.2178}],
                          remappings=[('body_pose','/benchmark/body_pose'),('cmd_vel','/benchmark/cmd_vel')])]
     return actions

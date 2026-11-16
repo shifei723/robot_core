@@ -38,6 +38,7 @@ public:
     declare_parameter<bool>("static_lateral_feedback", false);
     declare_parameter<bool>("static_spatial_tracking",false);
     declare_parameter<bool>("frs_spatial_tracking",true);
+    declare_parameter<bool>("height_spatial_tracking",false);
     declare_parameter<bool>("odom_twist_in_world",false);
     declare_parameter<double>("static_cruise_speed",.5);
     declare_parameter<double>("static_acceleration_limit",.5);
@@ -81,6 +82,9 @@ public:
     dynamic_soft_=declare_parameter<bool>("dynamic_soft_constraint",false);
     dynamic_weight_=declare_parameter<double>("dynamic_frs_weight",2.0);
     dynamic_safety_margin_=declare_parameter<double>("dynamic_safety_margin",.20);
+    dynamic_braking_=declare_parameter<double>("dynamic_braking_deceleration",.3);
+    if(!std::isfinite(dynamic_braking_) || dynamic_braking_<=0.)
+      throw std::invalid_argument("dynamic_braking_deceleration must be finite and positive");
     if(!std::isfinite(dynamic_safety_margin_) || dynamic_safety_margin_<.10)
       throw std::invalid_argument("dynamic_safety_margin must be finite and >=0.10");
     if(!std::isfinite(dynamic_weight_) || dynamic_weight_<0) throw std::invalid_argument("negative FRS weight");
@@ -98,7 +102,7 @@ public:
           std::vector<ObstacleSample> samples;
           for(const auto& o:msg->obstacles) {
             ObstacleSample s; s.id=o.id; s.position={o.position.x,o.position.y};
-            s.velocity={o.velocity.x,o.velocity.y}; s.radius=o.radius; s.observed=o.observed;
+            s.velocity={o.velocity.x,o.velocity.y}; s.radius=o.radius; s.observed=o.observed; s.unknown=o.state==scan_planner_msgs::msg::DynamicObstacle::UNKNOWN;
             s.last_observed=rclcpp::Time(o.last_observed).seconds();
             for(int i=0;i<4;++i) for(int j=0;j<4;++j) s.covariance(i,j)=o.covariance[i*4+j];
             samples.push_back(s);
@@ -280,7 +284,8 @@ private:
     spatial_active_=((get_parameter("static_spatial_tracking").as_bool() &&
         !height_safety_enabled_ && dynamic_mode_=="off" && std::abs(max_vy_)<1e-6) ||
         (get_parameter("frs_spatial_tracking").as_bool() && dynamic_mode_!="off")) &&
-        points.row(2).maxCoeff()-points.row(2).minCoeff()<.005;
+        (points.row(2).maxCoeff()-points.row(2).minCoeff()<.005 ||
+         (height_safety_enabled_ && get_parameter("height_spatial_tracking").as_bool()));
     if(spatial_active_) {
       if(!was_spatial) spatial_tracker_.v=std::clamp(measured_forward_speed_,0.,max_vx_);
       std::vector<SpatialSample> points;
@@ -625,7 +630,7 @@ private:
             const double h=.05;
             if(k>2) {
               const auto command=limitSpatialRisk(tracker.step(p,yaw,h,spatial_vmax,max_vyaw_,spatial_acc,finish_dist_),scale,spatial_vmax);
-              pv+=std::clamp(command.v-pv,-.3*h,spatial_acc*h);
+              pv+=std::clamp(command.v-pv,-dynamic_braking_*h,spatial_acc*h);
               pw+=std::clamp(command.w-pw,-2.*h,2.*h);
               tracker.v=pv;tracker.w=pw;
             }
@@ -648,7 +653,7 @@ private:
           return point;
         };
       if(!stale) {
-        const double hard_horizon=0.5+std::abs(before_v)/0.3; // latency + braking at validated 0.3 m/s^2
+        const double hard_horizon=0.5+std::abs(before_v)/dynamic_braking_;
         decision=dynamic_soft_ ? chooseSoftTiming(tracks,dynamic_mode_,candidate,dynamic_horizon_,hard_horizon,dynamic_weight_)
           : chooseTiming(tracks,dynamic_mode_,candidate,0.83,dynamic_horizon_);
       }
@@ -667,6 +672,26 @@ private:
           view.track->collision_radius>0 ? view.track->collision_radius-0.05 : 0.78)<0;
       });
       if(shield) { v=0;w=0;frozen=true;progress_scale=0;state="DYNAMIC_SHIELD"; }
+      // A fixed unknown region at the image border cannot gain free-space
+      // evidence while both translation and yaw are locked. Reobserve it by
+      // turning in place, only with fresh inputs and a collision-checked sweep.
+      // This never deletes occupancy or advances the reference trajectory.
+      if(height_safety_enabled_ && !stale && !shield && progress_scale==0 &&
+         !tracks.empty() && std::all_of(tracks.begin(),tracks.end(),
+             [](const auto& view){return view.track->unknown;})) {
+        const auto closest=std::min_element(tracks.begin(),tracks.end(),[this](const auto& a,const auto& b){
+          return (a.track->position-odom_pos_.head<2>()).squaredNorm()<
+                 (b.track->position-odom_pos_.head<2>()).squaredNorm();
+        });
+        const Eigen::Vector2d direction=closest->track->position-odom_pos_.head<2>();
+        const double view_error=normalizeAngle(std::atan2(direction.y(),direction.x())-odom_yaw_);
+        const double turn=std::abs(view_error)>.08 ? std::clamp(kp_yaw_*view_error,-max_vyaw_,max_vyaw_) : 0.;
+        if(turn!=0. && brakingMotionFree(odom_pos_,odom_yaw_,0.,turn,
+             measured_forward_speed_,measured_yaw_rate_,spatial_acc,
+             [this](const Eigen::Vector3d& p,double yaw){return p.z()<=safety_.maxBaseHeight(p,yaw);})) {
+          v=0.;w=turn;frozen=true;state="OBSERVING_UNKNOWN";
+        }
+      }
       const double elapsed=std::chrono::duration<double,std::milli>(
           std::chrono::steady_clock::now()-clock_start).count();
       if(current.seconds()-last_dynamic_log_>=0.099) {
@@ -681,6 +706,9 @@ private:
            <<",\"v\":"<<v<<",\"x\":"<<odom_pos_.x()<<",\"y\":"<<odom_pos_.y()
            <<",\"soft_constraint\":"<<dynamic_soft_<<",\"frs_weight\":"<<dynamic_weight_<<",\"horizon\":"<<dynamic_horizon_<<",\"track_count\":"<<tracks.size()<<",\"nominal_obstacle\":\""<<decision.nominal_obstacle<<"\"";
         out<<",\"spatial_tracking\":"<<spatial_active_;
+        std::vector<TrackView> moving_tracks,unknown_regions;
+        for(const auto& view:tracks) (view.track->unknown ? unknown_regions : moving_tracks).push_back(view);
+        out<<",\"moving_track_count\":"<<moving_tracks.size()<<",\"unknown_region_count\":"<<unknown_regions.size();
         auto boxes=[&](const TrackView &view) {
           out<<"[";
           for(int k=1;k<=30;++k) {
@@ -691,12 +719,19 @@ private:
           out<<"]";
         };
         // Legacy first-track field retained for single-pedestrian result readers.
-        out<<",\"boxes\":"; if(tracks.empty())out<<"[]";else boxes(tracks.front());
+        out<<",\"boxes\":"; if(moving_tracks.empty())out<<"[]";else boxes(moving_tracks.front());
         out<<",\"tracks\":[";
-        for(size_t i=0;i<tracks.size();++i) {
+        for(size_t i=0;i<moving_tracks.size();++i) {
           if(i)out<<",";
-          out<<"{\"id\":\""<<tracks[i].id<<"\",\"age\":"<<tracks[i].age<<",\"boxes\":";
-          boxes(tracks[i]);out<<"}";
+          out<<"{\"id\":\""<<moving_tracks[i].id<<"\",\"age\":"<<moving_tracks[i].age<<",\"boxes\":";
+          boxes(moving_tracks[i]);out<<"}";
+        }
+        out<<"]";
+        out<<",\"unknown_regions\":[";
+        for(size_t i=0;i<unknown_regions.size();++i) {
+          const auto& u=unknown_regions[i];if(i)out<<",";
+          out<<"{\"id\":\""<<u.id<<"\",\"x\":"<<u.track->position.x()<<",\"y\":"<<u.track->position.y()
+             <<",\"radius\":"<<u.track->collision_radius<<"}";
         }
         out<<"]";
         for(const auto &name : {std::string("nominal_path"),std::string("chosen_path")}) {
@@ -780,6 +815,7 @@ private:
   rclcpp::Time last_update_time_{0, 0, RCL_ROS_TIME};
   double time_forward_, heading_error_threshold_, kp_pos_, kp_yaw_;
   double max_vx_, max_vy_, max_vyaw_, finish_dist_;
+  double dynamic_braking_{.3};
   double leg_height_min_, leg_height_max_, leg_height_default_;
   double base_z_offset_;
 };

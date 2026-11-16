@@ -7,11 +7,19 @@
   "vendored_static_worlds": [
     0,
     6,
-    12
+    12,
+    18,
+    36,
+    54
   ],
   "dynamic_world": 2,
   "original_raw_results_preserved": true,
   "backup": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/navigation_sync_backup_20261112",
   "validation_group": "sync_smoke",
-  "source_copy_policy": "Algorithm packages are relative symlinks to canonical robot_core source; original thesis/tmp experiments retained as historical records."
+  "source_copy_policy": "Algorithm packages are relative symlinks to canonical robot_core source; original thesis/tmp experiments retained as historical records.",
+  "paper_validation_static_worlds": [
+    18,
+    36,
+    54
+  ]
 }

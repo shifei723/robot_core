@@ -82,7 +82,7 @@ def test_occlusion_does_not_delete_but_visible_free_space_does():
 
 def test_occluded_track_keeps_uncertainty_without_poisoning_sensor_health():
     t=Tracker(Config(accel_sigma=.2))
-    t.tracks[0]=Track(0,np.array([0.,0.,.1,0.]),np.eye(4)*.001,1.5,.1,0.,observed=False)
+    t.tracks[0]=Track(0,np.array([0.,0.,.1,0.]),np.eye(4)*.001,1.5,.1,0.,state='dynamic',observed=False)
     t.time=0.
     initial=t.tracks[0].P.copy()
     for stamp in np.arange(.1,2.,.1):
@@ -277,3 +277,148 @@ def test_oblique_contact_contour_does_not_leave_low_static_strips():
     depth=np.full(mask.shape,1500,np.uint16);depth[mask.astype(bool)]=65535
     assert depth[8,4]==65535  # omitted ray, never a zero/far free-space return
     assert depth[8,2]==1500  # measurements outside the envelope are retained
+
+
+def test_single_frame_residual_freezes_measured_support_without_velocity_prior():
+    tracker = Tracker(Config(lost_timeout=1.))
+    tracker.step(0., [cluster(2.4)])
+    measured = tracker.tracks[0].x[:2].copy()
+    covariance = tracker.tracks[0].P[:2,:2].copy()
+    for stamp in np.arange(.1, 2.1, .1):
+        tracker.step(stamp, [])
+        track = tracker.tracks[0]
+        assert track.unknown and not track.observed
+        np.testing.assert_allclose(track.x[:2], measured)
+        np.testing.assert_allclose(track.P[:2,:2], covariance)
+        assert np.count_nonzero(track.P[2:,:]) == 0
+        assert track.radius + 3*np.sqrt(track.P[0,0]) == pytest.approx(.38)
+    tracker.step(2.1, [cluster(2.42)])
+    assert len(tracker.tracks) == 1 and tracker.tracks[0].observed
+    assert not tracker.tracks[0].unknown
+
+
+def test_tentative_velocity_does_not_advect_unknown_region():
+    tracker = Tracker()
+    tracker.tracks[0] = Track(0, np.array([1.,0.,.3,0.]),
+                              np.diag([.0036,.0036,.16,.16]), .5,.2,0.)
+    tracker.time = 0.
+    tracker.step(.1, [])
+    assert tracker.tracks[0].unknown
+    assert tracker.tracks[0].x[0] == pytest.approx(1.)
+    assert tracker.tracks[0].P[0,0] == pytest.approx(.0036)
+
+
+def test_departing_static_object_leaves_background_before_dynamic_confirmation():
+    tracker = Tracker()
+    tracker.time = 0.
+    tracker.tracks[0] = Track(0, np.array([1.,0.,.12,0.]),
+                              np.eye(4)*.001, .5,.2,0.,state='static')
+    tracker.step(.1, [cluster(1.012)])
+    track = tracker.tracks[0]
+    assert track.observed
+    assert tracker.cfg.motion_off < np.linalg.norm(track.x[2:]) < tracker.cfg.motion_on
+    assert track.state == 'tentative'  # masked from static mapping already
+    tracker.step(.2, [])
+    assert track.unknown and track.state == 'tentative'
+
+
+def test_loss_becomes_fixed_unknown_then_reactivates_same_id():
+    t=Tracker(Config(lost_timeout=.5,accel_sigma=.2))
+    t.tracks[0]=Track(0,np.array([1.,0.,.4,0.]),np.eye(4)*.001,1.5,.1,0.,state='dynamic')
+    t.time=0.
+    t.step(.2,[]);assert not t.tracks[0].unknown
+    assert t.tracks[0].x[0]>1
+    for stamp in [.4,.6]:t.step(stamp,[])
+    track=t.tracks[0];assert track.unknown and not track.observed
+    assert track.x[0]==pytest.approx(1.2) # exactly the trusted .5 s, not .6 s
+    pos=track.x.copy();cov=track.P.copy()
+    for stamp in np.arange(.8,3,.2):t.step(stamp,[])
+    np.testing.assert_allclose(track.x,pos);np.testing.assert_allclose(track.P,cov)
+    cl=cluster(pos[0]+.02);cl.center[2]=1.5
+    t.step(3.,[cl]);assert len(t.tracks)==1
+    assert t.tracks[0].observed and not t.tracks[0].unknown
+    assert np.linalg.norm(t.tracks[0].x[2:])<.1
+
+
+def test_unknown_depth_clearance_requires_all_visible_pixels():
+    t=Tracker();t.tracks[0]=Track(0,np.zeros(4),np.eye(4)*1e-4,1.5,.15,0.,unknown=True,observed=False)
+    K=np.array([[30.,0,50],[0,30.,50],[0,0,1.]])
+    depth=np.full((100,100),2.5);depth[49,51]=1.0
+    assert t.retire(2.,depth,K,np.eye(4)) and 0 in t.tracks
+    depth[49,51]=np.nan
+    assert t.retire(2.1,depth,K,np.eye(4)) and 0 in t.tracks
+    depth[49,51]=2.5
+    assert t.retire(2.2,depth,K,np.eye(4)) and not t.tracks
+
+
+def test_unknown_laser_clearance_rejects_occlusion_invalid_and_partial_fov():
+    from geometric_obstacles.core import laser_region_free
+    angles=np.linspace(-1,1,401);ranges=np.full(401,np.inf)
+    assert laser_region_free([2,0],.5,[0,0],angles,ranges)
+    ranges[200]=1.;assert not laser_region_free([2,0],.5,[0,0],angles,ranges)
+    ranges[200]=np.nan;assert not laser_region_free([2,0],.5,[0,0],angles,ranges)
+    ranges[200]=0.;assert not laser_region_free([2,0],.5,[0,0],angles,ranges)
+    ranges[200]=np.inf
+    assert not laser_region_free([2,0],.5,[0,0],angles[200:],ranges[200:])
+    assert not laser_region_free([5,0],.5,[0,0],angles,ranges)
+    assert not laser_region_free([0,0],.5,[0,0],angles,ranges)
+
+
+def test_ground_contact_certificate_rejects_occlusion_invalid_and_partial_view():
+    from geometric_obstacles.core import ground_patch_free
+    K=np.array([[60.,0,80.],[0,60.,60.],[0,0,1.]])
+    T=np.eye(4);T[:3,:3]=[[0,0,1],[-1,0,0],[0,-1,0]];T[2,3]=.5
+    yy,xx=np.mgrid[:120,:160];q=(yy-60.)/60.
+    depth=np.divide(.5,q,out=np.zeros_like(q),where=q>0)
+    depth[(depth>3)|(depth<.3)]=0
+    assert ground_patch_free(np.array([1.2,0]),.12,.14,depth,K,T)
+    v=int(round(60.+(.5-.14)/1.2*60.))
+    for blocked in [.7,0.,np.nan]:
+        bad=depth.copy();bad[v,80]=blocked
+        assert not ground_patch_free(np.array([1.2,0]),.12,.14,bad,K,T)
+    assert not ground_patch_free(np.array([1.2,2.]),.12,.14,depth,K,T)
+
+
+def test_unknown_carving_keeps_unseen_cells_and_frozen_parent():
+    from geometric_obstacles.core import Track
+    tracker=Tracker();t=Track(0,np.array([1.2,0.,0.,0.]),np.diag([.01,.01,0.,0.]),
+        .8,.12,0.,unknown=True,observed=False,grounded_support=True)
+    tracker.tracks[0]=t
+    K=np.array([[60.,0,80.],[0,60.,60.],[0,0,1.]])
+    T=np.eye(4);T[:3,:3]=[[0,0,1],[-1,0,0],[0,-1,0]];T[2,3]=.5
+    yy,xx=np.mgrid[:120,:160];q=(yy-60.)/60.
+    depth=np.divide(.5,q,out=np.zeros_like(q),where=q>0);depth[(depth>3)|(depth<.3)]=0
+    tracker.carve_unknown(t,np.zeros_like(depth),K,T);all_cells=set(t.unknown_cells)
+    assert len(all_cells)>4
+    pose=t.x.copy();cov=t.P.copy();part=depth.copy();part[:,:80]=0
+    tracker.carve_unknown(t,part,K,T)
+    assert 0<len(t.unknown_cells)<len(all_cells)
+    remaining=set(t.unknown_cells)
+    tracker.carve_unknown(t,np.zeros_like(depth),K,T);assert set(t.unknown_cells)==remaining
+    np.testing.assert_array_equal(t.x,pose);np.testing.assert_array_equal(t.P,cov)
+    tracker.carve_unknown(t,depth,K,T);assert not t.unknown_cells
+
+
+def test_protected_map_corner_is_background_but_nearby_foreground_survives():
+    from geometric_obstacles.static_prior import StaticPrior
+    # Orthogonal lintel faces, deliberately sparse and voxel-offset.
+    xx,zz=np.meshgrid(np.arange(-.3,.31,.06),np.arange(0,.31,.06))
+    vertical=np.column_stack((xx.ravel(),np.zeros(xx.size),zz.ravel()))
+    xx,yy=np.meshgrid(np.arange(-.3,.31,.06),np.arange(0,.31,.06))
+    horizontal=np.column_stack((xx.ravel(),yy.ravel(),np.zeros(xx.size)))
+    prior=StaticPrior(np.vstack((vertical,horizontal)))
+    corner=np.array([[.03,0.,.03],[.03,.03,0.],[-.03,0.,.03],[-.03,.03,0.]])
+    assert prior.known(corner,np.ones(4,bool)).all()
+    foreground=np.array([[.03,-.065,.065],[-.03,-.065,.065]])
+    assert not prior.known(foreground,np.ones(2,bool)).any()
+
+
+def test_free_floor_does_not_carve_a_floating_unknown():
+    t=Tracker();t.tracks[0]=Track(0,np.array([1.2,0,0,0.]),np.eye(4)*.001,.9,.12,0.,
+        unknown=True,observed=False,grounded_support=False)
+    K=np.array([[60.,0,80.],[0,60.,60.],[0,0,1.]])
+    T=np.eye(4);T[:3,:3]=[[0,0,1],[-1,0,0],[0,-1,0]];T[2,3]=.5
+    yy,xx=np.mgrid[:120,:160];q=(yy-60.)/60.
+    depth=np.divide(.5,q,out=np.zeros_like(q),where=q>0);depth[(depth>3)|(depth<.3)]=0
+    t.retire(2.,depth,K,T)
+    assert 0 in t.tracks and t.tracks[0].unknown_cells is None

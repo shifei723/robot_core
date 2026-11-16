@@ -681,6 +681,16 @@ namespace scan_planner
       /* && (end_pt_ - pos).norm() < 0.5 */
       if (t_cur > info->duration_ - 1e-2)
       {
+        // A local segment ending is not proof that the robot reached its task
+        // goal. Holds, truncated emergency segments and tracking lag must retain
+        // the global target and request a new measured-state trajectory.
+        if (node_->get_parameter("manager.wheel_grid_trajectory").as_bool() &&
+            (end_pt_ - odom_pos_).norm() > no_replan_thresh_)
+        {
+          have_target_ = true;
+          changeFSMExecState(GEN_NEW_TRAJ, "LOCAL_SEGMENT_FINISHED");
+          return;
+        }
         if (isWaypointSequenceMode() && current_wp_ + 1 < (int)active_waypoints_.size())
         {
           current_wp_++;

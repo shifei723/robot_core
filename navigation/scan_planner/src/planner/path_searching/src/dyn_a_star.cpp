@@ -153,6 +153,7 @@ ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d
     step_size_ = step_size;
     inv_step_size_ = 1 / step_size;
     center_ = (start_pt + end_pt) / 2;
+    if (std::isfinite(height_lattice_anchor)) center_.z()=height_lattice_anchor;
 
     Vector3i start_idx, end_idx;
     if (!ConvertToIndexAndAdjustStartEndPoints(start_pt, end_pt, start_idx, end_idx))
@@ -276,6 +277,9 @@ ASTAR_RET AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d
                       preference=found!=preference_cache.end() ? found->second :
                         preference_cache.emplace(voxel_key,std::max(0.0,soft_cost(Index2Coord(neighborPtr->index)))).first->second;
                     }
+                    // Infinite cost denotes a mandatory local unknown-region
+                    // exclusion, not a very expensive traversable soft cell.
+                    if(!std::isfinite(preference)) continue;
                     tentative_gScore = current->gScore + static_cost*(1.0+preference);
 
                     if (!flag_explored)

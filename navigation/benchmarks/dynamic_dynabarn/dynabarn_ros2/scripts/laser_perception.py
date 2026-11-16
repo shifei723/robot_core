@@ -18,7 +18,7 @@ from std_msgs.msg import Header,String,Float64MultiArray
 from scan_planner_msgs.msg import DynamicObstacleArray,DynamicObstacle
 from tf2_ros import Buffer,TransformListener,StaticTransformBroadcaster
 from geometry_msgs.msg import TransformStamped
-from geometric_obstacles.core import Config,Tracker
+from geometric_obstacles.core import laser_region_free, Config,Tracker
 from map_geometry import static_wall_points,fit_circle
 
 def yaw(q):return math.atan2(2*(q.w*q.z+q.x*q.y),1-2*(q.y*q.y+q.z*q.z))
@@ -28,7 +28,7 @@ class Perception(Node):
   super().__init__('dynabarn_laser_perception')
   world=self.declare_parameter('world_file','').value
   self.walls=static_wall_points(world);self.tree=None;self.anchor=None;self.odom=None;self.last_sensor=-1.;self.epoch=time.time_ns()
-  self.cfg=Config(stride=1,voxel=.06,min_points=5,max_depth=5.,measurement_sigma=.08,accel_sigma=.4,max_cluster_extent=2.5)
+  self.cfg=Config(lost_timeout=self.declare_parameter("lost_timeout",1.0).value,stride=1,voxel=.06,min_points=5,max_depth=5.,measurement_sigma=.08,accel_sigma=.4,max_cluster_extent=2.5)
   self.tracker=Tracker(self.cfg);self.pending=None
   self.tf=Buffer();self.listener=TransformListener(self.tf,self)
   self.static_tf=StaticTransformBroadcaster(self);t=TransformStamped();t.header.frame_id='world';t.child_frame_id='odom';t.transform.rotation.w=1.;self.static_tf.sendTransform(t)
@@ -99,16 +99,11 @@ class Perception(Node):
    if t.observed:continue
    r=t.radius+3*np.sqrt(max(t.P[0,0],t.P[1,1]));d=t.x[:2]-position
    if np.linalg.norm(d)>self.cfg.retire_distance:del self.tracker.tracks[identity];continue
-   support=t.x[:2]+r*np.c_[np.cos(np.arange(8)*math.pi/4),np.sin(np.arange(8)*math.pi/4)]
-   rel=support-position;angle=np.arctan2(rel[:,1],rel[:,0])-heading;angle=np.arctan2(np.sin(angle),np.cos(angle))
-   index=np.rint((angle-m.angle_min)/m.angle_increment).astype(int)
-   if np.all((index>=0)&(index<len(raw))):
-    distance=np.linalg.norm(rel,axis=1);rr=np.minimum(raw[index],5.)
-    free=(np.isfinite(rr)&(rr>distance+.15))|(np.isposinf(rr)&(min(5.,m.range_max)>distance+.15))
-    if np.all(free):del self.tracker.tracks[identity]
+   if laser_region_free(t.x[:2],r,position,a+heading,raw,min(5.,m.range_max)):
+    del self.tracker.tracks[identity]
   out=DynamicObstacleArray();out.header=Header(stamp=m.header.stamp,frame_id='world');out.epoch=self.epoch;out.healthy=True;out.status='native laser, static-map residuals'
   for t in self.tracker.tracks.values():
-   o=DynamicObstacle();o.id=f'obstacle_{t.id}';o.observed=t.observed;o.last_observed=Time(seconds=t.last_seen).to_msg();o.state=o.COASTING if not t.observed else (o.DYNAMIC if t.state=='dynamic' else o.TENTATIVE)
+   o=DynamicObstacle();o.id=f'obstacle_{t.id}';o.observed=t.observed;o.last_observed=Time(seconds=t.last_seen).to_msg();o.state=o.UNKNOWN if t.unknown else o.COASTING if not t.observed else (o.DYNAMIC if t.state=='dynamic' else o.TENTATIVE)
    o.position.x=float(t.x[0]);o.position.y=float(t.x[1]);o.position.z=.25;o.velocity.x=float(t.x[2]);o.velocity.y=float(t.x[3]);o.radius=float(t.radius);o.covariance=t.P.ravel().tolist();out.obstacles.append(o)
   self.array.publish(out);self.last_sensor=stamp
   sensor=Odometry();sensor.header=out.header;sensor.pose.pose.position.x=float(position[0]);sensor.pose.pose.position.y=float(position[1]);sensor.pose.pose.position.z=.25;sensor.pose.pose.orientation=tr.rotation;self.sensor.publish(sensor)
@@ -121,7 +116,7 @@ class Perception(Node):
   ray_xy=position+np.c_[np.cos(a[ray_ok]+heading),np.sin(a[ray_ok]+heading)]*ranges[:,None]
   clear=np.linalg.norm(ray_xy-[self.odom.pose.pose.position.x,self.odom.pose.pose.position.y],axis=1)>.40
   self.cloud.publish(create_cloud_xyz32(out.header,np.c_[ray_xy[clear],np.full(clear.sum(),.25)]))
-  stats=String();stats.data=json.dumps({'stamp':stamp,'input':len(points),'residual':len(residual),'clusters':len(clusters),'circle_fits':fit_count,'tracks':len(out.obstacles),'filter_and_tracking_ms':(time.perf_counter()-begin)*1000,'source':'native LaserScan + odometry TF, no obstacle truth'})
+  stats=String();stats.data=json.dumps({'stamp':stamp,'input':len(points),'residual':len(residual),'clusters':len(clusters),'circle_fits':fit_count,'tracks':len(out.obstacles),'unknown_regions':sum(t.unknown for t in self.tracker.tracks.values()),'coast_timeout_s':self.cfg.lost_timeout,'filter_and_tracking_ms':(time.perf_counter()-begin)*1000,'source':'native LaserScan + odometry TF, no obstacle truth'})
   self.stats.publish(stats)
 
 def main():

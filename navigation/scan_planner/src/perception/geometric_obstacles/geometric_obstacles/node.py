@@ -229,9 +229,10 @@ class GeometricObstacles(Node):
     def publish(self, source, info, depth, T, transform, points, pixels, healthy):
         out = DynamicObstacleArray(); out.header.stamp = source.header.stamp
         out.header.frame_id = self.world; out.epoch = self.epoch
-        coasting = any(not t.observed for t in self.tracker.tracks.values())
+        coasting = any(not t.observed and not t.unknown for t in self.tracker.tracks.values())
+        unknown_regions=any(t.unknown for t in self.tracker.tracks.values())
         out.healthy = healthy
-        out.status = ('coasting predictions' if coasting else 'ok') if healthy else 'invalid track prediction'
+        out.status = ('unknown regions' if unknown_regions else ('coasting predictions' if coasting else 'ok')) if healthy else 'invalid track prediction'
         mask = np.zeros(depth.shape,np.uint8); unknown = np.zeros_like(mask)
         markers = MarkerArray(); clear = Marker(); clear.action = Marker.DELETEALL; markers.markers.append(clear)
         for t in self.tracker.tracks.values():
@@ -252,19 +253,25 @@ class GeometricObstacles(Node):
                     extend_contact_mask(target_mask,t.pixels,bottom)
             # Confident stationary clusters remain solely in the static map.
             if t.state == 'static' and t.observed: continue
-            item = DynamicObstacle(); item.id = 'obstacle_'+str(t.id)
-            item.state = item.COASTING if not t.observed else (item.DYNAMIC if t.state == 'dynamic' else item.TENTATIVE)
-            item.observed = t.observed
-            item.last_observed = Time(seconds=t.last_seen).to_msg()
-            item.position.x,item.position.y,item.position.z = float(t.x[0]),float(t.x[1]),float(t.z)
-            item.velocity.x,item.velocity.y = float(t.x[2]),float(t.x[3])
-            item.radius = float(t.radius); item.covariance = t.P.ravel().tolist()
-            out.obstacles.append(item)
-            m = Marker(); m.header = out.header; m.ns = 'tracked_obstacles'; m.id = t.id
-            m.type = Marker.CYLINDER; m.action = Marker.ADD; m.pose.position = item.position; m.pose.orientation.w = 1.
-            m.scale.x = m.scale.y = 2*t.radius; m.scale.z = .5
-            m.color.r = 1.; m.color.g = .5 if t.state == 'tentative' else 0.; m.color.a = .6
-            markers.markers.append(m)
+            regions=[('obstacle_'+str(t.id),t.x[:2],t.radius,t.P)]
+            if t.unknown and t.unknown_cells is not None:
+                regions=[('obstacle_'+str(t.id)+'_u_'+str(ix)+'_'+str(iy),centre,
+                    t.radius+self.cfg.unknown_cell_size/np.sqrt(2),np.zeros((4,4)))
+                    for (ix,iy),centre in t.unknown_cells.items()]
+            for identity,centre,radius,covariance in regions:
+                item = DynamicObstacle(); item.id = identity
+                item.state = item.UNKNOWN if t.unknown else item.COASTING if not t.observed else (item.DYNAMIC if t.state == 'dynamic' else item.TENTATIVE)
+                item.observed = t.observed
+                item.last_observed = Time(seconds=t.last_seen).to_msg()
+                item.position.x,item.position.y,item.position.z = float(centre[0]),float(centre[1]),float(t.z)
+                item.velocity.x,item.velocity.y = float(t.x[2]),float(t.x[3])
+                item.radius = float(radius); item.covariance = covariance.ravel().tolist()
+                out.obstacles.append(item)
+                m = Marker(); m.header = out.header; m.ns = 'unknown_regions' if t.unknown else 'tracked_obstacles'; m.id = len(markers.markers)
+                m.type = Marker.CYLINDER; m.action = Marker.ADD; m.pose.position = item.position; m.pose.orientation.w = 1.
+                m.scale.x=m.scale.y=2*(radius+3*np.sqrt(max(covariance[0,0],covariance[1,1])) if t.unknown else radius);m.scale.z=.5
+                m.color.r=1.;m.color.g=.8 if t.unknown else (.5 if t.state=='tentative' else 0.);m.color.a=.6
+                markers.markers.append(m)
         self.array_pub.publish(out); self.marker_pub.publish(markers)
         # 65535 means OMIT THIS RAY, never free space. Dilation covers stride gaps.
         mask = cv2.dilate(mask,np.ones((self.cfg.stride*2+1,)*2,np.uint8)).astype(bool)

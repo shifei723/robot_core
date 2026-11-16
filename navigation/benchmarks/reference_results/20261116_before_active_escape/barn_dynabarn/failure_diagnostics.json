@@ -1,0 +1,705 @@
+[
+  {
+    "method": "mppi",
+    "phase_s": 0,
+    "status": "collision",
+    "termination_s": 18.6,
+    "robot_world_xy": [
+      4.60122091890728,
+      0.1729364188264766
+    ],
+    "terminal_odom_vx_mps": 0.4821682460932435,
+    "continuous_terminal_low_speed_s": 0.0,
+    "nearest_obstacle": "easylibobs_177",
+    "obstacle_world_xy": [
+      3.9039079105677246,
+      -0.11459127932013624
+    ],
+    "obstacle_world_velocity_mps": [
+      0.2169656103790615,
+      0.5868971953845626
+    ],
+    "sampled_circle_clearance_m": -0.0797337281827788,
+    "terminal_decision": {
+      "stamp": null,
+      "feasible": null,
+      "shield": null,
+      "scale": null,
+      "v": null,
+      "before_v": null,
+      "moving_track_count": null,
+      "unknown_region_count": null,
+      "nominal_clearance": null
+    },
+    "terminal_tracks": [
+      {
+        "id": "obstacle_1",
+        "world_position": [
+          5.511674959006337,
+          5.7342345175292575
+        ],
+        "world_velocity": [
+          0.009362092467482753,
+          0.5917384823054668
+        ],
+        "state": 2,
+        "observed": false,
+        "last_observed_age_s": 0.22500000000000142,
+        "distance_to_contacting_obstacle_m": 6.065779264359687
+      },
+      {
+        "id": "obstacle_3",
+        "world_position": [
+          1.791861522550068,
+          -0.7371032863933658
+        ],
+        "world_velocity": [
+          -0.17854829865066263,
+          -0.6312877316217892
+        ],
+        "state": 2,
+        "observed": false,
+        "last_observed_age_s": 0.6000000000000014,
+        "distance_to_contacting_obstacle_m": 2.2018767322647217
+      },
+      {
+        "id": "obstacle_4",
+        "world_position": [
+          3.756090598110779,
+          -0.06856520653629648
+        ],
+        "world_velocity": [
+          0.17022078946845495,
+          0.5883377833455765
+        ],
+        "state": 2,
+        "observed": false,
+        "last_observed_age_s": 0.125,
+        "distance_to_contacting_obstacle_m": 0.15481717358838964
+      }
+    ],
+    "recent_planner_evidence": [
+      "[controller_server-4] [WARN] [1794818494.466858087] [controller_server]: Optimizer fail to compute path"
+    ]
+  },
+  {
+    "method": "frs_soft",
+    "phase_s": 0,
+    "status": "collision",
+    "termination_s": 19.2,
+    "robot_world_xy": [
+      4.757023724467907,
+      -0.0037973350385575593
+    ],
+    "terminal_odom_vx_mps": -4.394586674486261e-06,
+    "continuous_terminal_low_speed_s": 3.1999999999999993,
+    "nearest_obstacle": "easylibobs_177",
+    "obstacle_world_xy": [
+      4.036121591089831,
+      0.24907954880833216
+    ],
+    "obstacle_world_velocity_mps": [
+      0.22288000766099728,
+      0.6210078666911655
+    ],
+    "sampled_circle_clearance_m": -0.07003232771721613,
+    "terminal_decision": {
+      "stamp": 27.168,
+      "feasible": 0,
+      "shield": 1,
+      "scale": 0,
+      "v": 0,
+      "before_v": 0,
+      "moving_track_count": 1,
+      "unknown_region_count": 3,
+      "nominal_clearance": -0.8798201821148093
+    },
+    "terminal_tracks": [
+      {
+        "id": "obstacle_2",
+        "world_position": [
+          9.861343308132195,
+          -1.9897749755712881
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 3.3000000000000007,
+        "distance_to_contacting_obstacle_m": 6.240647212752623
+      },
+      {
+        "id": "obstacle_3",
+        "world_position": [
+          1.8530976218694253,
+          -0.9798087517829243
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 1.3000000000000007,
+        "distance_to_contacting_obstacle_m": 2.505146723351924
+      },
+      {
+        "id": "obstacle_4",
+        "world_position": [
+          4.006799725844465,
+          0.15105553472895714
+        ],
+        "world_velocity": [
+          0.2064853236175967,
+          0.5256585705764713
+        ],
+        "state": 2,
+        "observed": false,
+        "last_observed_age_s": 0.7250000000000014,
+        "distance_to_contacting_obstacle_m": 0.10231558589824372
+      },
+      {
+        "id": "obstacle_5",
+        "world_position": [
+          3.866661778580605,
+          -0.2606409450306028
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 0.8000000000000007,
+        "distance_to_contacting_obstacle_m": 0.5371513845230875
+      }
+    ],
+    "recent_planner_evidence": []
+  },
+  {
+    "method": "frs_hard",
+    "phase_s": 0,
+    "status": "collision",
+    "termination_s": 52.0,
+    "robot_world_xy": [
+      -2.0377005472691385,
+      -0.024009224390112237
+    ],
+    "terminal_odom_vx_mps": -6.3863442747159695e-06,
+    "continuous_terminal_low_speed_s": 5.399999999999999,
+    "nearest_obstacle": "easylibobs_180",
+    "obstacle_world_xy": [
+      -2.767018860766313,
+      0.16666406371080145
+    ],
+    "obstacle_world_velocity_mps": [
+      0.42541031694908343,
+      -0.48650767639089526
+    ],
+    "sampled_circle_clearance_m": -0.08016878202240973,
+    "terminal_decision": {
+      "stamp": 59.982,
+      "feasible": 0,
+      "shield": 1,
+      "scale": 0,
+      "v": 0,
+      "before_v": 0.005,
+      "moving_track_count": 2,
+      "unknown_region_count": 3,
+      "nominal_clearance": -1.070247878292096
+    },
+    "terminal_tracks": [
+      {
+        "id": "obstacle_3",
+        "world_position": [
+          0.7851049575144557,
+          -4.948253398631631
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 26.100000000999998,
+        "distance_to_contacting_obstacle_m": 6.227356121740036
+      },
+      {
+        "id": "obstacle_5",
+        "world_position": [
+          -1.7180766689936657,
+          -5.928774991336307
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 5.699999999999996,
+        "distance_to_contacting_obstacle_m": 6.185034922736848
+      },
+      {
+        "id": "obstacle_6",
+        "world_position": [
+          0.6035942209028899,
+          0.26031366286605717
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 1.1000000000000014,
+        "distance_to_contacting_obstacle_m": 3.371913817662234
+      },
+      {
+        "id": "obstacle_7",
+        "world_position": [
+          -2.8221531585701456,
+          0.2251025734110853
+        ],
+        "world_velocity": [
+          0.40827149969476956,
+          -0.46784478270395735
+        ],
+        "state": 2,
+        "observed": false,
+        "last_observed_age_s": 0.29999999999999716,
+        "distance_to_contacting_obstacle_m": 0.08034208243698852
+      },
+      {
+        "id": "obstacle_8",
+        "world_position": [
+          0.8999464269619537,
+          -4.289353427878394
+        ],
+        "world_velocity": [
+          -0.5216219664313562,
+          0.20791527207217225
+        ],
+        "state": 0,
+        "observed": true,
+        "last_observed_age_s": 0.0,
+        "distance_to_contacting_obstacle_m": 5.770851436898451
+      }
+    ],
+    "recent_planner_evidence": []
+  },
+  {
+    "method": "frs_hard",
+    "phase_s": 7,
+    "status": "success",
+    "termination_s": 70.6,
+    "robot_world_xy": [
+      -8.705939245259039,
+      -0.04167227118993401
+    ],
+    "terminal_odom_vx_mps": 0.4946987878819173,
+    "continuous_terminal_low_speed_s": 0.0,
+    "nearest_obstacle": "easylibobs_180",
+    "obstacle_world_xy": [
+      -8.884850186646773,
+      7.1539499863725275
+    ],
+    "obstacle_world_velocity_mps": [
+      0.47717803496518335,
+      -0.5460114244127943
+    ],
+    "sampled_circle_clearance_m": 6.363846122172698,
+    "terminal_decision": {
+      "stamp": 78.563,
+      "feasible": 1,
+      "shield": 0,
+      "scale": 1,
+      "v": 0.4647882571788684,
+      "before_v": 0.4647882571788684,
+      "moving_track_count": 0,
+      "unknown_region_count": 1,
+      "nominal_clearance": 0.1344876282374241
+    },
+    "terminal_tracks": [
+      {
+        "id": "obstacle_6",
+        "world_position": [
+          -10.48392270541148,
+          -0.4679118080395645
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 3.8499999999999943,
+        "distance_to_contacting_obstacle_m": 7.787798798979543
+      }
+    ],
+    "recent_planner_evidence": []
+  },
+  {
+    "method": "mppi",
+    "phase_s": 7,
+    "status": "collision",
+    "termination_s": 30.4,
+    "robot_world_xy": [
+      -1.1333005701115686,
+      0.487476073323026
+    ],
+    "terminal_odom_vx_mps": 0.5002589209528552,
+    "continuous_terminal_low_speed_s": 0.0,
+    "nearest_obstacle": "easylibobs_18",
+    "obstacle_world_xy": [
+      -0.7162436213224519,
+      1.1737368770643037
+    ],
+    "obstacle_world_velocity_mps": [
+      -0.13115481007309449,
+      -0.8555827237498769
+    ],
+    "sampled_circle_clearance_m": -0.03094932333948408,
+    "terminal_decision": {
+      "stamp": null,
+      "feasible": null,
+      "shield": null,
+      "scale": null,
+      "v": null,
+      "before_v": null,
+      "moving_track_count": null,
+      "unknown_region_count": null,
+      "nominal_clearance": null
+    },
+    "terminal_tracks": [
+      {
+        "id": "obstacle_4",
+        "world_position": [
+          -0.8029965609156093,
+          1.4046472544421795
+        ],
+        "world_velocity": [
+          -0.14881163991987867,
+          -0.8664564297356324
+        ],
+        "state": 1,
+        "observed": true,
+        "last_observed_age_s": 0.0,
+        "distance_to_contacting_obstacle_m": 0.2466691608386566
+      }
+    ],
+    "recent_planner_evidence": []
+  },
+  {
+    "method": "frs_soft",
+    "phase_s": 7,
+    "status": "success",
+    "termination_s": 42.2,
+    "robot_world_xy": [
+      -8.717974538853982,
+      -0.011381441174406669
+    ],
+    "terminal_odom_vx_mps": 0.4988893147298602,
+    "continuous_terminal_low_speed_s": 0.0,
+    "nearest_obstacle": "easylibobs_180",
+    "obstacle_world_xy": [
+      -3.9184780170721383,
+      1.4808522057305737
+    ],
+    "obstacle_world_velocity_mps": [
+      0.4182076798559884,
+      -0.4762316508593213
+    ],
+    "sampled_circle_clearance_m": 4.192124562677626,
+    "terminal_decision": {
+      "stamp": 50.186,
+      "feasible": 1,
+      "shield": 0,
+      "scale": 1,
+      "v": 0.47081481078252724,
+      "before_v": 0.47081481078252724,
+      "moving_track_count": 1,
+      "unknown_region_count": 0,
+      "nominal_clearance": 3.6547161715421277
+    },
+    "terminal_tracks": [
+      {
+        "id": "obstacle_6",
+        "world_position": [
+          -4.0071132693149245,
+          1.5254563569155004
+        ],
+        "world_velocity": [
+          0.378599907773334,
+          -0.4669294639844092
+        ],
+        "state": 2,
+        "observed": false,
+        "last_observed_age_s": 0.6000000000000014,
+        "distance_to_contacting_obstacle_m": 0.0992256934622789
+      }
+    ],
+    "recent_planner_evidence": []
+  },
+  {
+    "method": "frs_soft",
+    "phase_s": 14,
+    "status": "success",
+    "termination_s": 49.5,
+    "robot_world_xy": [
+      -8.719930327945338,
+      -0.013724766202249874
+    ],
+    "terminal_odom_vx_mps": 0.3151235681839313,
+    "continuous_terminal_low_speed_s": 0.0,
+    "nearest_obstacle": "easylibobs_40",
+    "obstacle_world_xy": [
+      -4.6625395591977306,
+      -2.4480350349010327
+    ],
+    "obstacle_world_velocity_mps": [
+      -0.5421583971881764,
+      0.17986597446499553
+    ],
+    "sampled_circle_clearance_m": 3.8976261828900474,
+    "terminal_decision": {
+      "stamp": 57.405,
+      "feasible": 1,
+      "shield": 0,
+      "scale": 1,
+      "v": 0.3450000000000002,
+      "before_v": 0.3450000000000002,
+      "moving_track_count": 1,
+      "unknown_region_count": 1,
+      "nominal_clearance": 0.2267738864306903
+    },
+    "terminal_tracks": [
+      {
+        "id": "obstacle_5",
+        "world_position": [
+          -9.972406819150898,
+          -1.2663415822847135
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 1.7250000000000014,
+        "distance_to_contacting_obstacle_m": 5.439769272154733
+      },
+      {
+        "id": "obstacle_6",
+        "world_position": [
+          -4.650817347837009,
+          -2.446697913615512
+        ],
+        "world_velocity": [
+          -0.5287259779088368,
+          0.17440060060659904
+        ],
+        "state": 1,
+        "observed": true,
+        "last_observed_age_s": 0.0,
+        "distance_to_contacting_obstacle_m": 0.011798225820758942
+      }
+    ],
+    "recent_planner_evidence": []
+  },
+  {
+    "method": "frs_hard",
+    "phase_s": 14,
+    "status": "collision",
+    "termination_s": 37.2,
+    "robot_world_xy": [
+      0.6769677256449872,
+      -0.014613934950545426
+    ],
+    "terminal_odom_vx_mps": 0.0001309489041616927,
+    "continuous_terminal_low_speed_s": 4.900000000000006,
+    "nearest_obstacle": "easylibobs_177",
+    "obstacle_world_xy": [
+      0.5788602212711491,
+      0.6596770371758236
+    ],
+    "obstacle_world_velocity_mps": [
+      0.19384660343266763,
+      -0.6254465864052983
+    ],
+    "sampled_circle_clearance_m": -0.1526092182120553,
+    "terminal_decision": {
+      "stamp": 45.193,
+      "feasible": 0,
+      "shield": 1,
+      "scale": 0,
+      "v": 0,
+      "before_v": 0,
+      "moving_track_count": 3,
+      "unknown_region_count": 3,
+      "nominal_clearance": -1.0689024180582045
+    },
+    "terminal_tracks": [
+      {
+        "id": "obstacle_3",
+        "world_position": [
+          6.263358426273013,
+          -0.6710251941974893
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 11.0,
+        "distance_to_contacting_obstacle_m": 5.83817508055825
+      },
+      {
+        "id": "obstacle_4",
+        "world_position": [
+          -1.419754004537225,
+          -5.6662126784254925
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 5.600000000000001,
+        "distance_to_contacting_obstacle_m": 6.634104273943401
+      },
+      {
+        "id": "obstacle_6",
+        "world_position": [
+          0.5500074677140834,
+          0.6913413712268115
+        ],
+        "world_velocity": [
+          0.1984074807799835,
+          -0.6672158709134727
+        ],
+        "state": 2,
+        "observed": false,
+        "last_observed_age_s": 0.20000000000000284,
+        "distance_to_contacting_obstacle_m": 0.04283820069420891
+      },
+      {
+        "id": "obstacle_7",
+        "world_position": [
+          1.267124314936316,
+          -4.419302149144848
+        ],
+        "world_velocity": [
+          -0.4453342358899089,
+          0.15351353981705113
+        ],
+        "state": 1,
+        "observed": true,
+        "last_observed_age_s": 0.0,
+        "distance_to_contacting_obstacle_m": 5.125401158710147
+      },
+      {
+        "id": "obstacle_8",
+        "world_position": [
+          -3.14636499386431,
+          0.5959238179379281
+        ],
+        "world_velocity": [
+          0.3967905892073145,
+          -0.4591542262905882
+        ],
+        "state": 1,
+        "observed": true,
+        "last_observed_age_s": 0.0,
+        "distance_to_contacting_obstacle_m": 3.72577070905393
+      },
+      {
+        "id": "obstacle_9",
+        "world_position": [
+          0.49484682837004,
+          0.8725720157290834
+        ],
+        "world_velocity": [
+          0.0,
+          0.0
+        ],
+        "state": 3,
+        "observed": false,
+        "last_observed_age_s": 0.25,
+        "distance_to_contacting_obstacle_m": 0.22887228333712464
+      }
+    ],
+    "recent_planner_evidence": []
+  },
+  {
+    "method": "mppi",
+    "phase_s": 14,
+    "status": "collision",
+    "termination_s": 37.0,
+    "robot_world_xy": [
+      -2.7708038039527523,
+      0.04493298883563239
+    ],
+    "terminal_odom_vx_mps": 0.4175006286845798,
+    "continuous_terminal_low_speed_s": 0.0,
+    "nearest_obstacle": "easylibobs_180",
+    "obstacle_world_xy": [
+      -3.184974439573383,
+      0.6443916315422741
+    ],
+    "obstacle_world_velocity_mps": [
+      0.40642353881194804,
+      -0.4642210350526773
+    ],
+    "sampled_circle_clearance_m": -0.10537939932631168,
+    "terminal_decision": {
+      "stamp": null,
+      "feasible": null,
+      "shield": null,
+      "scale": null,
+      "v": null,
+      "before_v": null,
+      "moving_track_count": null,
+      "unknown_region_count": null,
+      "nominal_clearance": null
+    },
+    "terminal_tracks": [
+      {
+        "id": "obstacle_3",
+        "world_position": [
+          0.22900890784380046,
+          0.8615878042894441
+        ],
+        "world_velocity": [
+          0.24484068485345822,
+          -0.6512636555442191
+        ],
+        "state": 2,
+        "observed": false,
+        "last_observed_age_s": 0.6999999999999957,
+        "distance_to_contacting_obstacle_m": 3.4208853348070374
+      },
+      {
+        "id": "obstacle_4",
+        "world_position": [
+          -3.4818189846750105,
+          0.37895528387950683
+        ],
+        "world_velocity": [
+          0.4279292173604816,
+          -0.45803122436580557
+        ],
+        "state": 2,
+        "observed": false,
+        "last_observed_age_s": 0.10000000000000142,
+        "distance_to_contacting_obstacle_m": 0.3982124290088666
+      }
+    ],
+    "recent_planner_evidence": [
+      "[controller_server-4] [WARN] [1794819232.540876574] [controller_server]: Optimizer fail to compute path"
+    ]
+  }
+]

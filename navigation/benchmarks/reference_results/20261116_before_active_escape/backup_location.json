@@ -1,0 +1,10 @@
+{
+  "created_local": "20261116_171045",
+  "purpose": "主动脱离机制修改前的算法与实验冻结备份",
+  "full_backup": "/home/robotx-2/ws_tianji_sharpa/temp/experiment_backups/robot_core_before_active_escape_20261116_171045",
+  "original_benchmark_archive": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/benchmark-current-20261116.zip",
+  "archive_sha256": "88ebf22adfdd64144220a3ebe1518843cf0fce108f7e7a06bc3d1dff33a70041",
+  "backup_files": 601,
+  "raw_backup_manifest": "/home/robotx-2/ws_tianji_sharpa/temp/experiment_backups/robot_core_before_active_escape_20261116_171045/backup_manifest.json",
+  "scope": "本机完整备份含室内24轮与BARN/DynaBARN21轮；Git保存摘要、图表与协议，原始数据路径见完整备份。"
+}
