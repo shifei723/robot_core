@@ -75,10 +75,11 @@ class Eval(Node):
    with (self.dest/(name+'.csv')).open('w') as f:w=csv.writer(f);w.writerow(header);w.writerows(rows)
   ranges={k:float(np.linalg.norm(np.ptp(v,axis=0))) for k,v in self.samples.items()}
   check=np.sum(self.scan_checks,axis=0) if self.scan_checks else np.zeros(3)
+  profile=getattr(self,'protocol',None)
   result={'status':status,'mode':self.a.mode,'sim_elapsed_s':self.now_s()-self.start if self.start is not None else None,
    'start_sim_s':self.start,'finish_sim_s':self.now_s(),'collision':self.touched,'models_seen':len(self.objects),'motion_ranges_m':ranges,
    'foreground_lidar':{'inlier_rays':int(check[0]),'tested_rays':int(check[1]),'mean_inlier_error_m':float(check[2]/check[0]) if check[0] else None},
-   'checks':self.checks,'goal_world':[-9.,0.],'start_world':[12.,0.,math.pi],'goal_tolerance_m':.3,
+   'checks':self.checks,'goal_world':[profile.goal_x if profile else -9.,0.],'start_world':[profile.start_x if profile else 12.,0.,profile.start_yaw if profile else math.pi],'goal_tolerance_m':profile.radius if profile else .3,
    'plant':'ROS2 Jazzy / Gazebo Harmonic / Jackal; native lidar, odometry, moving collisions',
    'scope':'Port functional verification; not official leaderboard reproduction; ground truth evaluation only'}
   (self.dest/'result.json').write_text(json.dumps(result,indent=2)+'\n');self.get_logger().info(json.dumps(result))

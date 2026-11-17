@@ -88,6 +88,9 @@ scan_planner_node:
     # 固定高度静态跟踪：保留实体包络并增加执行跟踪裕量。
     manager.shortcut_wheel_path: true
     manager.static_tracking_margin: 0.125
+    manager.dynamic_local_planning: false
+    manager.joint_rollout_planning: false
+    manager.dynamic_safety_margin: 0.1
     manager.max_vel: 0.75
     manager.max_acc: 0.5
     manager.max_jerk: 4.0

@@ -1,0 +1,8 @@
+{
+  "archive_path": "output/dynabarn-frs-navigation-fix-20261117.zip",
+  "archive_sha256": "3e4fe641fb09a04e8f33c6604789913e09d32502c0156bc606a8b71cf77b5a61",
+  "archive_bytes": 35882321,
+  "image_tag": "barn-jazzy-mpc-d-cbf:local",
+  "image_id_observed_at_commit": "sha256:23620d93e630149713f88e10bd64252e0bcdba36fc67844f33d2a7939cbf6e31",
+  "note": "镜像ID在保存Git版本时观察；冻结源码和安装文件见manifest.json。完整日志、预试验失败和回放保留在本地归档。"
+}

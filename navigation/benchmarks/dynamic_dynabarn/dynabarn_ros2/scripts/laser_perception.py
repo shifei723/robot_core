@@ -12,7 +12,7 @@ from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data,QoSProfile,DurabilityPolicy
 from rclpy.time import Time
 from nav_msgs.msg import Odometry,OccupancyGrid
-from sensor_msgs.msg import LaserScan,PointCloud2
+from sensor_msgs.msg import LaserScan,PointCloud2,Imu
 from sensor_msgs_py.point_cloud2 import create_cloud_xyz32
 from std_msgs.msg import Header,String,Float64MultiArray
 from scan_planner_msgs.msg import DynamicObstacleArray,DynamicObstacle
@@ -27,6 +27,10 @@ class Perception(Node):
  def __init__(self):
   super().__init__('dynabarn_laser_perception')
   world=self.declare_parameter('world_file','').value
+  self.require_imu=bool(self.declare_parameter('require_imu',False).value)
+  self.imu_stamp=-1.
+  self.start_x=float(self.declare_parameter('start_world_x',12.).value)
+  self.start_yaw=float(self.declare_parameter('start_world_yaw',math.pi).value)
   self.walls=static_wall_points(world);self.tree=None;self.anchor=None;self.odom=None;self.last_sensor=-1.;self.epoch=time.time_ns()
   self.cfg=Config(lost_timeout=self.declare_parameter("lost_timeout",1.0).value,stride=1,voxel=.06,min_points=5,max_depth=5.,measurement_sigma=.08,accel_sigma=.4,max_cluster_extent=2.5)
   self.tracker=Tracker(self.cfg);self.pending=None
@@ -41,16 +45,19 @@ class Perception(Node):
   self.cloud=self.create_publisher(PointCloud2,'/benchmark/static_cloud',10)
   self.array=self.create_publisher(DynamicObstacleArray,'/dynamic_obstacles/tracks',10)
   self.stats=self.create_publisher(String,'/dynamic_obstacles/perception_stats',10)
+  self.create_subscription(Imu,'/sensors/imu_0/data',self.on_imu,qos_profile_sensor_data)
   self.create_subscription(Odometry,'/platform/odom/filtered',self.on_odom,qos_profile_sensor_data)
   self.create_subscription(LaserScan,'/front/scan',self.on_scan,qos_profile_sensor_data)
   self.create_timer(.2,self.publish_prior);self.create_timer(.1,self.watchdog);self.create_timer(.02,self.process_scan)
+ def on_imu(self,m):
+  self.imu_stamp=m.header.stamp.sec+m.header.stamp.nanosec*1e-9
  def now_s(self):return self.get_clock().now().nanoseconds/1e9
  def on_odom(self,m):
   self.odom=m
   if self.anchor is None and self.now_s()>2.5:
    self.anchor=(m.pose.pose.position.x,m.pose.pose.position.y,yaw(m.pose.pose.orientation))
-   angle=self.anchor[2]-math.pi;R=np.array([[math.cos(angle),-math.sin(angle)],[math.sin(angle),math.cos(angle)]])
-   self.nav_walls=(self.walls-[12.,0.])@R.T+self.anchor[:2];self.tree=cKDTree(self.nav_walls)
+   angle=self.anchor[2]-self.start_yaw;R=np.array([[math.cos(angle),-math.sin(angle)],[math.sin(angle),math.cos(angle)]])
+   self.nav_walls=(self.walls-[self.start_x,0.])@R.T+self.anchor[:2];self.tree=cKDTree(self.nav_walls)
    self.publish_grid();a=Float64MultiArray();a.data=list(self.anchor);self.anchor_pub.publish(a)
   b=copy.deepcopy(m);b.header.frame_id='world';b.pose.pose.position.z=.25;self.body.publish(b)
  def publish_grid(self):
@@ -65,13 +72,16 @@ class Perception(Node):
  def invalid(self,reason):
   m=DynamicObstacleArray();m.header=Header(stamp=self.get_clock().now().to_msg(),frame_id='world');m.epoch=self.epoch;m.healthy=False;m.status=reason;self.array.publish(m)
  def watchdog(self):
-  if self.now_s()-self.last_sensor>.35:self.invalid('no fresh native laser/TF')
+  if self.require_imu and not 0<=self.now_s()-self.imu_stamp<.35:self.invalid('no fresh native IMU')
+  elif self.now_s()-self.last_sensor>.35:self.invalid('no fresh native laser/TF')
  def on_scan(self,m):
   self.pending=m
  def process_scan(self):
   m=self.pending
   if m is None:return
   if self.tree is None or self.odom is None:return
+  if self.require_imu and not 0<=self.now_s()-self.imu_stamp<.35:
+   self.invalid('no fresh native IMU');return
   begin=time.perf_counter();stamp=m.header.stamp.sec+m.header.stamp.nanosec/1e9
   if self.now_s()-stamp>.35:self.pending=None;return
   try:tr=self.tf.lookup_transform('odom',m.header.frame_id,Time.from_msg(m.header.stamp)).transform
@@ -116,7 +126,7 @@ class Perception(Node):
   ray_xy=position+np.c_[np.cos(a[ray_ok]+heading),np.sin(a[ray_ok]+heading)]*ranges[:,None]
   clear=np.linalg.norm(ray_xy-[self.odom.pose.pose.position.x,self.odom.pose.pose.position.y],axis=1)>.40
   self.cloud.publish(create_cloud_xyz32(out.header,np.c_[ray_xy[clear],np.full(clear.sum(),.25)]))
-  stats=String();stats.data=json.dumps({'stamp':stamp,'input':len(points),'residual':len(residual),'clusters':len(clusters),'circle_fits':fit_count,'tracks':len(out.obstacles),'unknown_regions':sum(t.unknown for t in self.tracker.tracks.values()),'coast_timeout_s':self.cfg.lost_timeout,'filter_and_tracking_ms':(time.perf_counter()-begin)*1000,'source':'native LaserScan + odometry TF, no obstacle truth'})
+  stats=String();stats.data=json.dumps({'stamp':stamp,'input':len(points),'residual':len(residual),'clusters':len(clusters),'circle_fits':fit_count,'tracks':len(out.obstacles),'unknown_regions':sum(t.unknown for t in self.tracker.tracks.values()),'coast_timeout_s':self.cfg.lost_timeout,'filter_and_tracking_ms':(time.perf_counter()-begin)*1000,'require_imu':self.require_imu,'imu_age_s':self.now_s()-self.imu_stamp,'source':'native LaserScan + odometry TF, no obstacle truth'})
   self.stats.publish(stats)
 
 def main():

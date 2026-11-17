@@ -1031,3 +1031,112 @@ XY几何进度追踪，并从对应样条相位提取高度参考，避免低横
 剩余单元以固定ID、零速度和包含物体半径/单元半对角线的包络发布为UNKNOWN，绝不生成运动FRS。
 此证据使用现有局部地面高度及连通接地假设；悬空目标、无效深度、遮挡和视野外部分保留原保守管理。
 超过256个单元时退回整体未知区，保证计算有界。旧v2的正式记录和全部预试验独立保留。
+
+### 可选主动避险恢复模块（实验功能，默认关闭）
+
+`plan_manage/active_escape.hpp` 为独立、无 ROS 依赖的差速候选评估模块。
+`closed_loop_controller` 的 `active_escape_enabled` 控制启用，默认 false；
+`active_escape_horizon` 默认 2.5 s，`active_escape_max_speed` 默认 0.5 m/s。
+启用需要原有动态跟踪、空间跟踪及新鲜的地图/里程计输入；输入过期或不健康继续停车。
+
+模块以“当前位置在未来 FRS 中存在冲突”为触发依据，在进入保护停车前预留转向时间。
+候选为前进加转向（0、左右约37/66/90度的目标航向及两个速度），不输出横向平移，
+也不启用无法确认后方安全的倒车。滚动预测从实测速度开始，包含反应时间和制动尾段。
+静态占据、固定 UNKNOWN 全程硬检查；运动目标保留近场 CV/误差包络硬检查；
+远期 FRS 进入软代价，同时排除远期 CV 中心与当前位置误差包络的名义实体拦截。
+未来速度不确定性不会被再次全部硬化为禁行区。没有可行候选时，继续原有保护停车，
+不会删除 UNKNOWN、缩小实体或关闭近场保护以换取通过。
+
+执行中保持航向偏好，按控制周期连续增加命令，避免里程计频率较低时转向增长过慢。
+避险期间暂停原参考推进并请求重规划；风险消除且正常跟踪可行后，通过保持时间退出。
+`ESCAPING_DYNAMIC` 表示正在执行；决策日志的 `escape_enabled/active/triggered/feasible/reason`、
+`escape_candidates/parked_clearance/chosen_clearance/path` 用于单独评价。
+日志 `feasible/scale` 仍表示原路径的时序决策，不能以其单独判断避险候选。
+`chosen_path` 在避险期间改为所选避险预测路径，实际发布命令仍有最终静态制动检查。
+
+DynaBARN 调用示例（须重新 build；使用新分组防止覆盖）：
+```
+DYNA_GROUP=escape_on_new DYNA_ACTIVE_ESCAPE=true navigation/benchmarks/dynamic_dynabarn/run.sh frs_soft 0 0
+DYNA_GROUP=escape_off_new DYNA_ACTIVE_ESCAPE=false navigation/benchmarks/dynamic_dynabarn/run.sh frs_soft 0 0
+```
+评估应使用同一二进制、相同场景/初相位/传感器，仅切换模块开关。
+这是受限候选的局部恢复，不保证任何动态环境均可脱离；遮挡、估计误差、超出预测的
+加速度及平台跟踪误差仍可能导致失败。高度通行继续由原高度安全层约束，未把
+Jackal 平面避险试验等同于 Slash 全高度/实机验证。
+
+避险对照沿用原始轮速/IMU定位，不更换理想位姿。评价同时区分原碰撞路段的局部交互
+及完整导航到达。为了与Nav2动作返回的处理一致，本文控制器报告终点到达、规划器
+进入WAIT_TARGET且估计位置距原目标小于0.1m，但真值尚未进入0.3m门限时，评价器
+记`estimated_goal_only`并结束；这是精度失败，不是成功。真值与估计误差单独报告，
+不把定位偏差当作避险无效，也不把局部无碰撞通过当作整场导航成功。旧版延长停车
+后发生碰撞的开发记录保留，不覆盖或反改。
+
+### 局部规划层的动态路径与速度联合选择（默认关闭）
+
+`manager.dynamic_local_planning` 在 `planWheelTrajectory` 内启用
+`dynamic_local_path.hpp`。对同一静态几何种子生成相对横向偏移
+0、±0.25、±0.5、±0.9 m 的平滑候选，偏移在不超过3 m的行进距离内重新接回
+原参考；比较0.5、0.375、0.25 m/s速度上限及等待。实际速度上限按manager.max_vel
+同比例缩放。候选均通过同一空间跟踪器模型传播，评分包含时序FRS风险、速度损失、
+相对全局引导的偏离及转向，保留静态/UNKNOWN硬检查与近场动态硬检查。远期FRS
+仍是软代价，另排除CV名义实体拦截。该离散候选方法不等同于完整连续最优控制器。
+
+选择发生在最终样条发布之前，控制器不再通过旧ActiveEscape旁路接管。
+规划器发布`planning/local_speed_limit=[traj_id, stamp, cap]`；控制器设置
+`planned_local_speed_required=true`，只采用匹配当前轨迹编号的有效速度上限。
+缓存相邻编号避免新轨迹/速度消息不同步引起停车；缺失、无效或零速度计划保持停车。
+等待时仍按重规划周期重新评估，不能因轨迹时钟冻结永久阻塞。曲线经静态认证后
+才发布，候选最终样条与用于评估的曲线相同。非平面高度轨迹保留原高度参考及
+既有FRS/高度安全层，本功能未宣称完成高度变化下的全状态联合优化验证。
+
+两个开关必须成对配置；DynaBARN启动入口已完成配对：
+```
+DYNA_GROUP=local_path_on_new DYNA_ACTIVE_ESCAPE=false DYNA_LOCAL_PLANNER=true navigation/benchmarks/dynamic_dynabarn/run.sh frs_soft 0 0
+DYNA_GROUP=local_path_off_new DYNA_ACTIVE_ESCAPE=false DYNA_LOCAL_PLANNER=false navigation/benchmarks/dynamic_dynabarn/run.sh frs_soft 0 0
+```
+禁止同时启用旧控制器ActiveEscape与新局部选择。对照双方共用0.2 m动态裕度、
+原传感器与轮速/IMU定位；没有真值输入规划。`planning/dynamic_local_decision`记录
+选中偏移、速度、候选数、风险及选择耗时，评价器保存为local_plans.json，实际命令
+保存commands.csv。默认关闭，须根据固定场景对照的完整到达及碰撞结果判断效果。
+
+### 局部规划层联合速度与转向滚动选择（2026-11-17，实验开关）
+
+`manager.joint_rollout_planning` 配对控制器 `joint_rollout_required`，默认均为false。
+DynaBARN入口使用 `DYNA_JOINT_ROLLOUT=true` 自动配对；不可叠加旧ActiveEscape或
+旧DynamicLocalPath候选。模块位于规划层，控制器只执行经时间戳及轨迹ID匹配的前缀，
+不再用旧路径的速度缩放消去选中的转向。该入口目前验证平面差速任务；启用高度安全
+控制时拒绝执行活动序列，非平面高度参考显式委托原高度规划与跟踪。
+
+`joint_rollout.hpp`从实测速度、角速度开始，以0.05s积分、0.4s控制段、3.2s预测窗口
+联合搜索4档非负速度及7档角速度；考虑线加减速和角加速度限制。有限宽度搜索保留
+不同转向状态、恒定控制种子及上次序列的安全延续，避免只按短期推进剪掉提前转弯。
+每次只执行前缀，并约0.4s重新规划；无导航目标不自行移动。该方法是有限候选滚动
+选择，不是连续非线性MPC，也不具备全局可行性或递归安全保证。
+
+保持远期FRS为软风险；静态地图、固定UNKNOWN、近场CV误差包络为硬检查，远期另
+排除名义实体拦截。保留静态/UNKNOWN制动尾段与执行时最新观测的0.6s前缀检查。
+缺失、过期、不可行序列及异常感知停车；不扩大指令有效期来掩盖计算超时。
+静态查询使用每轮独立的保守空闲证书缓存：外包圆覆盖两圆柱、整个位置格及体素误差，
+证书失败则回到原精确包络查询，UNKNOWN仍逐步独立检查。
+
+`planning/joint_rollout`为可靠、瞬态本地Float64MultiArray：
+`[version=1, traj_id, input_stamp, active, feasible, segment_dt, count, v0,w0,...]`。
+控制器缓存相邻ID以处理消息先后差异，只接受当前轨迹的有效序列。无障碍及非平面
+参考通过显式inactive消息委托既有跟踪器；过期inactive也不能解锁运动。
+`planning/dynamic_local_decision`保存输入时间、活动标志、可行性、停车威胁、候选数、
+控制序列、预测路径及耗时。`dynamic_navigation/decision`保存执行前缀检查与实际命令。
+
+示例（先重新build；新分组避免覆盖）：
+```
+DYNA_GROUP=joint_on_new DYNA_ACTIVE_ESCAPE=false DYNA_LOCAL_PLANNER=false DYNA_JOINT_ROLLOUT=true navigation/benchmarks/dynamic_dynabarn/run.sh frs_soft 0 0
+DYNA_GROUP=joint_off_new DYNA_ACTIVE_ESCAPE=false DYNA_LOCAL_PLANNER=false DYNA_JOINT_ROLLOUT=false navigation/benchmarks/dynamic_dynabarn/run.sh frs_soft 0 0
+```
+本轮开发与正式对照分别保存在`output/joint_rollout_20261117/development`和`formal_v2`，
+原有实验与源码备份保留，不用新预试验覆盖旧失败，不自动改写论文或推送Git。
+
+联合模式下，状态机的前视静态/未知区检查改为实际选中序列的预测路径；当前机身
+碰撞检查保留，避免未执行的引导样条触发无关急停。目标代价还包含连续净距软代价，
+用于提前远离名义硬边界，未改变硬半径或将FRS整体改成禁行区。前缀、轨迹消息及
+新鲜度仍独立检查；不可行时没有强行穿越硬约束的恢复旁路。
+
+联合控制到达分支发布终点执行进度，允许新鲜里程计下的终点捕获完成，避免旧序列过期掩盖完成状态。旧formal批次因该衔接缺陷单独保留，最终对照在formal_v2。

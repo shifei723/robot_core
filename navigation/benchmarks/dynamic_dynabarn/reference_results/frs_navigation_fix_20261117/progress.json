@@ -1,0 +1,205 @@
+{
+  "started_utc": "2026-11-17T08:59:23.559924+00:00",
+  "completed": [
+    {
+      "kind": "dynamic",
+      "method": "mppi",
+      "phase": 0,
+      "trial": 0,
+      "status": "collision",
+      "exit_code": 0,
+      "wall_s": 33.4289434790262,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_0_trial_0/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/01_dynamic_mppi_0.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_soft",
+      "phase": 0,
+      "trial": 0,
+      "status": "collision",
+      "exit_code": 0,
+      "wall_s": 32.00339220103342,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_0_trial_0/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/02_dynamic_frs_soft_0.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_joint",
+      "phase": 0,
+      "trial": 0,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 62.38027622899972,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_0_trial_0/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/03_dynamic_frs_joint_0.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_soft",
+      "phase": 0,
+      "trial": 1,
+      "status": "collision",
+      "exit_code": 0,
+      "wall_s": 31.897619190975092,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_0_trial_1/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/04_dynamic_frs_soft_0.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_joint",
+      "phase": 0,
+      "trial": 1,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 60.82965653401334,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_0_trial_1/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/05_dynamic_frs_joint_0.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "mppi",
+      "phase": 0,
+      "trial": 1,
+      "status": "collision",
+      "exit_code": 0,
+      "wall_s": 33.165010205004364,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_0_trial_1/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/06_dynamic_mppi_0.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_joint",
+      "phase": 7,
+      "trial": 0,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 55.67635710403556,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_7_trial_0/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/07_dynamic_frs_joint_7.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "mppi",
+      "phase": 7,
+      "trial": 0,
+      "status": "collision",
+      "exit_code": 0,
+      "wall_s": 43.937420864996966,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_7_trial_0/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/08_dynamic_mppi_7.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_soft",
+      "phase": 7,
+      "trial": 0,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 54.06143683101982,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_7_trial_0/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/09_dynamic_frs_soft_7.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "mppi",
+      "phase": 7,
+      "trial": 1,
+      "status": "collision",
+      "exit_code": 0,
+      "wall_s": 44.246393502980936,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_7_trial_1/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/10_dynamic_mppi_7.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_soft",
+      "phase": 7,
+      "trial": 1,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 54.24337081401609,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_7_trial_1/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/11_dynamic_frs_soft_7.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_joint",
+      "phase": 7,
+      "trial": 1,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 54.51687136600958,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_7_trial_1/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/12_dynamic_frs_joint_7.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_soft",
+      "phase": 14,
+      "trial": 0,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 60.62553968798602,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_14_trial_0/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/13_dynamic_frs_soft_14.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_joint",
+      "phase": 14,
+      "trial": 0,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 58.54040305601666,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_14_trial_0/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/14_dynamic_frs_joint_14.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "mppi",
+      "phase": 14,
+      "trial": 0,
+      "status": "collision",
+      "exit_code": 0,
+      "wall_s": 38.07014191598864,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_14_trial_0/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/15_dynamic_mppi_14.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_joint",
+      "phase": 14,
+      "trial": 1,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 60.28306598699419,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_14_trial_1/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/16_dynamic_frs_joint_14.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "mppi",
+      "phase": 14,
+      "trial": 1,
+      "status": "collision",
+      "exit_code": 0,
+      "wall_s": 37.90487490099622,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_14_trial_1/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/17_dynamic_mppi_14.log"
+    },
+    {
+      "kind": "dynamic",
+      "method": "frs_soft",
+      "phase": 14,
+      "trial": 1,
+      "status": "success",
+      "exit_code": 0,
+      "wall_s": 60.355236920004245,
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_14_trial_1/result.json",
+      "log": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/logs/18_dynamic_frs_soft_14.log"
+    }
+  ],
+  "planned": 18,
+  "finished_utc": "2026-11-17T09:14:00.594729+00:00"
+}

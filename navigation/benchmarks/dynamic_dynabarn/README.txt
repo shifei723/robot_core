@@ -1,38 +1,50 @@
-动态 DynaBARN 基准
+动态 DynaBARN：ROS2统一条件适配对照
 
-从 robot_core 根目录先执行 navigation/benchmarks/build.sh。
-单轮：navigation/benchmarks/dynamic_dynabarn/run.sh 方法 初相位 试验编号
-方法为 mppi / frs_soft / frs_hard。原始场景world_2有8个运动圆柱，
-保留原关键帧、周期和周期末尾回跳，不依赖ROS1或Gazebo Classic。
-全套：navigation/benchmarks/dynamic_dynabarn/run_suite.sh 试验编号
-固定初相位为0、7、14 s，共9轮；不是3个独立地图或同条件统计重复。
-使用 DYNA_GROUP=新分组 可额外验证，默认final，禁止覆盖已有结果。
+从robot_core根目录先运行 navigation/benchmarks/build.sh。
+默认使用challenge协议，按BARN Challenge固定run.py的任务/终止规则评分：
+(11,0,3.14)->(-9,0)，真值距终点<=1m，移动0.1m后开始100s计时。
+控制器报告完成不提前结束；估计到达与定位偏差另外记录。
+定位仍为原生轮速/IMU EKF；未把真值送入导航、感知或目标跟踪。
+共同速度0.5m/s、1rad/s，有效感知5m，Jazzy/Harmonic现代Jackal；
+这是适配对照，不等同于官方完整样本/物理条件或排行榜成绩。详见PROTOCOL.txt。
 
-传感器链：5 m真实模拟激光、原生里程计、同一静态墙背景 -> 背景差分 ->
-残差聚类 -> 可靠圆弧拟合 -> KF -> FRS。拟合不可靠的点纳入近场占据；
-动态真值只进入评价器，不输入感知。延迟TF采用最新扫描缓存，真实超时仍停车。
-圆拟合是基准圆柱的形状适配，不等价于任意形状恢复，也不是Slash实机深度输入。
+单轮（新分组，禁止覆盖）：
+DYNA_GROUP=challenge_new navigation/benchmarks/dynamic_dynabarn/run.sh mppi 0 0
+DYNA_GROUP=challenge_new navigation/benchmarks/dynamic_dynabarn/run.sh frs_soft 0 0
+DYNA_GROUP=challenge_new navigation/benchmarks/dynamic_dynabarn/run.sh frs_joint 0 0
+frs_joint自动配对规划器与控制器开关；不要叠加旧ActiveEscape或旧局部曲线候选。
+其他方法frs_hard、mpc_d_cbf仍支持；后者需设置BENCH_IMAGE=barn-jazzy-mpc-d-cbf:local。
+DYNA_GROUP=challenge_suite navigation/benchmarks/dynamic_dynabarn/run_suite.sh 0
+便利套件为初相位0/7/14×MPPI/FRS-Soft/frs_joint共9轮，不能视为3张独立地图。
 
-共同sim=8 s启动，起点(12,0,pi)，目标(-9,0)，容差0.3 m、超时120模拟秒。
-双方线速度上限0.5 m/s、角速度上限1 rad/s，MPPI保留倒车，本文控制器前向。
-软/硬FRS仅风险处理开关不同。详细协议见PROTOCOL.txt（其中旧目录名为历史记录）。
+复现此前内部条件必须显式设置DYNA_PROTOCOL=legacy：起点12m、真值0.3m、
+发目标计时120s及estimated_goal_only提前终止。历史数据保持原结果，不与challenge混算。
 
-新结果汇总：python3 navigation/benchmarks/dynamic_dynabarn/report.py
-           python3 navigation/benchmarks/dynamic_dynabarn/plot.py
-report默认读取results/final和logs/final；图像使用Tinos数字/英文、Noto宋体中文，
-需要numpy/scipy/matplotlib/fonttools以及fonts-croscore、fonts-noto-cjk。
-reference_results/保留此前9轮汇总及中文图，原始完整记录位置见上级source_manifest.json。
-既往软风险到达2/3，MPPI三轮碰撞，硬约束两轮碰撞一轮超时，失败均被保留。
-目前仍有保护停车后被运动目标接近的失败，代码整理不表示该策略缺口已经解决。
+汇总（所有重复与启动异常都保留，不按方法/初相位静默去重）：
+python3 navigation/benchmarks/dynamic_dynabarn/report.py --group challenge_new --output output/challenge_review
+python3 navigation/benchmarks/dynamic_dynabarn/plot.py --report output/challenge_review/report.json
+报告拒绝混合challenge和legacy结果，保留成功/碰撞/超时、路径、等待、净距和定位误差。
+时间平均仅用成功样本；MPPI没有同名FRS状态，不虚写求解器耗时。
 
-包内测试：
-  python3 dynabarn_ros2/test/test_laser_geometry.py
-  python3 dynabarn_ros2/test/test_conversion.py
-延迟TF真实ROS2回归在安装并source工作空间后执行：
-  python3 dynabarn_ros2/test/test_delayed_laser_tf.py
-原始官方插件往返转换测试需要可选原数据，其余测试使用包内独立夹具。
+场景world_2保留原8圆柱轨迹及周期回跳，尚未包含完整60场景。
+原生模拟激光->静态墙背景差分->聚类->可靠圆拟合->KF->FRS；
+该圆柱适配不等同于任意物体形状恢复，也不等同于Slash实机深度相机输入。
+长期失观目标超过可信时长转固定UNKNOWN，取得自由空间证据后清除。
 
-长期失观生命周期已更新：默认仅1 s运动预测，之后固定为UNKNOWN区域；
-未知区域参与局部硬碰撞检查，观测自由空间后清除，重新观测可恢复跟踪。
-轨迹消息UNKNOWN=3；决策日志unknown_regions与运动FRS tracks分开。
-详见 ../../scan_planner/FRS_NAVIGATION.md 文末。该更新不自动修复所有主动脱离问题。
+测试：dynabarn_ros2/scripts/test_benchmark_protocol.py、test_evaluation_ros.py，
+以及dynabarn_ros2/test/中的轨迹转换、几何与延迟TF测试。
+新协议启动规则与未启动看门狗、计时采样以及原仓库版本等全部记录在PROTOCOL.txt。
+
+MPPI控制器显式使用/platform/odom/filtered速度反馈；challenge评测器在发目标前
+检查controller_server实际Odometry订阅，避免默认/odom重映射到原始轮速。
+legacy只恢复评测条件；精确重现旧算法/接线还需使用对应实验的源码与镜像快照。
+
+2026-11-17 FRS动态导航修复：
+run.sh无参数默认frs_joint，执行联合线速度/转向滚动选择，FRS为软风险、近场CV/实体包络为硬检查。
+DYNA_LOCALIZATION=velocity_imu为新默认：编码器只融合机体系vx/vy，原生IMU融合yaw rate，
+不将同源轮速积分的XY/yaw再次作为绝对观测融合。不是全局定位，也没有使用机器人真值。
+新配置使用隔离的临时setup目录，原robot.yaml与旧实验快照保留；require_imu检查实时输入。
+DYNA_LOCALIZATION=legacy可以复现原融合配置；DYNA_PROTOCOL=legacy只选择旧评分规则，两者独立。
+MPPI平滑器正负角速度均限制在±1rad/s，线速度[-0.35,0.5]m/s。
+结果保存localization_profile、runtime_localization.yaml和传感器新鲜度；不同定位配置不得混合统计。
+建议：BENCH_IMAGE=barn-jazzy-mpc-d-cbf:local DYNA_GROUP=frs_new navigation/benchmarks/dynamic_dynabarn/run.sh frs_joint 14 0

@@ -434,6 +434,8 @@ namespace scan_planner
     odom_orient_.y() = msg->pose.pose.orientation.y;
     odom_orient_.z() = msg->pose.pose.orientation.z;
 
+    planner_manager_->setExecutionState(odom_pos_,getOdomYaw(),msg->twist.twist.linear.x,
+        msg->twist.twist.angular.z,rclcpp::Time(msg->header.stamp).seconds());
     have_odom_ = true;
     publishSelfInflationMarker();
     if (navi_mode_ == NAVI_MODE::PRESET_TARGET && !preset_started_)
@@ -678,6 +680,12 @@ namespace scan_planner
         return;
       }
 
+      // A checked wait must still be replanned as targets move. Spatial-clock
+      // freezing and the near-start early return must not lock a zero speed plan.
+      if(planner_manager_->dynamicLocalPlanDue(replan_interval_) &&
+          (end_pt_-odom_pos_).norm()>no_replan_thresh_) {
+        changeFSMExecState(REPLAN_TRAJ,"DYNAMIC_LOCAL_REFRESH");return;
+      }
       /* && (end_pt_ - pos).norm() < 0.5 */
       if (t_cur > info->duration_ - 1e-2)
       {
@@ -879,9 +887,27 @@ namespace scan_planner
     const bool spatial_execution=spatial_feedback_id_==info->traj_id_ &&
         node_->now().seconds()-spatial_feedback_stamp_<.3;
     const Eigen::Vector3d body_heading=odom_orient_*Eigen::Vector3d::UnitX();
-    if(spatial_execution && planner_manager_->trajectoryCollision(odom_pos_,std::atan2(body_heading.y(),body_heading.x()))) {
+    const bool joint_execution=planner_manager_->jointRolloutActive();
+    if((spatial_execution || joint_execution) && planner_manager_->trajectoryCollision(odom_pos_,std::atan2(body_heading.y(),body_heading.x()))) {
       flag_escape_emergency_=true;
       changeFSMExecState(EMERGENCY_STOP,"SPATIAL_BODY_SAFETY");
+      return;
+    }
+    if(joint_execution){
+      // The spline is guidance while the selected control sequence owns motion.
+      // Check that sequence, rather than emergency-stopping for an unexecuted
+      // guidance segment. Missing/expired sequences remain a controller hold.
+      const auto& path=planner_manager_->jointSafetyPath();
+      const double age=node_->now().seconds()-planner_manager_->jointInputStamp();
+      if(age<0 || age>.75 || path.empty())return;
+      for(size_t i=size_t(age/.05);i<path.size() && i*.05<=age+.8;i++){
+        const auto& p=path[i];const auto& next=path[std::min(i+1,path.size()-1)];
+        if(planner_manager_->trajectoryCollision(p,estimateYawFromSegment(p,next))){
+          if(i*.05-age<emergency_time_){flag_escape_emergency_=true;changeFSMExecState(EMERGENCY_STOP,"JOINT_STATIC_SAFETY");}
+          else changeFSMExecState(REPLAN_TRAJ,"JOINT_STATIC_SAFETY");
+          return;
+        }
+      }
       return;
     }
     double travelled=0.;

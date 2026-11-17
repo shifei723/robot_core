@@ -23,6 +23,8 @@
 #include "plan_manage/spatial_tracker.hpp"
 #include "plan_manage/static_motion_safety.hpp"
 #include "plan_manage/intent_frs.hpp"
+#include "plan_manage/active_escape.hpp"
+#include "plan_manage/joint_rollout.hpp"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/utils.hpp>
 
@@ -95,6 +97,38 @@ public:
     if(dynamic_min_tracks_<1) throw std::invalid_argument("dynamic_min_tracks must be positive");
     if(dynamic_mode_!="off" && dynamic_mode_!="cv" && dynamic_mode_!="frs" && dynamic_mode_!="physical")
       throw std::invalid_argument("dynamic_prediction must be off/cv/frs/physical");
+    local_speed_required_=declare_parameter<bool>("planned_local_speed_required",false);
+    joint_rollout_required_=declare_parameter<bool>("joint_rollout_required",false);
+    joint_rollout_sub_=create_subscription<std_msgs::msg::Float64MultiArray>("planning/joint_rollout",rclcpp::QoS(8).reliable().transient_local(),
+      [this](std_msgs::msg::Float64MultiArray::ConstSharedPtr m){
+        JointRolloutPacket p;
+        if(!JointRolloutPacket::decode(m->data,now().seconds(),max_vx_,max_vyaw_,p))return;
+        auto old=joint_packets_.find(p.id);
+        if(old!=joint_packets_.end() && old->second.stamp>p.stamp)return;
+        joint_packets_[p.id]=std::move(p);while(joint_packets_.size()>8)joint_packets_.erase(joint_packets_.begin());
+      });
+    local_speed_sub_=create_subscription<std_msgs::msg::Float64MultiArray>("planning/local_speed_limit",rclcpp::QoS(8).reliable().transient_local(),
+      [this](std_msgs::msg::Float64MultiArray::ConstSharedPtr m) {
+        if(m->data.size()!=3)return;
+        const double id=m->data[0],stamp=m->data[1],speed=m->data[2],time=now().seconds();
+        if(!std::isfinite(id) || id<0 || id>1e12 || std::abs(id-std::round(id))>1e-6 ||
+           !std::isfinite(stamp) || stamp>time+.05 || time-stamp>1. ||
+           !std::isfinite(speed) || speed<0 || speed>max_vx_+1e-6)return;
+        local_speed_limits_[static_cast<std::int64_t>(std::llround(id))]=speed;
+        RCLCPP_DEBUG(get_logger(),"Accepted local speed id=%.0f cap=%.3f",id,speed);
+        while(local_speed_limits_.size()>8)local_speed_limits_.erase(local_speed_limits_.begin());
+      });
+    active_escape_.config.enabled=declare_parameter<bool>("active_escape_enabled",false);
+    if((local_speed_required_ || joint_rollout_required_) && active_escape_.config.enabled)
+      throw std::invalid_argument("local planner and controller escape cannot both own motion");
+    active_escape_.config.horizon=declare_parameter<double>("active_escape_horizon",2.5);
+    active_escape_.config.max_speed=std::min(max_vx_,declare_parameter<double>("active_escape_max_speed",.5));
+    active_escape_.config.max_yaw_rate=max_vyaw_;
+    active_escape_.config.acceleration=get_parameter("static_acceleration_limit").as_double();
+    active_escape_.config.braking=dynamic_braking_;
+    if(!std::isfinite(active_escape_.config.horizon) || active_escape_.config.horizon<1. || active_escape_.config.horizon>3. ||
+       !std::isfinite(active_escape_.config.max_speed) || active_escape_.config.max_speed<=0.)
+      throw std::invalid_argument("invalid active escape horizon/speed");
     dynamic_log_=create_publisher<std_msgs::msg::String>("dynamic_navigation/decision",10);
     if(dynamic_mode_!="off" && dynamic_input_=="array") {
       obstacle_sub_=create_subscription<scan_planner_msgs::msg::DynamicObstacleArray>("/dynamic_obstacles/tracks",10,
@@ -343,6 +377,22 @@ private:
     odom_time_=now();
   }
 
+  double spatialCruise() const {
+    double speed=std::min(max_vx_,get_parameter("static_cruise_speed").as_double());
+    if(local_speed_required_) {
+      const auto found=local_speed_limits_.find(traj_id_);
+      speed=found==local_speed_limits_.end()?0.:std::min(speed,found->second);
+    }
+    return speed;
+  }
+  bool holdForLocalPlan() {
+    if(!local_speed_required_ || !receive_traj_ || !have_odom_)return false;
+    if(spatial_active_ && spatialCruise()>0)return false;
+    RCLCPP_DEBUG_THROTTLE(get_logger(),*get_clock(),200,"Local speed hold id=%lld spatial=%d cap=%.3f cache=%zu",static_cast<long long>(traj_id_),spatial_active_,spatialCruise(),local_speed_limits_.size());
+    spatial_tracker_.v=spatial_tracker_.w=0.;last_update_time_=now();
+    publishStop();publishExecutionFrozen(true);
+    publishLegHeightFromBaseZ(last_height_cmd_+base_z_offset_);reportState("WAIT_LOCAL_PLAN");return true;
+  }
   void legacyCmdCallback()
   {
     if (!receive_traj_ || !have_odom_)
@@ -353,6 +403,7 @@ private:
       publishLegHeightFromBaseZ(leg_height_default_ + base_z_offset_);
       return;
     }
+    if(holdForLocalPlan())return;
     const auto current_time = now();
     double dt = (current_time - last_update_time_).seconds();
     if (dt < 0.0 || dt > 0.2) dt = 0.0;
@@ -370,7 +421,7 @@ private:
       const auto begin=std::chrono::steady_clock::now();
       const auto previous=spatial_tracker_;
       auto result=spatial_tracker_.step(odom_pos_.head<2>(),odom_yaw_,dt,
-          std::min(max_vx_,get_parameter("static_cruise_speed").as_double()),max_vyaw_,get_parameter("static_acceleration_limit").as_double(),finish_dist_);
+          spatialCruise(),max_vyaw_,get_parameter("static_acceleration_limit").as_double(),finish_dist_);
       auto safe=[&](double v,double w) {
         return brakingMotionFree(odom_pos_,odom_yaw_,v,w,measured_forward_speed_,measured_yaw_rate_,
           get_parameter("static_acceleration_limit").as_double(),
@@ -382,7 +433,7 @@ private:
         if(feasible)break;
         spatial_tracker_=previous;selected_lookahead=scale;
         result=spatial_tracker_.step(odom_pos_.head<2>(),odom_yaw_,dt,
-          std::min(max_vx_,get_parameter("static_cruise_speed").as_double()),max_vyaw_,
+          spatialCruise(),max_vyaw_,
           get_parameter("static_acceleration_limit").as_double(),finish_dist_,scale);
         feasible=safe(result.v,result.w);
       }
@@ -480,8 +531,101 @@ private:
     std_msgs::msg::String msg; msg.data=state; state_pub_->publish(msg);
   }
 
+  bool executeJointRollout()
+  {
+    const double time=now().seconds();auto found=joint_packets_.find(traj_id_);
+    auto hold=[&](const std::string& state){
+      joint_executing_=false;joint_v_=joint_w_=0.;last_update_time_=now();
+      publishStop();publishExecutionFrozen(true);reportState(state);
+      publishLegHeightFromBaseZ(last_height_cmd_+base_z_offset_);
+    };
+    if(!receive_traj_){hold("IDLE");return true;}
+    if(found==joint_packets_.end()){hold("WAIT_JOINT_PLAN");return true;}
+    const auto& packet=found->second;
+    // Completion must publish the same phase feedback as normal execution.
+    // Otherwise the FSM suppresses replans near goal while waiting forever for
+    // an end phase, and the expiring sequence masks GOAL_REACHED.
+    if(spatial_active_ && !height_safety_enabled_ && have_odom_ && time-odom_time_.seconds()<=data_timeout_ &&
+       (odom_pos_.head<2>()-traj_[0].evaluateDeBoorT(traj_duration_).head<2>()).norm()<finish_dist_){
+      exec_time_=traj_duration_;hold("GOAL_REACHED");publishExecutionFrozen(false);
+      std_msgs::msg::Float64MultiArray phase;phase.data={double(traj_id_),exec_time_,0.,get_parameter("static_acceleration_limit").as_double()};
+      execution_phase_pub_->publish(phase);return true;
+    }
+    if(time-packet.stamp>.75 || packet.stamp>time+.05){hold("WAIT_JOINT_PLAN");return true;}
+    // An explicit inactive packet delegates empty scenes and nonplanar height
+    // references to the existing tracker. It never authorises stale perception.
+    if(!packet.active){joint_executing_=false;return false;}
+    const double age=time-packet.stamp;
+    if(!have_odom_ || time-odom_time_.seconds()>data_timeout_){hold("WAIT_ODOM");return true;}
+    if(odom_frame_!="world" || !spatial_active_ || height_safety_enabled_){hold("JOINT_UNSUPPORTED_CONFIG");return true;}
+    if(time-static_map_time_>data_timeout_ || (prior_required_ && (prior_applied_stamp_<0 || time-prior_applied_stamp_>.8))){hold("WAIT_MAP");return true;}
+    if(!obstacle_tracks_.fresh(time)){hold("WAIT_TRACK");return true;}
+    if(age<-.05 || age>.75 || !packet.feasible || packet.controls.empty()){
+      hold(packet.feasible?"WAIT_JOINT_PLAN":"JOINT_NO_SAFE_SEQUENCE");return true;
+    }
+    const auto begin=std::chrono::steady_clock::now();
+    const auto views=obstacle_tracks_.bank.views(time);
+    const double acc=get_parameter("static_acceleration_limit").as_double();
+    double dt=std::clamp(time-last_update_time_.seconds(),0.,.05);last_update_time_=now();
+    if(!joint_executing_){joint_v_=std::clamp(measured_forward_speed_,0.,max_vx_);joint_w_=std::clamp(measured_yaw_rate_,-max_vyaw_,max_vyaw_);joint_executing_=true;}
+    const auto control=[&](double t){return packet.controls[std::min(size_t(std::max(0.,t)/packet.step),packet.controls.size()-1)];};
+    auto target=control(age);
+    const Eigen::Vector2d local_goal=traj_[0].evaluateDeBoorT(traj_duration_).head<2>();
+    target.v=std::min(target.v,std::sqrt(2*dynamic_braking_*std::max(0.,(local_goal-odom_pos_.head<2>()).norm()-.06)));
+    if(age<.05){target.v=joint_v_;target.w=joint_w_;}
+    double v=joint_v_+std::clamp(target.v-joint_v_,-dynamic_braking_*dt,acc*dt);
+    double w=joint_w_+std::clamp(target.w-joint_w_,-2.*dt,2.*dt);
+    // Recheck the selected moving prefix with the newest observations. Do not
+    // multiply it by an old path's timing scale, which can erase an escape.
+    Eigen::Vector3d p=odom_pos_;double angle=odom_yaw_,pv=std::max(0.,measured_forward_speed_),pw=measured_yaw_rate_;
+    bool safe=true;double gap=100.;std::vector<Eigen::Vector2d> prefix;
+    for(double t=0;t<=.600001;t+=.05){
+      prefix.push_back(p.head<2>());
+      for(const auto& tr:views){const double g=jointHardGap(tr,t,p.head<2>(),.6);gap=std::min(gap,g);if(g<0)safe=false;}
+      if(p.z()>static_safety_.maxBaseHeight(p,angle))safe=false;
+      if(!safe)break;
+      auto u=control(age+t);
+      u.v=std::min(u.v,std::sqrt(2*dynamic_braking_*std::max(0.,(local_goal-p.head<2>()).norm()-.06)));
+      if(age+t>=.05){pv+=std::clamp(u.v-pv,-dynamic_braking_*.05,acc*.05);pw+=std::clamp(u.w-pw,-.1,.1);}
+      p.x()+=pv*.05*std::cos(angle+.025*pw);p.y()+=pv*.05*std::sin(angle+.025*pw);angle+=pw*.05;
+    }
+    safe=safe && brakingMotionFree(odom_pos_,odom_yaw_,v,w,measured_forward_speed_,measured_yaw_rate_,acc,
+      [this,&views](const Eigen::Vector3d& q,double yaw){
+        if(q.z()>static_safety_.maxBaseHeight(q,yaw))return false;
+        for(const auto& tr:views)if(tr.track->unknown && jointHardGap(tr,0.,q.head<2>(),0.)<0)return false;
+        return true;
+      });
+    if(!safe){v=w=0.;joint_executing_=false;}
+    joint_v_=v;joint_w_=w;spatial_tracker_.v=v;spatial_tracker_.w=w;
+    auto progress=spatial_tracker_.step(odom_pos_.head<2>(),odom_yaw_,0.,max_vx_,max_vyaw_,acc,finish_dist_);
+    spatial_tracker_.v=v;spatial_tracker_.w=w;exec_time_=progress.phase;
+    geometry_msgs::msg::Twist cmd;cmd.linear.x=v;cmd.angular.z=w;cmd_vel_pub_->publish(cmd);
+    publishExecutionFrozen(!safe);reportState(safe?"JOINT_ROLLOUT":"JOINT_SAFETY_HOLD");
+    std_msgs::msg::Float64MultiArray phase;phase.data={double(traj_id_),exec_time_,std::max(v,measured_forward_speed_),acc};execution_phase_pub_->publish(phase);
+    publishLegHeightFromBaseZ(last_height_cmd_+base_z_offset_);
+    if(!safe && time-last_replan_request_>.2){std_msgs::msg::Bool request;request.data=true;replan_request_pub_->publish(request);last_replan_request_=time;}
+    if(time-last_dynamic_log_>=.099){
+      last_dynamic_log_=time;std::ostringstream out;out.precision(17);
+      out<<"{\"stamp\":"<<time<<",\"mode\":\"frs\",\"joint_rollout\":true,\"plan_id\":"<<packet.id
+        <<",\"plan_age\":"<<age<<",\"scale\":1,\"stale\":false,\"feasible\":"<<(safe?"true":"false")
+        <<",\"shield\":"<<(!safe?"true":"false")<<",\"track_count\":"<<views.size()
+        <<",\"decision_ms\":"<<std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-begin).count()
+        <<",\"nominal_clearance\":"<<gap<<",\"chosen_clearance\":"<<gap<<",\"before_v\":"<<measured_forward_speed_
+        <<",\"v\":"<<v<<",\"w\":"<<w<<",\"x\":"<<odom_pos_.x()<<",\"y\":"<<odom_pos_.y()<<",\"nominal_obstacle\":\"\",\"tracks\":[";
+      bool first=true;for(const auto& tr:views){if(tr.track->unknown)continue;if(!first)out<<",";first=false;
+        out<<"{\"id\":\""<<tr.id<<"\",\"boxes\":[";
+        for(int k=0;k<=6;++k){const double t=.5*k;const auto b=tr.track->predict(tr.age+t,"frs");if(k)out<<",";out<<"["<<t<<","<<b.center.x()<<","<<b.center.y()<<","<<b.half.x()<<","<<b.half.y()<<"]";}out<<"]}";
+      }
+      out<<"],\"nominal_path\":[],\"chosen_path\":[";for(size_t i=0;i<prefix.size();++i){if(i)out<<",";out<<"["<<prefix[i].x()<<","<<prefix[i].y()<<"]";}out<<"]}";
+      std_msgs::msg::String message;message.data=out.str();dynamic_log_->publish(message);
+    }
+    return true;
+  }
+
   void cmdCallback()
   {
+    if(joint_rollout_required_ && executeJointRollout())return;
+    if(holdForLocalPlan())return;
     if (!height_safety_enabled_ && dynamic_mode_=="off") { legacyCmdCallback(); return; }
     // A fresh complete empty snapshot authorizes the proven static tracker,
     // never a missing packet or an unresolved/predicted target.
@@ -499,6 +643,7 @@ private:
            <<",\"nominal_obstacle\":\"\",\"boxes\":[],\"tracks\":[],\"nominal_path\":[],\"chosen_path\":[]}";
         std_msgs::msg::String message;message.data=out.str();dynamic_log_->publish(message);
       }
+      active_escape_.reset();
       legacyCmdCallback();
       if(!have_odom_ || (now()-odom_time_).seconds()>data_timeout_) reportState("WAIT_ODOM");
       else if(now().seconds()-static_map_time_>data_timeout_) reportState("WAIT_MAP");
@@ -511,6 +656,7 @@ private:
     last_update_time_=current;
     dt=std::clamp(dt,0.0,0.05);
     auto hold = [&](const std::string &state) {
+      active_escape_.reset();
       spatial_tracker_.v=spatial_tracker_.w=0.;
       publishStop(); publishExecutionFrozen(true);
       // Hold the last commanded posture: never stand up blindly on a timeout.
@@ -528,7 +674,7 @@ private:
     if (!receive_traj_) { hold("IDLE"); return; }
 
     SpatialCommand spatial;
-    const double spatial_vmax=std::min(max_vx_,get_parameter("static_cruise_speed").as_double());
+    const double spatial_vmax=spatialCruise();
     const double spatial_acc=get_parameter("static_acceleration_limit").as_double();
     if(spatial_active_) {
       if(!height_safety_enabled_ && current.seconds()-static_map_time_>data_timeout_) {hold("WAIT_MAP");return;}
@@ -692,6 +838,23 @@ private:
           v=0.;w=turn;frozen=true;state="OBSERVING_UNKNOWN";
         }
       }
+      EscapeResult escape;
+      if(!stale && spatial_active_ && state!="LOWERING" && state!="GOAL_REACHED") {
+        escape=active_escape_.step(current.seconds(),dt,odom_pos_.head<2>(),odom_yaw_,
+            measured_forward_speed_,measured_yaw_rate_,endpoint,tracks,dynamic_mode_,
+            progress_scale<.999 || shield,!shield && decision.feasible && progress_scale>=.999,
+            [this](const Eigen::Vector2d& xy,double yaw){
+              Eigen::Vector3d p=odom_pos_;p.head<2>()=xy;
+              return p.z()<=(height_safety_enabled_?safety_:static_safety_).maxBaseHeight(p,yaw);
+            });
+        if(escape.active) {
+          v=escape.v;w=escape.w;frozen=true;progress_scale=0.;state="ESCAPING_DYNAMIC";
+          if(current.seconds()-last_replan_request_>.5) {
+            std_msgs::msg::Bool request;request.data=true;replan_request_pub_->publish(request);
+            last_replan_request_=current.seconds();
+          }
+        }
+      } else active_escape_.reset();
       const double elapsed=std::chrono::duration<double,std::milli>(
           std::chrono::steady_clock::now()-clock_start).count();
       if(current.seconds()-last_dynamic_log_>=0.099) {
@@ -705,6 +868,15 @@ private:
            <<",\"decision_ms\":"<<elapsed<<",\"before_v\":"<<before_v
            <<",\"v\":"<<v<<",\"x\":"<<odom_pos_.x()<<",\"y\":"<<odom_pos_.y()
            <<",\"soft_constraint\":"<<dynamic_soft_<<",\"frs_weight\":"<<dynamic_weight_<<",\"horizon\":"<<dynamic_horizon_<<",\"track_count\":"<<tracks.size()<<",\"nominal_obstacle\":\""<<decision.nominal_obstacle<<"\"";
+        out<<",\"escape_enabled\":"<<active_escape_.config.enabled
+           <<",\"escape_active\":"<<escape.active<<",\"escape_triggered\":"<<escape.triggered
+           <<",\"escape_feasible\":"<<escape.feasible<<",\"escape_reason\":\""<<escape.reason<<"\""
+           <<",\"escape_candidates\":"<<escape.checked<<",\"escape_parked_clearance\":"<<escape.parked_clearance
+           <<",\"escape_chosen_clearance\":"<<escape.chosen_clearance<<",\"w\":"<<w;
+        out<<",\"escape_path\":[";
+        for(size_t i=0;i<escape.path.size();++i) {if(i)out<<",";out<<"["<<escape.path[i].x()<<","<<escape.path[i].y()<<"]";}
+        out<<"]";
+        out<<",\"planned_speed_required\":"<<local_speed_required_<<",\"planned_speed_limit\":"<<spatialCruise();
         out<<",\"spatial_tracking\":"<<spatial_active_;
         std::vector<TrackView> moving_tracks,unknown_regions;
         for(const auto& view:tracks) (view.track->unknown ? unknown_regions : moving_tracks).push_back(view);
@@ -738,7 +910,9 @@ private:
           out<<",\""<<name<<"\":[";
           for(int k=0;k<=30;++k) {
             const double scale=name=="nominal_path" ? 1.0 : progress_scale;
-            const Eigen::Vector2d point=candidate(scale,k*.1);
+            Eigen::Vector2d point=candidate(scale,k*.1);
+            if(name=="chosen_path" && escape.active && !escape.path.empty())
+              point=escape.path[std::min(static_cast<size_t>(k*2),escape.path.size()-1)];
             if(k)out<<",";
             out<<"["<<point.x()<<","<<point.y()<<"]";
           }
@@ -780,6 +954,14 @@ private:
   rclcpp::Subscription<scan_planner_msgs::msg::Bspline>::SharedPtr bspline_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
   rclcpp::TimerBase::SharedPtr cmd_timer_;
+  bool local_speed_required_{false};
+  bool joint_rollout_required_{false},joint_executing_{false};
+  double joint_v_{0},joint_w_{0};
+  std::map<std::int64_t,JointRolloutPacket> joint_packets_;
+  rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr joint_rollout_sub_;
+  std::map<std::int64_t,double> local_speed_limits_;
+  rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr local_speed_sub_;
+  ActiveEscape active_escape_;
   HeightSafety safety_;
   FrsTracks pedestrians_;
   SnapshotTracks obstacle_tracks_;

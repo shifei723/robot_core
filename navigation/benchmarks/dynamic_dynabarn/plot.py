@@ -1,56 +1,59 @@
 #!/usr/bin/env python3
+"""Plot all attempts without mixing protocols or treating failure time as arrival."""
 from pathlib import Path
-import csv,json
+import argparse,json
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import font_manager as fm
-font_path=Path(__file__).resolve().parent/'plot_fonts/NotoSerifCJKSC.ttf'
-if not font_path.exists():
- from fontTools.ttLib import TTCollection
- font_path.parent.mkdir(exist_ok=True)
- TTCollection('/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc',lazy=True).fonts[2].save(str(font_path))
-for font in ["/usr/share/fonts/truetype/croscore/Tinos-Regular.ttf",str(Path(__file__).resolve().parent/"plot_fonts/NotoSerifCJKSC.ttf")]:
- if Path(font).exists():fm.fontManager.addfont(font)
-R=Path(__file__).resolve().parent;report=json.loads((R/'report.json').read_text())
-plt.rcParams.update({'font.family':['Tinos','Noto Serif CJK SC'],'font.size':10,'pdf.fonttype':42,'axes.spines.top':False,'axes.spines.right':False,'axes.unicode_minus':False})
-methods=['mppi','frs_soft','frs_hard'];labels=['MPPI','FRS 软风险','FRS 硬约束'];colors=['#777777','#0072B2','#D55E00'];phases=[0,7,14]
-fig,ax=plt.subplots(figsize=(8,4.1));x=np.arange(3);width=.24
-for j,(method,label,color) in enumerate(zip(methods,labels,colors)):
- for i,phase in enumerate(phases):
-  row=next((z for z in report['runs'] if z['method']==method and z['phase_s']==phase),None)
-  if row is None or row['termination_s'] is None:continue
-  value=row['termination_s'];b=ax.bar(x[i]+(j-1)*width,value,width,color=color,label=label if i==0 else None)[0]
-  if row['status']!='success':b.set_hatch('///' if row['status']=='collision' else 'xx')
-  state={'success':'到达','collision':'碰撞','timeout':'超时'}.get(row['status'],'失败')
-  ax.text(b.get_x()+width/2,value+1,f'{value:.1f}\n{state}',ha='center',fontsize=9)
-ax.set_xticks(x,['初相位 0 s','初相位 7 s','初相位 14 s']);ax.set_ylabel('到达或终止时间 / s');ax.set_ylim(0,145);ax.legend(frameon=False,ncol=3,loc='upper left')
-fig.text(.5,.015,'斜线表示碰撞，交叉线表示超时；失败终止时间不作为到达时间。',ha='center',fontsize=9)
-fig.tight_layout(rect=(0,.05,1,1));fig.savefig(R/'comparison_time.png',dpi=220);fig.savefig(R/'comparison_time.pdf');plt.close(fig)
-fig,axes=plt.subplots(2,1,figsize=(7,5.4),sharex=True)
-for method,label,color in zip(methods,labels,colors):
- row=next((z for z in report['runs'] if z['method']==method and z['phase_s']==0),None)
- if row is None:continue
- p=Path(row['source_result']).parent
- a=np.genfromtxt(p/'robot.csv',delimiter=',',names=True)
- c=np.genfromtxt(R/'derived'/(p.name+'_clearance.csv'),delimiter=',',names=True)
- axes[0].plot(a['sim_elapsed_s'],12-a['world_x'],color=color,label=label,lw=1.5)
- axes[1].plot(c['elapsed_s'],c['clearance_m'],color=color,lw=1.1)
- if row['collision']:
-  axes[0].plot(a['sim_elapsed_s'][-1],12-a['world_x'][-1],marker='x',color=color,ms=7)
-  axes[1].plot(c['elapsed_s'][-1],c['clearance_m'][-1],marker='x',color=color,ms=7)
-axes[0].axhline(21,color='.4',ls='--',lw=.8);axes[0].set_ylabel('沿路线前进距离 / m');axes[0].legend(frameon=False,ncol=3,loc='upper left');axes[0].set_ylim(-.3,25)
-axes[1].axhline(0,color='#A00000',ls='--',lw=.8);axes[1].set_ylabel('采样动态圆盘净距 / m');axes[1].set_xlabel('下发目标后的时间 / s');axes[1].set_ylim(-.2,3.5)
-fig.tight_layout();fig.savefig(R/'phase0_progress_clearance.png',dpi=220);fig.savefig(R/'phase0_progress_clearance.pdf');plt.close(fig)
-
-# All FRS control-state durations; MPPI has no equivalent state labels.
-fig,ax=plt.subplots(figsize=(8,3.8))
-rows=[r for method in ['frs_soft','frs_hard'] for phase in phases for r in report['runs'] if r['method']==method and r['phase_s']==phase]
-state_groups=[('正常跟踪',['TRACKING'],'#0072B2'),('风险减速',['DYNAMIC_SLOW'],'#009E73'),('动态让行',['DYNAMIC_WAIT'],'#E69F00'),('近场保护',['DYNAMIC_SHIELD'],'#D55E00'),('感知等待',['PERCEPTION_WAIT'],'#CC79A7')]
-y=np.arange(len(rows));left=np.zeros(len(rows))
-for label,states,color in state_groups:
- values=np.array([sum(r['state_duration_s'].get(s,0) for s in states) for r in rows]);ax.barh(y,values,left=left,label=label,color=color);left+=values
-other=np.array([max(0,r['termination_s']-left[i]) for i,r in enumerate(rows)])
-ax.barh(y,other,left=left,color='.85',label='其他状态')
-ax.set_yticks(y,[f"{'软风险' if r['method']=='frs_soft' else '硬约束'} / {r['phase_s']:g} s" for r in rows]);ax.invert_yaxis();ax.set_xlabel('累计状态时长 / s');ax.legend(frameon=False,ncol=3,loc='upper center',bbox_to_anchor=(.5,1.22));fig.tight_layout();fig.savefig(R/'frs_control_states.png',dpi=220);fig.savefig(R/'frs_control_states.pdf');plt.close(fig)
+R=Path(__file__).resolve().parent
+LABEL={'mppi':'MPPI','frs_soft':'基础 FRS','frs_joint':'联合滚动 FRS','frs_hard':'FRS 硬约束','mpc_d_cbf':'MPC-D-CBF'}
+COLOR={'mppi':'#777777','frs_soft':'#0072B2','frs_joint':'#009E73','frs_hard':'#D55E00','mpc_d_cbf':'#CC79A7'}
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--report',type=Path,default=R/'report.json');p.add_argument('--output',type=Path);args=p.parse_args()
+ d=json.loads(args.report.read_text());out=args.output or args.report.parent;out.mkdir(parents=True,exist_ok=True)
+ font=R/'plot_fonts/NotoSerifCJKSC.ttf'
+ if not font.exists():
+  from fontTools.ttLib import TTCollection
+  font.parent.mkdir(exist_ok=True);TTCollection('/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc',lazy=True).fonts[2].save(str(font))
+ for f in ['/usr/share/fonts/truetype/croscore/Tinos-Regular.ttf',str(font)]:
+  if Path(f).exists():fm.fontManager.addfont(f)
+ plt.rcParams.update({'font.family':['Tinos','Noto Serif CJK SC'],'font.size':10.5,'pdf.fonttype':42,'axes.spines.top':False,'axes.spines.right':False,'axes.unicode_minus':False})
+ rows=d['runs'];methods=[m for m in LABEL if m in d['summary']]
+ def save(fig,name):
+  fig.tight_layout();fig.savefig(out/(name+'.pdf'),bbox_inches='tight');fig.savefig(out/(name+'.png'),dpi=220,bbox_inches='tight');plt.close(fig)
+ fig,ax=plt.subplots(figsize=(7.,3.6));bottom=np.zeros(len(methods));x=np.arange(len(methods))
+ for state,label,c in [('success','到达','#0072B2'),('collision','碰撞','#D55E00'),('timeout','超时','#E69F00'),('other','启动或其他异常','#AAAAAA')]:
+  n=[sum(r['method']==m and (r['status']==state if state!='other' else r['status'] not in ['success','collision','timeout']) for r in rows) for m in methods]
+  ax.bar(x,n,bottom=bottom,color=c,label=label,width=.6)
+  for i,v in enumerate(n):
+   if v:ax.text(i,bottom[i]+v/2,str(v),ha='center',va='center',color='white')
+  bottom+=n
+ ax.set_xticks(x,[LABEL[m] for m in methods]);ax.set_ylabel('运行次数');ax.set_ylim(0,max(bottom)+1.);ax.legend(frameon=False,ncol=4,loc='upper center');save(fig,'outcomes')
+ phases=sorted({r['phase_s'] for r in rows});fig,axs=plt.subplots(1,len(phases),figsize=(3.7*len(phases),3.4),squeeze=False)
+ for ax,phase in zip(axs[0],phases):
+  for i,m in enumerate(methods):
+   rr=[r for r in rows if r['method']==m and r['phase_s']==phase];ok=[r['arrival_s'] for r in rr if r['success']]
+   if ok:
+    ax.scatter(np.full(len(ok),i)+np.linspace(-.06,.06,len(ok)),ok,c=COLOR[m],s=23);ax.plot([i-.15,i+.15],[np.mean(ok)]*2,c=COLOR[m],lw=1.4)
+   ax.text(i,.97,f'{len(ok)}/{len(rr)}',ha='center',va='top',transform=ax.get_xaxis_transform())
+  ax.set_xticks(range(len(methods)),[LABEL[m] for m in methods],rotation=15);ax.set_title(f'初相位 {phase:g} s');ax.set_ylabel('成功通行时间 / s');ax.grid(axis='y',alpha=.16);ax.margins(y=.25)
+ save(fig,'success_times')
+ fig,axs=plt.subplots(1,len(phases),figsize=(3.7*len(phases),3.5),squeeze=False)
+ for ax,phase in zip(axs[0],phases):
+  xy=[]
+  for m in methods:
+   rr=[r for r in rows if r['method']==m and r['phase_s']==phase]
+   for j,r in enumerate(rr):
+    p=Path(r['source_result']).parent/'robot.csv'
+    a=np.atleast_1d(np.genfromtxt(p,delimiter=',',names=True))
+    if not len(a):continue
+    points=np.c_[a['world_x'],a['world_y']];xy.extend(points)
+    ax.plot(*points.T,c=COLOR[m],lw=1.1,alpha=1 if j==0 else .5,label=LABEL[m] if j==0 else None)
+    ax.plot(*points[-1],marker='x' if r['collision'] else 'o',ms=4,c=COLOR[m])
+  raw=json.loads(Path(next(r for r in rows if r['phase_s']==phase)['source_result']).read_text());ax.scatter([raw['start_world'][0],raw['goal_world'][0]],[0,0],marker='*',s=35,c=['#009E73','#B2182B'])
+  ax.set(xlabel='$x$ / m',ylabel='$y$ / m',title=f'初相位 {phase:g} s');ax.grid(alpha=.15);ax.legend(frameon=False,fontsize=8)
+ save(fig,'trajectories')
+ print('Figures:',out)
+if __name__=='__main__':main()

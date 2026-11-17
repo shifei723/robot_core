@@ -1,0 +1,14 @@
+[
+  {
+    "phase_s": 7,
+    "base_mean_s": 39.55,
+    "joint_mean_s": 40.43,
+    "joint_minus_base_s": 0.8800000000000026
+  },
+  {
+    "phase_s": 14,
+    "base_mean_s": 45.9,
+    "joint_mean_s": 43.83,
+    "joint_minus_base_s": -2.0700000000000003
+  }
+]

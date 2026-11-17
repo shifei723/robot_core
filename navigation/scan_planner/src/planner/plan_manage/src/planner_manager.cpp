@@ -1,3 +1,4 @@
+#include <sstream>
 // #include <fstream>
 #include <plan_manage/planner_manager.h>
 #include <plan_manage/wheel_timing.hpp>
@@ -89,6 +90,17 @@ namespace scan_planner
       throw std::invalid_argument("invalid wheel execution height range or lattice anchor");
     wheel_search_timeout_ = node_->declare_parameter<double>("manager.wheel_search_timeout", 1.0);
     dynamic_spatial_weight_ = get_double("manager.dynamic_frs_weight",0.0);
+    node_->declare_parameter<double>("manager.dynamic_safety_margin",.1);
+    dynamic_local_enabled_=node_->declare_parameter<bool>("manager.dynamic_local_planning",false);
+    joint_rollout_enabled_=node_->declare_parameter<bool>("manager.joint_rollout_planning",false);
+    if(joint_rollout_enabled_)dynamic_local_enabled_=true;
+    joint_rollout_pub_=node_->create_publisher<std_msgs::msg::Float64MultiArray>("planning/joint_rollout",rclcpp::QoS(8).reliable().transient_local());
+    dynamic_local_.config.braking=node_->declare_parameter<double>("manager.dynamic_local_braking",.5);
+    dynamic_local_.config.yaw_rate=node_->declare_parameter<double>("manager.dynamic_local_yaw_rate",1.);
+    if(dynamic_local_.config.braking<=0 || dynamic_local_.config.yaw_rate<=0)
+      throw std::invalid_argument("invalid dynamic local planning limits");
+    local_speed_pub_=node_->create_publisher<std_msgs::msg::Float64MultiArray>("planning/local_speed_limit",rclcpp::QoS(8).reliable().transient_local());
+    local_decision_pub_=node_->create_publisher<std_msgs::msg::String>("planning/dynamic_local_decision",10);
     dynamic_sub_=node_->create_subscription<scan_planner_msgs::msg::DynamicObstacleArray>(
       "/dynamic_obstacles/tracks",rclcpp::QoS(1),[this](scan_planner_msgs::msg::DynamicObstacleArray::ConstSharedPtr msg) {
         std::vector<ObstacleSample> samples;
@@ -101,7 +113,7 @@ namespace scan_planner
         dynamic_tracks_.accept(rclcpp::Time(msg->header.stamp).seconds(),msg->epoch,
           msg->healthy && msg->header.frame_id=="world",samples,node_->now().seconds(),
           node_->get_parameter("manager.execution_radius").as_double()+
-            std::abs(node_->get_parameter("manager.execution_offset").as_double()),.1);
+            std::abs(node_->get_parameter("manager.execution_offset").as_double()),node_->get_parameter("manager.dynamic_safety_margin").as_double());
       });
     pp_.max_vel_ = get_double("manager.max_vel", -1.0);
     pp_.max_acc_ = get_double("manager.max_acc", -1.0);
@@ -470,6 +482,35 @@ namespace scan_planner
         [this](const Eigen::Vector3d &p,double yaw){return grid_map_->getInflateOccupancyAdaptive(p,yaw)==0;});
     }
     UniformBspline spline;
+    DynamicPathResult dynamic_choice;
+    bool dynamic_selected=false;
+    double planned_speed=pp_.max_vel_;
+    std::string dynamic_reason="disabled";
+    const auto selection_begin=std::chrono::steady_clock::now();
+    if(dynamic_local_enabled_ && planar && !joint_rollout_enabled_) {
+      planned_speed=0.;dynamic_reason="stale_inputs";
+      const double now=node_->now().seconds();
+      if(dynamic_tracks_.fresh(now) && execution_stamp_>=0 && now-execution_stamp_<.5 && now>=execution_stamp_-.05) {
+        if(views.empty()) {planned_speed=pp_.max_vel_;dynamic_choice.feasible=true;dynamic_reason="empty_scene";}
+        else {
+          std::vector<Eigen::Vector3d> guide;
+          const double duration=global_data_.global_duration_;
+          if(std::isfinite(duration) && duration>0.)
+            for(double t=0;t<=duration;t+=std::max(.1,duration/160.))guide.push_back(global_data_.getPosition(t));
+          if(guide.empty())guide=path;
+          dynamic_local_.config.speed=pp_.max_vel_;
+          dynamic_local_.config.acceleration=pp_.max_acc_;
+          dynamic_choice=dynamic_local_.choose(path,start,execution_yaw_,execution_speed_,execution_yaw_rate_,views,guide,
+            [this](const Eigen::Vector3d& p,double yaw){return !trajectoryCollision(p,yaw);});
+          if(dynamic_choice.feasible) {
+            dynamic_selected=true;path=dynamic_choice.path;spline=dynamic_choice.spline;
+            planned_speed=dynamic_choice.speed;dynamic_reason=planned_speed>0.?"moving_candidate":"checked_wait";
+          } else dynamic_reason="no_safe_candidate";
+        }
+      }
+    } else if(dynamic_local_enabled_)dynamic_reason="height_reference_preserved";
+    const double selection_ms=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-selection_begin).count();
+    if(!dynamic_selected) {
     if (node_->get_parameter("manager.local_wheel_timing").as_bool()) {
       if (!makeLocallyTimedWheelSpline(path,pp_.max_vel_,pp_.max_acc_,0.06,spline)) {
         RCLCPP_WARN(node_->get_logger(), "Wheel time allocation failed feasibility bounds");
@@ -496,7 +537,8 @@ namespace scan_planner
     double ratio=1.0;
     if (!spline.checkFeasibility(ratio, false)) spline.lengthenTime(ratio * 1.05);
     }
-    if(path.size()<raw_path.size() && node_->get_parameter("manager.local_wheel_timing").as_bool()) {
+    }
+    if(!dynamic_selected && path.size()<raw_path.size() && node_->get_parameter("manager.local_wheel_timing").as_bool()) {
       bool safe=true;
       for(double t=0;t<=spline.getTimeSum();t+=.02) {
         const Eigen::Vector3d p=spline.evaluateDeBoorT(t);
@@ -524,6 +566,7 @@ namespace scan_planner
       return true;
     };
     if(!certified(spline)) {
+      if(dynamic_selected)return false;
       // Search waypoints are safe but a smoothed height transition can cut a
       // narrow ceiling corner. Descend at the current pose, traverse low, then
       // restore at the goal. All segments and the final curve are checked.
@@ -552,7 +595,83 @@ namespace scan_planner
       path=std::move(fallback);
       RCLCPP_INFO(node_->get_logger(),"WHEEL_HEIGHT_FALLBACK: certified corner-preserving corridor");
     }
+    JointRolloutResult joint_choice;
+    JointRolloutPacket joint_packet; joint_packet.stamp=node_->now().seconds();
+    if(joint_rollout_enabled_){
+      planned_speed=pp_.max_vel_;
+      const bool fresh=dynamic_tracks_.fresh(joint_packet.stamp) && execution_stamp_>=0 &&
+        joint_packet.stamp-execution_stamp_<.35 && joint_packet.stamp>=execution_stamp_-.05;
+      joint_packet.active=planar && (!fresh || !views.empty());
+      if(joint_packet.active && fresh){
+        joint_rollout_.config.speed=pp_.max_vel_;joint_rollout_.config.acceleration=pp_.max_acc_;
+        joint_rollout_.config.yaw_rate=dynamic_local_.config.yaw_rate;
+        joint_rollout_.config.braking=dynamic_local_.config.braking;
+        const double radius=node_->get_parameter("manager.execution_radius").as_double();
+        const double offset=node_->get_parameter("manager.execution_offset").as_double();
+        const double low=node_->get_parameter("manager.execution_height_min").as_double();
+        const double high=node_->get_parameter("manager.execution_height_max").as_double();
+        const bool world_bound=node_->get_parameter("grid_map.world_bound_enable").as_bool();
+        const double resolution=grid_map_->getResolution(),tile=std::max(.08,resolution);
+        std::map<std::pair<int,int>,bool> certificates;
+        // Cache only conservative FREE certificates. An enlarged circle covers
+        // both cylinders, every pose/yaw in a tile, and voxel sampling error.
+        // A failed certificate falls back to the exact original body query.
+        auto free=[&](const Eigen::Vector3d& p,double yaw){
+          if(!grid_map_->isInMap(p) || (world_bound && !grid_map_->isInWorldBound(p)) || p.z()<low-1e-6 || p.z()>high+1e-6)return false;
+          const std::pair<int,int> key{int(std::floor(p.x()/tile)),int(std::floor(p.y()/tile))};
+          auto found=certificates.find(key);
+          if(found==certificates.end()){
+            Eigen::Vector3d q((key.first+.5)*tile,(key.second+.5)*tile,p.z());
+            const double enlarged=radius+std::abs(offset)+std::sqrt(.5)*tile+std::sqrt(2.)*resolution;
+            const double ceiling=grid_map_->queryCeilingHeight(q,0.,nullptr,enlarged,0.);
+            bool certified=!std::isfinite(ceiling) || q.z()+.328+.05<=ceiling+1e-6;
+            for(double x:{-.5,.5})for(double y:{-.5,.5}){
+              Eigen::Vector3d corner=q+Eigen::Vector3d(x*tile,y*tile,0.);
+              certified=certified && grid_map_->isInMap(corner) && (!world_bound || grid_map_->isInWorldBound(corner));
+            }
+            found=certificates.emplace(key,certified).first;
+          }
+          if(found->second)return true;
+          const double ceiling=grid_map_->queryCeilingHeight(p,yaw,nullptr,radius,offset);
+          return !std::isfinite(ceiling) || p.z()+.328+.05<=ceiling+1e-6;
+        };
+        joint_choice=joint_rollout_.choose(execution_pose_,execution_yaw_,execution_speed_,execution_yaw_rate_,
+          path.back(),path,views,free,joint_packet.stamp);
+        joint_packet.controls=joint_choice.controls;joint_packet.feasible=joint_choice.feasible;
+      } else joint_packet.feasible=!joint_packet.active;
+      dynamic_reason=!planar?"height_reference_preserved":!joint_packet.active?"empty_scene":!fresh?"stale_inputs":
+        joint_choice.feasible?(joint_choice.parked_threat?"joint_escape":"joint_tracking"):"joint_no_safe_sequence";
+    }
     updateTrajInfo(spline, node_->now());
+    if(joint_rollout_enabled_){
+      joint_packet.id=local_data_.traj_id_;joint_packet.step=joint_rollout_.config.step;
+      joint_id_=joint_packet.id;joint_active_=joint_packet.active;joint_stamp_=joint_packet.stamp;
+      joint_path_=joint_choice.feasible?joint_choice.path:std::vector<Eigen::Vector3d>{};
+      std_msgs::msg::Float64MultiArray msg;msg.data=joint_packet.encode();joint_rollout_pub_->publish(msg);
+    }
+    if(dynamic_local_enabled_) {
+      last_local_selection_=node_->now().seconds();last_local_speed_=planned_speed;
+      std_msgs::msg::Float64MultiArray limit;
+      limit.data={static_cast<double>(local_data_.traj_id_),node_->now().seconds(),planned_speed};local_speed_pub_->publish(limit);
+      std::ostringstream log;log.precision(17);
+      log<<"{\"stamp\":"<<node_->now().seconds()<<",\"traj_id\":"<<local_data_.traj_id_
+         <<",\"enabled\":true,\"feasible\":"<<((joint_rollout_enabled_?joint_packet.feasible:dynamic_choice.feasible)?"true":"false")
+         <<",\"reason\":\""<<dynamic_reason<<"\",\"speed\":"<<(joint_rollout_enabled_ && joint_packet.active?(joint_choice.controls.empty()?0.:joint_choice.controls.front().v):planned_speed)
+         <<",\"offset\":"<<dynamic_choice.offset<<",\"candidates\":"<<(joint_rollout_enabled_?joint_choice.candidates:dynamic_choice.candidates)
+         <<",\"risk\":"<<(joint_rollout_enabled_?joint_choice.risk:dynamic_choice.risk)<<",\"clearance\":"<<(joint_rollout_enabled_?joint_choice.clearance:dynamic_choice.clearance)
+         <<",\"selection_ms\":"<<(joint_rollout_enabled_?std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-selection_begin).count():selection_ms)
+         <<",\"joint_rollout\":"<<(joint_rollout_enabled_?"true":"false")
+         <<",\"joint_active\":"<<(joint_packet.active?"true":"false")<<",\"joint_input_stamp\":"<<joint_packet.stamp
+         <<",\"joint_feasible\":"<<(joint_choice.feasible?"true":"false")
+         <<",\"parked_threat\":"<<(joint_choice.parked_threat?"true":"false")
+         <<",\"joint_candidates\":"<<joint_choice.candidates<<",\"joint_risk\":"<<joint_choice.risk
+         <<",\"joint_clearance\":"<<joint_choice.clearance<<",\"controls\":[";
+      for(size_t i=0;i<joint_choice.controls.size();++i){if(i)log<<",";log<<"["<<joint_choice.controls[i].v<<","<<joint_choice.controls[i].w<<"]";}
+      log<<"],\"path\":[";
+      const auto& logged_path=joint_rollout_enabled_&&!joint_choice.path.empty()?joint_choice.path:path;
+      for(size_t i=0;i<logged_path.size();++i){if(i)log<<",";log<<"["<<logged_path[i].x()<<","<<logged_path[i].y()<<"]";}
+      log<<"]}";std_msgs::msg::String message;message.data=log.str();local_decision_pub_->publish(message);
+    }
     visualization_->displayInitPathList(path, 0.08, 0);
     continuous_failures_count_=0;
     return true;

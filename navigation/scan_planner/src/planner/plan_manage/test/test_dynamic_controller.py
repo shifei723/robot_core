@@ -139,3 +139,90 @@ def test_height_unknown_reobservation_requires_fresh_inputs_and_safe_rotation(no
         try:proc.wait(timeout=5)
         except subprocess.TimeoutExpired:proc.kill();proc.wait()
         node.destroy_node();rclpy.shutdown()
+
+
+def test_active_escape_real_binary_respects_health_unknown_and_map_gates():
+    from sensor_msgs_py import point_cloud2
+    from std_msgs.msg import Header
+    rclpy.init();node=Node('active_escape_gate_test');commands=[];decisions=[]
+    exe=os.path.join(get_package_prefix('scan_planner'),'lib','scan_planner','closed_loop_controller')
+    proc=subprocess.Popen([exe,'--ros-args','-p','active_escape_enabled:=true',
+        '-p','dynamic_input:=array','-p','dynamic_prediction:=frs','-p','static_body_radius:=0.2',
+        '-p','static_body_offset:=0.0','-p','dynamic_braking_deceleration:=0.5',
+        '-p','static_acceleration_limit:=0.5','-p','max_vx:=0.5',
+        '-r','cmd_vel:=/test_escape/cmd','-r','leg_height_cmd:=/test_escape/height'])
+    node.create_subscription(Twist,'/test_escape/cmd',lambda m:commands.append((m.linear.x,m.angular.z)),10)
+    node.create_subscription(String,'/dynamic_navigation/decision',lambda m:decisions.append(json.loads(m.data)),10)
+    op=node.create_publisher(Odometry,'/body_pose',10);sp=node.create_publisher(Bspline,'/planning/bspline',10)
+    mp=node.create_publisher(PointCloud2,'/grid_map/occupancy',10);tp=node.create_publisher(DynamicObstacleArray,'/dynamic_obstacles/tracks',10)
+    od=Odometry();od.header.frame_id='world';od.pose.pose.orientation.w=1.;od.pose.pose.position.x=.1;od.pose.pose.position.z=.25
+    spline=Bspline();spline.order=3;spline.traj_id=1;spline.pos_pts=[Point(x=i*.2,y=0.,z=.25) for i in range(15)];spline.knots=[float(i)*.3 for i in range(-3,16)]
+    def pump(seconds,healthy=True,unknown=False,blocked=False,publish_tracks=True):
+        end=time.monotonic()+seconds
+        while time.monotonic()<end:
+            stamp=node.get_clock().now().to_msg();od.header.stamp=stamp;op.publish(od)
+            header=Header();header.frame_id='world';header.stamp=stamp
+            mp.publish(point_cloud2.create_cloud_xyz32(header,[[.1,0.,.2]] if blocked else []))
+            if publish_tracks:
+                msg=DynamicObstacleArray();msg.header=header;msg.epoch=1;msg.healthy=healthy
+                target=DynamicObstacle();target.id='approaching';target.observed=True;target.state=target.DYNAMIC;target.position.x=1.95;target.velocity.x=-.5;target.radius=.25;target.last_observed=stamp;msg.obstacles=[target]
+                if unknown:
+                    u=DynamicObstacle();u.id='unknown';u.state=u.UNKNOWN;u.observed=False;u.position.x=.1;u.radius=.25;u.last_observed=stamp;msg.obstacles.append(u)
+                tp.publish(msg)
+            rclpy.spin_once(node,timeout_sec=.015)
+    try:
+        pump(.5);sp.publish(spline);pump(.6)
+        assert any(d.get('escape_active') for d in decisions), 'Approaching threat should activate actual binary recovery'
+        assert any(v>0 and abs(w)>0 for v,w in commands), 'Recovery uses forward/turn, never lateral translation'
+        pump(.8,publish_tracks=False);commands.clear();pump(.15,publish_tracks=False)
+        assert commands and all(abs(v)+abs(w)<1e-6 for v,w in commands), 'Stale sensing must stop active recovery'
+        pump(.2,healthy=False)
+        assert sum(map(abs,commands[-1]))<1e-6, 'Unhealthy data must stop recovery'
+        pump(.25,unknown=True)
+        assert sum(map(abs,commands[-1]))<1e-6, 'Recovery cannot erase or cross unknown support'
+        pump(.25,blocked=True)
+        assert sum(map(abs,commands[-1]))<1e-6, 'Recovery cannot bypass actual static occupancy'
+    finally:
+        proc.terminate()
+        try:proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:proc.kill();proc.wait()
+        node.destroy_node();rclpy.shutdown()
+
+
+def test_planned_speed_matches_trajectory_and_zero_plan_holds():
+    from std_msgs.msg import Float64MultiArray, Header
+    from sensor_msgs_py import point_cloud2
+    rclpy.init();node=Node('planned_speed_contract_test');commands=[]
+    exe=os.path.join(get_package_prefix('scan_planner'),'lib','scan_planner','closed_loop_controller')
+    proc=subprocess.Popen([exe,'--ros-args','-p','planned_local_speed_required:=true',
+        '-p','static_spatial_tracking:=true','-p','max_vx:=0.5','-p','max_vy:=0.0',
+        '-r','cmd_vel:=/test_plan_limit/cmd','-r','leg_height_cmd:=/test_plan_limit/height'])
+    node.create_subscription(Twist,'/test_plan_limit/cmd',lambda m:commands.append((m.linear.x,m.angular.z)),10)
+    op=node.create_publisher(Odometry,'/body_pose',10);sp=node.create_publisher(Bspline,'/planning/bspline',10)
+    mp=node.create_publisher(PointCloud2,'/grid_map/occupancy',10);lp=node.create_publisher(Float64MultiArray,'/planning/local_speed_limit',rclpy.qos.QoSProfile(depth=8,durability=rclpy.qos.DurabilityPolicy.TRANSIENT_LOCAL))
+    od=Odometry();od.header.frame_id='world';od.pose.pose.orientation.w=1.;od.pose.pose.position.x=.1;od.pose.pose.position.z=.25
+    spline=Bspline();spline.order=3;spline.traj_id=1;spline.pos_pts=[Point(x=i*.2,y=0.,z=.25) for i in range(12)];spline.knots=[float(i)*.3 for i in range(-3,13)]
+    def pump(seconds,limit=None,stamp_offset=0.):
+        end=time.monotonic()+seconds
+        while time.monotonic()<end:
+            stamp=node.get_clock().now().to_msg();od.header.stamp=stamp;op.publish(od)
+            header=Header();header.frame_id='world';header.stamp=stamp;mp.publish(point_cloud2.create_cloud_xyz32(header,[]))
+            if limit is not None:
+                msg=Float64MultiArray();msg.data=[float(limit[0]),node.get_clock().now().nanoseconds*1e-9+stamp_offset,float(limit[1])];lp.publish(msg)
+            rclpy.spin_once(node,timeout_sec=.015)
+    try:
+        pump(.4);sp.publish(spline);pump(.2);assert commands and sum(map(abs,commands[-1]))<1e-6
+        pump(.2,(99,.2));assert sum(map(abs,commands[-1]))<1e-6, 'Unrelated trajectory cannot unlock motion'
+        pump(.2,(1,.2),stamp_offset=5.);assert sum(map(abs,commands[-1]))<1e-6, 'Future-dated speed plan cannot unlock motion'
+        commands.clear();pump(.5,(1,.2));assert any(v>.02 for v,w in commands)
+        assert max(v for v,w in commands)<=.20001, 'Follower must respect the planner speed cap'
+        pump(.2,(2,0.));commands.clear();pump(.15)
+        assert any(v>.01 for v,w in commands), 'A future ID must not stop the current valid reference'
+        spline.traj_id=2;sp.publish(spline);pump(.2)
+        assert sum(map(abs,commands[-1]))<1e-6, 'Matching checked-wait plan freezes translation and rotation'
+        pump(.2,(2,.6));assert sum(map(abs,commands[-1]))<1e-6, 'Out-of-bound cap must not override checked wait'
+    finally:
+        proc.terminate()
+        try:proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:proc.kill();proc.wait()
+        node.destroy_node();rclpy.shutdown()

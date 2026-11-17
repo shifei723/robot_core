@@ -25,7 +25,7 @@ def setup(c):
    ros_arguments=['--log-level','warn']),
   SetRemap(src='/sensors/lidar2d_0/scan',dst='/front/scan'),
   IncludeLaunchDescription(PythonLaunchDescriptionSource(str(Path(get_package_share_directory('clearpath_gz'))/'launch/robot_spawn.launch.py')),
-   launch_arguments={'use_sim_time':'true','setup_path':LaunchConfiguration('setup_path'),'world':'default','rviz':'false','generate':'true','x':'12.0','y':'0.0','z':'0.1','yaw':'3.14159265359'}.items())]
+   launch_arguments={'use_sim_time':'true','setup_path':LaunchConfiguration('setup_path'),'world':'default','rviz':'false','generate':'true','x':LaunchConfiguration('spawn_x'),'y':'0.0','z':'0.1','yaw':LaunchConfiguration('spawn_yaw')}.items())]
  if LaunchConfiguration('navigation').perform(c)=='mppi':
   actions.append(IncludeLaunchDescription(PythonLaunchDescriptionSource(str(Path(get_package_share_directory('jackal_helper'))/'launch/nav2_bringup.launch.py')),
    launch_arguments={'use_sim_time':'true','setup_path':LaunchConfiguration('setup_path'),'scan_topic':'/front/scan','nav2_params_file':'nav2.yaml','log_level':'WARN'}.items()))
@@ -34,7 +34,7 @@ def setup(c):
  return actions
 
 def generate_launch_description():
- return LaunchDescription([DeclareLaunchArgument('motion_phase',default_value='0'),DeclareLaunchArgument('world_file',default_value=''),DeclareLaunchArgument('gui',default_value='false'),
+ return LaunchDescription([DeclareLaunchArgument('spawn_x',default_value='12.0'),DeclareLaunchArgument('spawn_yaw',default_value='3.141592653589793'),DeclareLaunchArgument('motion_phase',default_value='0'),DeclareLaunchArgument('world_file',default_value=''),DeclareLaunchArgument('gui',default_value='false'),
   DeclareLaunchArgument('navigation',default_value='mppi',choices=['mppi','none']),DeclareLaunchArgument('evaluate',default_value='true'),
   DeclareLaunchArgument('setup_path',default_value=str(Path(get_package_share_directory('dynabarn_ros2'))/'config')),
   DeclareLaunchArgument('output',default_value='/tmp/dynabarn_ros2_result'),OpaqueFunction(function=setup)])

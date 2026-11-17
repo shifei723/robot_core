@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Offline comparisons, keeping unsuccessful trials and discontinuous loop boundaries."""
-import csv,json,math,re
+import csv,json,math,re,argparse
 from pathlib import Path
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -13,8 +13,8 @@ def stats(x):
  a=np.asarray(x,float)
  return {'count':len(a),'mean':float(a.mean()),'p95':float(np.percentile(a,95)),'max':float(a.max())} if len(a) else None
 
-def run(path):
- d=json.loads((path/'result.json').read_text());method=d.get('method',d['mode']);phase=d.get('motion_phase_s',0)
+def run(path,derived_root=None):
+ d=json.loads((path/'result.json').read_text());method=d.get('method_label',('frs_joint' if d.get('joint_rollout_enabled') else d.get('method',d['mode'])));phase=d.get('motion_phase_s',0)
  rr=table(path/'robot.csv');a=np.array([[float(z[k]) for k in ['sim_elapsed_s','world_x','world_y','yaw','odom_vx','odom_wz']] for z in rr]).reshape(-1,6)
  objects={}
  for z in table(path/'objects.csv'):objects.setdefault(z['name'],[]).append([float(z[k]) for k in ['sim_s','world_x','world_y']])
@@ -29,7 +29,7 @@ def run(path):
  gaps=[]
  for row in a:
   gaps.append(min(np.linalg.norm(row[1:3]-at(v,row[0]+d['start_sim_s'],name))-.834 for name,v in objects.items()))
- derived=R/'derived';derived.mkdir(exist_ok=True)
+ derived=Path(derived_root) if derived_root else R/'derived';derived.mkdir(exist_ok=True)
  if len(a):np.savetxt(derived/(path.name+'_clearance.csv'),np.c_[a[:,0],gaps],delimiter=',',header='elapsed_s,clearance_m',comments='')
  dt=np.r_[np.diff(a[:,0]),0.] if len(a) else np.zeros(0)
  stopped=np.abs(a[:,4])<.03 if len(a) else np.zeros(0,bool)
@@ -40,13 +40,13 @@ def run(path):
  decisions=json.loads((path/'decisions.json').read_text());perception=json.loads((path/'perception.json').read_text());tracks=json.loads((path/'tracks.json').read_text())
  anchor=d.get('navigation_anchor');errors=[];velocity_errors=[];unmatched=matched=discontinuities=0
  if anchor is not None:
-  theta=math.pi-anchor[2];rotation=np.array([[math.cos(theta),-math.sin(theta)],[math.sin(theta),math.cos(theta)]])
+  theta=d.get('start_world',[12.,0.,math.pi])[2]-anchor[2];rotation=np.array([[math.cos(theta),-math.sin(theta)],[math.sin(theta),math.cos(theta)]])
   names=list(objects)
   for row in tracks:
    if not row['healthy'] or d['start_sim_s'] is None or row['stamp']<d['start_sim_s']:continue
    observed=[o for o in row['objects'] if o['observed']]
    if not observed:continue
-   estimated=np.array([o['p'] for o in observed]);estimated=(estimated-anchor[:2])@rotation.T+[12.,0.]
+   estimated=np.array([o['p'] for o in observed]);estimated=(estimated-anchor[:2])@rotation.T+np.array(d.get('start_world',[12.,0.])[:2])
    actual=np.array([at(objects[name],row['stamp'],name) for name in names])
    cost=np.linalg.norm(estimated[:,None,:]-actual[None,:,:],axis=2);i,j=linear_sum_assignment(cost)
    accepted=0
@@ -59,11 +59,11 @@ def run(path):
    unmatched+=len(observed)-accepted
  ego_error=None
  if anchor is not None and (path/'odometry.csv').exists() and len(a):
-  od=table(path/'odometry.csv');ego=np.array([[float(z['x']),float(z['y'])] for z in od]);world_ego=(ego-anchor[:2])@rotation.T+[12.,0.]
+  od=table(path/'odometry.csv');ego=np.array([[float(z['x']),float(z['y'])] for z in od]);world_ego=(ego-anchor[:2])@rotation.T+np.array(d.get('start_world',[12.,0.])[:2])
   ego_error=float(np.sqrt(np.mean(np.sum((world_ego-a[:len(ego),1:3])**2,axis=1))))
- name=path.name;log=R/'logs/final'/f'{name}_launch.log';ms=[]
+ name=path.name;log=R/'logs'/path.parent.name/f'{name}_launch.log';ms=[]
  if log.exists():ms=[float(x) for x in re.findall(r'WHEEL_PLAN_MS ([0-9.]+)',log.read_text())]
- return {'run':name,'method':method,'phase_s':phase,'status':d['status'],'success':d['status']=='success','collision':d['collision'],
+ return {'localization_profile':d.get('localization_profile','legacy'),'total_goal_elapsed_s':d.get('goal_to_finish_s'),'evaluation_profile':d.get('evaluation_profile',{'name':'legacy'})['name'],'reference_revision':d.get('reference_revision'),'start_world':d.get('start_world'),'goal_world':d.get('goal_world'),'goal_radius_m':d.get('goal_tolerance_m'),'startup_delay_s':d.get('startup_delay_s'),'run':name,'method':method,'phase_s':phase,'status':d['status'],'success':d['status']=='success','collision':d['collision'],
   'arrival_s':d['sim_elapsed_s'] if d['status']=='success' else None,'termination_s':d['sim_elapsed_s'],
   'start_sim_s':d['start_sim_s'],'path_m':float(np.linalg.norm(np.diff(a[:,1:3],axis=0),axis=1).sum()) if len(a)>1 else 0.,
   'stopped_s':float(dt[stopped].sum()),'longest_stop_s':longest,'min_dynamic_circle_clearance_m':float(min(gaps)) if gaps else None,
@@ -77,24 +77,29 @@ def run(path):
   'ego_position_rmse_m':ego_error,'peak_frs_tracks':max((z.get('moving_track_count',z['track_count']) for z in decisions),default=None),'peak_unknown_regions':max((z.get('unknown_region_count',0) for z in decisions),default=0),'protocol_sha256':d.get('protocol_sha256'),
   'configuration_sha256':d.get('configuration_sha256'),'source_result':str(path/'result.json')}
 
-attempts=[run(p.parent) for p in sorted((R/'results/final').glob('*/result.json'))]
-selected={}
-for r in attempts:
- if r['start_sim_s'] is not None:selected.setdefault((r['method'],r['phase_s']),r)
-rows=list(selected.values())
-summary={}
-for method in ['mppi','frs_soft','frs_hard']:
- a=[x for x in rows if x['method']==method];success=[x for x in a if x['success']]
- summary[method]={'runs':len(a),'successes':len(success),'collisions':sum(x['collision'] for x in a),'timeouts':sum(x['status']=='timeout' for x in a),
-  'mean_success_arrival_s':float(np.mean([x['arrival_s'] for x in success])) if success else None,
-  'mean_stopped_s_all_runs':float(np.mean([x['stopped_s'] for x in a])) if a else None,
-  'min_dynamic_circle_clearance_m':min((x['min_dynamic_circle_clearance_m'] for x in a if x['min_dynamic_circle_clearance_m'] is not None),default=None)}
-report={'scope':'One official DynaBARN world, three preset motion phase variants; native ROS2/Gazebo/Jackal, common 5m lidar and static background. Not three independent maps or official leaderboard.',
- 'safety_metric':'Gazebo TouchPlugin contacts primary; radius .334+.5 circle clearance offline, interpolation never crosses original loop jumps.',
- 'tracking_metric':'Observed estimates matched offline to truth with 0.8m gate. Includes ego-odometry errors; unmatched points separately counted. No truth used for inference.',
- 'summary':summary,'runs':rows,'attempts':attempts,'startup_failures':[r for r in attempts if r['start_sim_s'] is None]}
-(R/'report.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n')
-if rows:
- fields=['run','method','phase_s','status','arrival_s','termination_s','path_m','stopped_s','longest_stop_s','min_dynamic_circle_clearance_m','final_goal_distance_m']
- with (R/'comparison.csv').open('w') as f:w=csv.DictWriter(f,fields,extrasaction='ignore');w.writeheader();w.writerows(rows)
-print(json.dumps(summary,indent=2))
+def main():
+ parser=argparse.ArgumentParser();parser.add_argument('--group',default='final');parser.add_argument('--output',type=Path)
+ args=parser.parse_args();out=args.output or R/'reports'/args.group;out.mkdir(parents=True,exist_ok=True)
+ paths=sorted((R/'results'/args.group).glob('*/result.json'))
+ if not paths:raise SystemExit('No results in selected group')
+ profiles={json.loads(p.read_text()).get('evaluation_profile',{'name':'legacy'})['name'] for p in paths}
+ if len(profiles)!=1:raise SystemExit('Refusing to combine challenge and legacy evaluation profiles')
+ rows=[run(p.parent,out/'derived') for p in paths];summary={}
+ if len({r['localization_profile'] for r in rows})>1:raise SystemExit('Refusing to mix localization profiles')
+ revisions={r['reference_revision'] for r in rows}
+ if len(revisions)>1:raise SystemExit('Refusing to combine different reference revisions')
+ if not any(r['method']=='mpc_d_cbf' for r in rows) and len({r['protocol_sha256'] for r in rows})>1:
+  raise SystemExit('Refusing to combine different evaluator/navigation source versions')
+ for method in sorted({r['method'] for r in rows}):
+  rr=[r for r in rows if r['method']==method];ok=[r for r in rr if r['success']]
+  summary[method]=dict(runs=len(rr),successes=len(ok),collisions=sum(r['collision'] for r in rr),timeouts=sum(r['status']=='timeout' for r in rr),infrastructure_failures=sum(r['start_sim_s'] is None for r in rr),other_failures=sum(not r['success'] and not r['collision'] and r['status']!='timeout' for r in rr),
+   mean_success_arrival_s=float(np.mean([r['arrival_s'] for r in ok])) if ok else None,
+   min_dynamic_circle_clearance_m=min((r['min_dynamic_circle_clearance_m'] for r in rr if r['min_dynamic_circle_clearance_m'] is not None),default=None))
+ report=dict(scope='ROS2 matched-condition adaptation on world_2; task and termination follow pinned BARN Challenge run.py, not full official-suite equivalence',evaluation_profile=next(iter(profiles)),group=args.group,
+  source_directory=str(R/'results'/args.group),derived_directory=str(out/'derived'),summary=summary,runs=rows,attempts=rows,
+  selection_policy='All attempts and repeats retained; no method/phase deduplication and no replacement of failed runs',startup_failures=[r for r in rows if r['start_sim_s'] is None])
+ (out/'report.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n')
+ fields=['run','method','phase_s','evaluation_profile','status','arrival_s','termination_s','startup_delay_s','path_m','stopped_s','min_dynamic_circle_clearance_m','final_goal_distance_m','ego_position_rmse_m','source_result']
+ with (out/'comparison.csv').open('w',encoding='utf-8-sig') as f:w=csv.DictWriter(f,fields,extrasaction='ignore');w.writeheader();w.writerows(rows)
+ print(json.dumps(summary,indent=2,ensure_ascii=False))
+if __name__=='__main__':main()

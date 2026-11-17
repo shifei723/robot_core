@@ -1,0 +1,3445 @@
+{
+  "scope": "ROS2 matched-condition adaptation on world_2; task and termination follow pinned BARN Challenge run.py, not full official-suite equivalence",
+  "evaluation_profile": "challenge",
+  "group": "frs_navigation_fix_20261117",
+  "source_directory": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117",
+  "derived_directory": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/output/frs_navigation_fix_20261117/formal/analysis/derived",
+  "summary": {
+    "frs_joint": {
+      "runs": 6,
+      "successes": 6,
+      "collisions": 0,
+      "timeouts": 0,
+      "infrastructure_failures": 0,
+      "other_failures": 0,
+      "mean_success_arrival_s": 43.78666666666667,
+      "min_dynamic_circle_clearance_m": 0.17856900626958738
+    },
+    "frs_soft": {
+      "runs": 6,
+      "successes": 4,
+      "collisions": 2,
+      "timeouts": 0,
+      "infrastructure_failures": 0,
+      "other_failures": 0,
+      "mean_success_arrival_s": 42.724999999999994,
+      "min_dynamic_circle_clearance_m": -0.05967613389831994
+    },
+    "mppi": {
+      "runs": 6,
+      "successes": 0,
+      "collisions": 6,
+      "timeouts": 0,
+      "infrastructure_failures": 0,
+      "other_failures": 0,
+      "mean_success_arrival_s": null,
+      "min_dynamic_circle_clearance_m": -0.14009512543058011
+    }
+  },
+  "runs": [
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 48.6,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_joint_phase_0_trial_0",
+      "method": "frs_joint",
+      "phase_s": 0.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 47.85,
+      "termination_s": 47.85,
+      "start_sim_s": 8.75,
+      "path_m": 19.087840959217196,
+      "stopped_s": 5.9999999999999964,
+      "longest_stop_s": 4.599999999999998,
+      "min_dynamic_circle_clearance_m": 0.17856900626958738,
+      "terminal_odom_vx_mps": 0.5003889403896461,
+      "terminal_state": "JOINT_ROLLOUT",
+      "terminal_frs_decision": {
+        "stamp": 56.565,
+        "mode": "frs",
+        "joint_rollout": true,
+        "plan_id": 101,
+        "plan_age": 0.28599999999999426,
+        "scale": 1,
+        "stale": false,
+        "feasible": true,
+        "shield": false,
+        "track_count": 1,
+        "decision_ms": 0.137146,
+        "nominal_clearance": 3.021346462156746,
+        "chosen_clearance": 3.021346462156746,
+        "before_v": 0.500393892147237,
+        "v": 0.5,
+        "w": 0,
+        "x": 19.131856490650083,
+        "y": 0.04298051563498409,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9700158659506483,
+      "state_duration_s": {
+        "TRACKING": 2.1000000000000014,
+        "JOINT_ROLLOUT": 40.200000000000074,
+        "JOINT_NO_SAFE_SEQUENCE": 4.599999999999998,
+        "WAIT_JOINT_PLAN": 0.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 405,
+        "mean": 0.05933141481481482,
+        "p95": 0.08576379999999999,
+        "max": 0.3093
+      },
+      "perception_callback_ms": {
+        "count": 1159,
+        "mean": 2.1335276955058853,
+        "p95": 4.555126867489888,
+        "max": 5.668719008099288
+      },
+      "planner_call_ms": {
+        "count": 108,
+        "mean": 57.78791666666666,
+        "p95": 97.53264999999993,
+        "max": 100.781
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.0766684873229819,
+        0.030923552736449193
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08520474813603067,
+        0.21752058047990294
+      ],
+      "matched_observations": 1513,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.08462882266902659,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "ae9c107a262ed928d2a68da7b98c4b539de5802494882036e5912470e3bd7c01",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_0_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 47.1,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_joint_phase_0_trial_1",
+      "method": "frs_joint",
+      "phase_s": 0.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 46.35,
+      "termination_s": 46.35,
+      "start_sim_s": 8.75,
+      "path_m": 19.11563026279171,
+      "stopped_s": 5.199999999999999,
+      "longest_stop_s": 4.100000000000001,
+      "min_dynamic_circle_clearance_m": 0.3234740755468478,
+      "terminal_odom_vx_mps": 0.4998649184570833,
+      "terminal_state": "JOINT_ROLLOUT",
+      "terminal_frs_decision": {
+        "stamp": 55.019,
+        "mode": "frs",
+        "joint_rollout": true,
+        "plan_id": 100,
+        "plan_age": 0.3500000000000014,
+        "scale": 1,
+        "stale": false,
+        "feasible": true,
+        "shield": false,
+        "track_count": 1,
+        "decision_ms": 0.228925,
+        "nominal_clearance": 2.7944422543831173,
+        "chosen_clearance": 2.7944422543831173,
+        "before_v": 0.5002551803553684,
+        "v": 0.5,
+        "w": 0,
+        "x": 19.08792190909896,
+        "y": 0.041884364973067245,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9903754107896076,
+      "state_duration_s": {
+        "TRACKING": 5.29999999999999,
+        "JOINT_ROLLOUT": 36.90000000000012,
+        "JOINT_NO_SAFE_SEQUENCE": 4.100000000000001
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 372,
+        "mean": 0.0671621747311828,
+        "p95": 0.09126614999999999,
+        "max": 0.31588
+      },
+      "perception_callback_ms": {
+        "count": 1153,
+        "mean": 2.1044540974042554,
+        "p95": 4.403379815630612,
+        "max": 5.757450009696186
+      },
+      "planner_call_ms": {
+        "count": 101,
+        "mean": 55.23683168316832,
+        "p95": 79.376,
+        "max": 101.854
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.08600116459604204,
+        0.03687016929926702
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08232748250407253,
+        0.22119135239600882
+      ],
+      "matched_observations": 1526,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.09636997366232003,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "ae9c107a262ed928d2a68da7b98c4b539de5802494882036e5912470e3bd7c01",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_0_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 44.8,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.8300000000000001,
+      "run": "frs_joint_phase_14_trial_0",
+      "method": "frs_joint",
+      "phase_s": 14.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 43.97,
+      "termination_s": 43.97,
+      "start_sim_s": 8.83,
+      "path_m": 19.458271941208874,
+      "stopped_s": 4.0,
+      "longest_stop_s": 4.0,
+      "min_dynamic_circle_clearance_m": 0.1787512407913009,
+      "terminal_odom_vx_mps": 0.4999955616684205,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 52.733,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "track_count": 0,
+        "decision_ms": 0,
+        "nominal_clearance": 0,
+        "chosen_clearance": 0,
+        "spatial_tracking": 1,
+        "empty_fallback": 1,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "before_v": 0.49999817530998997,
+        "v": 0.49999817530998997,
+        "x": 19.137698455085555,
+        "y": 0.11886708811581814,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9656600054167798,
+      "state_duration_s": {
+        "JOINT_ROLLOUT": 35.39999999999999,
+        "TRACKING": 5.299999999999997,
+        "JOINT_NO_SAFE_SEQUENCE": 3.1999999999999957
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 361,
+        "mean": 0.05781990304709141,
+        "p95": 0.085744,
+        "max": 0.16662
+      },
+      "perception_callback_ms": {
+        "count": 1089,
+        "mean": 1.8941943210449592,
+        "p95": 3.365601995028555,
+        "max": 4.514876985922456
+      },
+      "planner_call_ms": {
+        "count": 97,
+        "mean": 51.373969072164954,
+        "p95": 69.1186,
+        "max": 74.455
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.06959230198327329,
+        0.05407179097897262
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.04872903602938003,
+        0.1048895777412161
+      ],
+      "matched_observations": 859,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.08497892473431891,
+      "peak_frs_tracks": 3,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "739937efd2fd01d93503f571104231fc7d12149472cb4eb23013af7051587630",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_14_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 44.5,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.8100000000000005,
+      "run": "frs_joint_phase_14_trial_1",
+      "method": "frs_joint",
+      "phase_s": 14.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 43.69,
+      "termination_s": 43.69,
+      "start_sim_s": 8.81,
+      "path_m": 19.507690457767918,
+      "stopped_s": 3.5,
+      "longest_stop_s": 3.5,
+      "min_dynamic_circle_clearance_m": 0.23300632967087542,
+      "terminal_odom_vx_mps": 0.5000029620423532,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 52.497,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "track_count": 0,
+        "decision_ms": 0,
+        "nominal_clearance": 0,
+        "chosen_clearance": 0,
+        "spatial_tracking": 1,
+        "empty_fallback": 1,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "before_v": 0.4999999967036873,
+        "v": 0.4999999967036873,
+        "x": 19.152828156957884,
+        "y": -0.02019804162150417,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9948782151955369,
+      "state_duration_s": {
+        "JOINT_ROLLOUT": 33.900000000000006,
+        "TRACKING": 6.499999999999993,
+        "JOINT_NO_SAFE_SEQUENCE": 3.200000000000003
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 346,
+        "mean": 0.05886265028901735,
+        "p95": 0.086388,
+        "max": 0.149081
+      },
+      "perception_callback_ms": {
+        "count": 1095,
+        "mean": 1.9348954552780309,
+        "p95": 3.386031603440642,
+        "max": 4.499257018323988
+      },
+      "planner_call_ms": {
+        "count": 96,
+        "mean": 54.392208333333336,
+        "p95": 72.82225,
+        "max": 89.417
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.05901735337674622,
+        0.03789702871020402
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.052670038425540945,
+        0.11138757806462543
+      ],
+      "matched_observations": 873,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.07002242562283517,
+      "peak_frs_tracks": 3,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "739937efd2fd01d93503f571104231fc7d12149472cb4eb23013af7051587630",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_14_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 41.9,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.8100000000000005,
+      "run": "frs_joint_phase_7_trial_0",
+      "method": "frs_joint",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 41.089999999999996,
+      "termination_s": 41.089999999999996,
+      "start_sim_s": 8.81,
+      "path_m": 19.077263145550475,
+      "stopped_s": 0.5,
+      "longest_stop_s": 0.5,
+      "min_dynamic_circle_clearance_m": 0.9121233305932032,
+      "terminal_odom_vx_mps": 0.500223191397431,
+      "terminal_state": "JOINT_ROLLOUT",
+      "terminal_frs_decision": {
+        "stamp": 49.892,
+        "mode": "frs",
+        "joint_rollout": true,
+        "plan_id": 87,
+        "plan_age": 0.4000000000000057,
+        "scale": 1,
+        "stale": false,
+        "feasible": true,
+        "shield": false,
+        "track_count": 1,
+        "decision_ms": 0.144709,
+        "nominal_clearance": 3.084104586848046,
+        "chosen_clearance": 3.084104586848046,
+        "before_v": 0.500223191397431,
+        "v": 0.5,
+        "w": 0,
+        "x": 19.084926990983483,
+        "y": -0.0005956451083262707,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9843763815917368,
+      "state_duration_s": {
+        "JOINT_ROLLOUT": 36.8,
+        "TRACKING": 3.6999999999999957,
+        "WAIT_JOINT_PLAN": 0.5
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 374,
+        "mean": 0.0653844010695187,
+        "p95": 0.09428429999999999,
+        "max": 0.305047
+      },
+      "perception_callback_ms": {
+        "count": 1026,
+        "mean": 2.0860379302400376,
+        "p95": 3.969204524764791,
+        "max": 5.854704009834677
+      },
+      "planner_call_ms": {
+        "count": 92,
+        "mean": 58.8458695652174,
+        "p95": 86.34325000000003,
+        "max": 100.753
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.035580271626658964,
+        0.028080909120453395
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09156226047343523,
+        0.2210677226738588
+      ],
+      "matched_observations": 1317,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.03130643543044041,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "e62f0f9a0127e201eed11c5a52b52b64986c1e2072652bf4944802562e657a08",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_7_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 40.6,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.8300000000000001,
+      "run": "frs_joint_phase_7_trial_1",
+      "method": "frs_joint",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 39.77,
+      "termination_s": 39.77,
+      "start_sim_s": 8.83,
+      "path_m": 19.51788561234651,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": 0.947636177738817,
+      "terminal_odom_vx_mps": 0.49999999580012183,
+      "terminal_state": "JOINT_ROLLOUT",
+      "terminal_frs_decision": {
+        "stamp": 48.509,
+        "mode": "frs",
+        "joint_rollout": true,
+        "plan_id": 86,
+        "plan_age": 0.4650000000000034,
+        "scale": 1,
+        "stale": false,
+        "feasible": true,
+        "shield": false,
+        "track_count": 1,
+        "decision_ms": 0.228948,
+        "nominal_clearance": 2.849244153884123,
+        "chosen_clearance": 2.849244153884123,
+        "before_v": 0.49999999558227265,
+        "v": 0.5,
+        "w": 0,
+        "x": 19.11703209028985,
+        "y": 0.06723014322057186,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.996783564666973,
+      "state_duration_s": {
+        "JOINT_ROLLOUT": 35.59999999999998,
+        "TRACKING": 4.100000000000001
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 365,
+        "mean": 0.06343973972602739,
+        "p95": 0.087698,
+        "max": 0.309886
+      },
+      "perception_callback_ms": {
+        "count": 998,
+        "mean": 1.9491705873758085,
+        "p95": 3.790385858155787,
+        "max": 5.275142029859126
+      },
+      "planner_call_ms": {
+        "count": 87,
+        "mean": 55.66114942528736,
+        "p95": 73.0798,
+        "max": 85.015
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.056215368202908046,
+        0.03232358486123245
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09172959899848895,
+        0.22436161070717084
+      ],
+      "matched_observations": 1267,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.063247867033873,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "e62f0f9a0127e201eed11c5a52b52b64986c1e2072652bf4944802562e657a08",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_7_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 18.2,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_0_trial_0",
+      "method": "frs_soft",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 17.45,
+      "start_sim_s": 8.75,
+      "path_m": 6.3463469312419925,
+      "stopped_s": 2.3000000000000007,
+      "longest_stop_s": 2.3000000000000007,
+      "min_dynamic_circle_clearance_m": -0.04043235682771251,
+      "terminal_odom_vx_mps": -0.0012108552940888135,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 26.172,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -0.7301522743296754,
+        "chosen_clearance": 0,
+        "decision_ms": 0.460462,
+        "before_v": 0,
+        "v": 0,
+        "x": 6.4721784314432576,
+        "y": 0.020058357482715075,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 6,
+        "nominal_obstacle": "obstacle_4",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 0,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 3,
+        "unknown_region_count": 3,
+        "unknown_regions": [
+          {
+            "id": "obstacle_2",
+            "x": 1.1735255456289309,
+            "y": 2.166011830519608,
+            "radius": 1.4234889951439762
+          },
+          {
+            "id": "obstacle_5",
+            "x": 11.508886554947225,
+            "y": 2.529985566584977,
+            "radius": 1.2686870561420556
+          },
+          {
+            "id": "obstacle_6",
+            "x": 7.238976492695449,
+            "y": 0.4994350363765025,
+            "radius": 1.2290951743125862
+          }
+        ]
+      },
+      "final_goal_distance_m": 13.53727130327265,
+      "state_duration_s": {
+        "TRACKING": 11.599999999999998,
+        "DYNAMIC_SLOW": 3.400000000000002,
+        "DYNAMIC_WAIT": 1.5999999999999979,
+        "DYNAMIC_SHIELD": 0.8000000000000007
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 9,
+      "frs_infeasible_decisions": 25,
+      "active_frs_decision_ms": {
+        "count": 164,
+        "mean": 0.22143631707317074,
+        "p95": 0.3314437,
+        "max": 0.460462
+      },
+      "perception_callback_ms": {
+        "count": 494,
+        "mean": 2.354283003854803,
+        "p95": 5.214369980967604,
+        "max": 6.320285960100591
+      },
+      "planner_call_ms": {
+        "count": 8,
+        "mean": 33.685,
+        "p95": 41.786249999999995,
+        "max": 42.495
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02753336592519103,
+        0.031574391701148785
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08294002187051147,
+        0.17913942846466036
+      ],
+      "matched_observations": 787,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.026139955558291145,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 3,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "fc03ebd7955be8f9765bdb53a9087799f55700d6b8311cbdff8ff4f490b75f7f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_0_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 18.2,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_0_trial_1",
+      "method": "frs_soft",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 17.45,
+      "start_sim_s": 8.75,
+      "path_m": 6.369000085989631,
+      "stopped_s": 2.3000000000000007,
+      "longest_stop_s": 2.3000000000000007,
+      "min_dynamic_circle_clearance_m": -0.05967613389831994,
+      "terminal_odom_vx_mps": -0.0012244703155028767,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 26.124,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -0.7328655676880009,
+        "chosen_clearance": 0,
+        "decision_ms": 0.492234,
+        "before_v": 0,
+        "v": 0,
+        "x": 6.493461511771486,
+        "y": 0.02009021284785781,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 6,
+        "nominal_obstacle": "obstacle_4",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 0,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 3,
+        "unknown_region_count": 3,
+        "unknown_regions": [
+          {
+            "id": "obstacle_2",
+            "x": 1.1716468444751025,
+            "y": 2.169956723756784,
+            "radius": 1.3907458322584212
+          },
+          {
+            "id": "obstacle_5",
+            "x": 11.503316062337053,
+            "y": 2.5533924292930874,
+            "radius": 1.270508247273999
+          },
+          {
+            "id": "obstacle_6",
+            "x": 7.244653724320861,
+            "y": 0.5092281647470629,
+            "radius": 1.308042921100191
+          }
+        ]
+      },
+      "final_goal_distance_m": 13.516012285545001,
+      "state_duration_s": {
+        "TRACKING": 11.7,
+        "DYNAMIC_SLOW": 3.3000000000000007,
+        "DYNAMIC_WAIT": 1.5999999999999979,
+        "DYNAMIC_SHIELD": 0.8000000000000007
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 9,
+      "frs_infeasible_decisions": 25,
+      "active_frs_decision_ms": {
+        "count": 163,
+        "mean": 0.23136842944785277,
+        "p95": 0.3368164,
+        "max": 0.492234
+      },
+      "perception_callback_ms": {
+        "count": 488,
+        "mean": 2.3413752833072126,
+        "p95": 5.342448866576888,
+        "max": 6.4587200176902115
+      },
+      "planner_call_ms": {
+        "count": 9,
+        "mean": 32.687,
+        "p95": 50.660399999999996,
+        "max": 53.068
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02781566359944641,
+        0.03113532434031103
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.0870246644820603,
+        0.17387153041632553
+      ],
+      "matched_observations": 801,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.026203349344476164,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 3,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "fc03ebd7955be8f9765bdb53a9087799f55700d6b8311cbdff8ff4f490b75f7f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_0_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 46.8,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_14_trial_0",
+      "method": "frs_soft",
+      "phase_s": 14.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 46.05,
+      "termination_s": 46.05,
+      "start_sim_s": 8.75,
+      "path_m": 18.8999201373286,
+      "stopped_s": 5.699999999999996,
+      "longest_stop_s": 3.299999999999997,
+      "min_dynamic_circle_clearance_m": 0.16561303071715872,
+      "terminal_odom_vx_mps": 0.5000371795486082,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 54.789,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 0.0008964665400128524,
+        "chosen_clearance": 0.0008964665400128524,
+        "decision_ms": 0.213109,
+        "before_v": 0.4999999999754285,
+        "v": 0.4999999999754285,
+        "x": 18.99409735915673,
+        "y": 0.03171871041105723,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 2,
+        "nominal_obstacle": "obstacle_6",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 4.24853659425369e-05,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 1,
+        "unknown_region_count": 1,
+        "unknown_regions": [
+          {
+            "id": "obstacle_5",
+            "x": 13.386732489644741,
+            "y": 0.3070081428044174,
+            "radius": 1.442659071915128
+          }
+        ]
+      },
+      "final_goal_distance_m": 0.9817942210634243,
+      "state_duration_s": {
+        "TRACKING": 40.000000000000156,
+        "DYNAMIC_SLOW": 0.399999999999995,
+        "DYNAMIC_WAIT": 3.1000000000000014,
+        "DYNAMIC_SHIELD": 2.499999999999993
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 25,
+      "frs_infeasible_decisions": 52,
+      "active_frs_decision_ms": {
+        "count": 360,
+        "mean": 0.21067521666666664,
+        "p95": 0.31307130000000005,
+        "max": 0.432863
+      },
+      "perception_callback_ms": {
+        "count": 1072,
+        "mean": 1.8647352732855256,
+        "p95": 3.396512891049495,
+        "max": 4.4179659453220665
+      },
+      "planner_call_ms": {
+        "count": 18,
+        "mean": 34.59594444444444,
+        "p95": 48.740899999999996,
+        "max": 52.146
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02994919898357241,
+        0.01590492718068822
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.0509229426158777,
+        0.13770327657217257
+      ],
+      "matched_observations": 835,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.027717250255108575,
+      "peak_frs_tracks": 3,
+      "peak_unknown_regions": 2,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "53b9c2d85347bafe1f9923f0d5edf03e9fd607811bdde65ae99af334666e4d15",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_14_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 46.5,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_14_trial_1",
+      "method": "frs_soft",
+      "phase_s": 14.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 45.75,
+      "termination_s": 45.75,
+      "start_sim_s": 8.75,
+      "path_m": 18.891863535783834,
+      "stopped_s": 5.5,
+      "longest_stop_s": 3.200000000000003,
+      "min_dynamic_circle_clearance_m": 0.19799322046712808,
+      "terminal_odom_vx_mps": 0.5000394881075176,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 54.428,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 0.09258384529992947,
+        "chosen_clearance": 0.09258384529992947,
+        "decision_ms": 0.18516,
+        "before_v": 0.4999999999900153,
+        "v": 0.4999999999900153,
+        "x": 18.95283372620296,
+        "y": 0.031777241493150414,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 2,
+        "nominal_obstacle": "obstacle_6",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 2.8458479632140724e-05,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 1,
+        "unknown_region_count": 1,
+        "unknown_regions": [
+          {
+            "id": "obstacle_5",
+            "x": 13.410534853173163,
+            "y": 0.2854557980151709,
+            "radius": 1.331137416509381
+          }
+        ]
+      },
+      "final_goal_distance_m": 0.9931541715089162,
+      "state_duration_s": {
+        "TRACKING": 40.10000000000013,
+        "DYNAMIC_SLOW": 0.6000000000000014,
+        "DYNAMIC_WAIT": 3.200000000000003,
+        "DYNAMIC_SHIELD": 1.7999999999999972
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 17,
+      "frs_infeasible_decisions": 46,
+      "active_frs_decision_ms": {
+        "count": 358,
+        "mean": 0.20584785474860337,
+        "p95": 0.32664139999999997,
+        "max": 0.431808
+      },
+      "perception_callback_ms": {
+        "count": 1080,
+        "mean": 1.91296836079952,
+        "p95": 3.4972851455677287,
+        "max": 4.542310955002904
+      },
+      "planner_call_ms": {
+        "count": 18,
+        "mean": 35.74683333333334,
+        "p95": 47.303999999999974,
+        "max": 61.805
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02932369915668579,
+        0.016434706156481883
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.05325905760675885,
+        0.13388116953950205
+      ],
+      "matched_observations": 850,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.02784641027183987,
+      "peak_frs_tracks": 3,
+      "peak_unknown_regions": 2,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "53b9c2d85347bafe1f9923f0d5edf03e9fd607811bdde65ae99af334666e4d15",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_14_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 40.3,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_7_trial_0",
+      "method": "frs_soft",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 39.55,
+      "termination_s": 39.55,
+      "start_sim_s": 8.75,
+      "path_m": 18.90912057231794,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": 0.6693204708875217,
+      "terminal_odom_vx_mps": 0.4999999373293439,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 48.281,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 2.8475654984913557,
+        "chosen_clearance": 2.8475654984913557,
+        "decision_ms": 0.19567,
+        "before_v": 0.4999999999960959,
+        "v": 0.4999999999960959,
+        "x": 18.98805444450804,
+        "y": 0.031804606284336505,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_7",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 1.8634442556268712e-05,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 1,
+        "unknown_region_count": 0,
+        "unknown_regions": []
+      },
+      "final_goal_distance_m": 0.9762251265462988,
+      "state_duration_s": {
+        "TRACKING": 37.20000000000017,
+        "DYNAMIC_SLOW": 2.299999999999997
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 343,
+        "mean": 0.19719484548104957,
+        "p95": 0.32862769999999997,
+        "max": 0.429416
+      },
+      "perception_callback_ms": {
+        "count": 954,
+        "mean": 2.018297607673672,
+        "p95": 3.76059754344169,
+        "max": 5.405687028542161
+      },
+      "planner_call_ms": {
+        "count": 20,
+        "mean": 37.27575,
+        "p95": 51.27445,
+        "max": 55.729
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.03216223751654736,
+        0.028505062914824415
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09125674531210898,
+        0.23257706306854964
+      ],
+      "matched_observations": 1205,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.027401867073089604,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 2,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "bb505b8a6e7523c31b526e86c5b583ec908ae43be553d660c50a2808fadba5f7",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_7_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 40.3,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_7_trial_1",
+      "method": "frs_soft",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 39.55,
+      "termination_s": 39.55,
+      "start_sim_s": 8.75,
+      "path_m": 18.91777109763266,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": 0.6550365196195157,
+      "terminal_odom_vx_mps": 0.49993229074348117,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 48.211,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 2.8340368480839357,
+        "chosen_clearance": 2.8340368480839357,
+        "decision_ms": 0.168703,
+        "before_v": 0.4999999999959427,
+        "v": 0.4999999999959427,
+        "x": 18.968907159067065,
+        "y": 0.03180451727870388,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_7",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 1.8146116463921425e-05,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 1,
+        "unknown_region_count": 0,
+        "unknown_regions": []
+      },
+      "final_goal_distance_m": 0.965261480396419,
+      "state_duration_s": {
+        "TRACKING": 37.60000000000018,
+        "DYNAMIC_SLOW": 1.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 344,
+        "mean": 0.20657375000000003,
+        "p95": 0.335822,
+        "max": 0.387954
+      },
+      "perception_callback_ms": {
+        "count": 946,
+        "mean": 2.0797099212005374,
+        "p95": 3.9766147529007867,
+        "max": 5.451523000374436
+      },
+      "planner_call_ms": {
+        "count": 20,
+        "mean": 36.557599999999994,
+        "p95": 49.575300000000006,
+        "max": 53.343
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.03256732178915293,
+        0.028233800656340378
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09472740182922636,
+        0.23117885834601318
+      ],
+      "matched_observations": 1204,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.027560559419143458,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 2,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "bb505b8a6e7523c31b526e86c5b583ec908ae43be553d660c50a2808fadba5f7",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_7_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 19.5,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.6099999999999994,
+      "run": "mppi_phase_0_trial_0",
+      "method": "mppi",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 18.89,
+      "start_sim_s": 8.61,
+      "path_m": 6.561530241887039,
+      "stopped_s": 0.5,
+      "longest_stop_s": 0.3000000000000007,
+      "min_dynamic_circle_clearance_m": -0.0411722207902242,
+      "terminal_odom_vx_mps": 0.14428919177777771,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 13.903482551841911,
+      "state_duration_s": {
+        "": 18.800000000000075
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 555,
+        "mean": 2.202187141462288,
+        "p95": 4.456605779705563,
+        "max": 5.547071050386876
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.04740957717153716,
+        0.07375951078850262
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.0817020801319305,
+        0.13567449595774983
+      ],
+      "matched_observations": 831,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.0791725340899985,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "29f012de1e86e23b257d2d47bcd06554ba04fe72c6e7b2580d1c78b833bdab2f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_0_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 19.4,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.5700000000000003,
+      "run": "mppi_phase_0_trial_1",
+      "method": "mppi",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 18.83,
+      "start_sim_s": 8.57,
+      "path_m": 6.582361292343523,
+      "stopped_s": 0.3000000000000007,
+      "longest_stop_s": 0.1999999999999993,
+      "min_dynamic_circle_clearance_m": -0.05997511250774201,
+      "terminal_odom_vx_mps": 0.2652404089190293,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 13.857735415324779,
+      "state_duration_s": {
+        "": 18.80000000000007
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 558,
+        "mean": 2.350062194887856,
+        "p95": 4.743184344260953,
+        "max": 5.827795015648007
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.046476868570628535,
+        0.08034015163551761
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.07839775790328447,
+        0.13123145827201477
+      ],
+      "matched_observations": 830,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.08232345891570199,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "29f012de1e86e23b257d2d47bcd06554ba04fe72c6e7b2580d1c78b833bdab2f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_0_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 24.200000000000003,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.5899999999999999,
+      "run": "mppi_phase_14_trial_0",
+      "method": "mppi",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 23.610000000000003,
+      "start_sim_s": 8.59,
+      "path_m": 11.617912550304293,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": -0.14009512543058011,
+      "terminal_odom_vx_mps": 0.5000119592669319,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 8.30301788831983,
+      "state_duration_s": {
+        "": 23.60000000000021
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 619,
+        "mean": 1.7574989844921538,
+        "p95": 2.855939016444609,
+        "max": 4.770177009049803
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.026300621539693717,
+        0.015498463256844217
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.04531082451693195,
+        0.13495517261547701
+      ],
+      "matched_observations": 360,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.0219424253389601,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "1ad16a4d9471cb61511e8ab4c26701638bf41c6915bfd41c75922829a8688301",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_14_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 24.200000000000003,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.6099999999999994,
+      "run": "mppi_phase_14_trial_1",
+      "method": "mppi",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 23.590000000000003,
+      "start_sim_s": 8.61,
+      "path_m": 11.553872329313725,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": -0.13567570511265759,
+      "terminal_odom_vx_mps": 0.500010928573214,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 8.343064535963252,
+      "state_duration_s": {
+        "": 23.500000000000206
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 621,
+        "mean": 1.7578744617457263,
+        "p95": 2.9722939943894744,
+        "max": 4.512901999987662
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.02298491369911756,
+        0.015529432553914662
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.04399072673065228,
+        0.13100072522469278
+      ],
+      "matched_observations": 356,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.018381022549247793,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "1ad16a4d9471cb61511e8ab4c26701638bf41c6915bfd41c75922829a8688301",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_14_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 30.200000000000003,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.5800000000000001,
+      "run": "mppi_phase_7_trial_0",
+      "method": "mppi",
+      "phase_s": 7.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 29.620000000000005,
+      "start_sim_s": 8.58,
+      "path_m": 11.903740639895567,
+      "stopped_s": 0.30000000000000426,
+      "longest_stop_s": 0.20000000000000284,
+      "min_dynamic_circle_clearance_m": -0.046457953058704704,
+      "terminal_odom_vx_mps": 0.49995764208860793,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 8.625497827869983,
+      "state_duration_s": {
+        "": 29.6
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 755,
+        "mean": 2.1601396380763327,
+        "p95": 4.080235026776788,
+        "max": 5.324728030245751
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.05854685835087735,
+        0.08903861901471458
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08443852406828174,
+        0.1433380181752419
+      ],
+      "matched_observations": 918,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.14957112473713405,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "eb214df5499cfa37213be4ac4ff4b37218edb5fe6d939c79aaa7f583f542c2c1",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_7_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 30.5,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.5700000000000003,
+      "run": "mppi_phase_7_trial_1",
+      "method": "mppi",
+      "phase_s": 7.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 29.93,
+      "start_sim_s": 8.57,
+      "path_m": 11.677259538036708,
+      "stopped_s": 0.3999999999999986,
+      "longest_stop_s": 0.1999999999999993,
+      "min_dynamic_circle_clearance_m": -0.04203441507965067,
+      "terminal_odom_vx_mps": 0.4959759152872797,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 8.735032730964589,
+      "state_duration_s": {
+        "": 29.900000000000205
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 766,
+        "mean": 2.1565426708662314,
+        "p95": 4.178947754553519,
+        "max": 5.233948992099613
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.09670505943469848,
+        0.07640322520897787
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.07848219940522694,
+        0.13962361169555354
+      ],
+      "matched_observations": 924,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.1761036449584261,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "eb214df5499cfa37213be4ac4ff4b37218edb5fe6d939c79aaa7f583f542c2c1",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_7_trial_1/result.json"
+    }
+  ],
+  "attempts": [
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 48.6,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_joint_phase_0_trial_0",
+      "method": "frs_joint",
+      "phase_s": 0.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 47.85,
+      "termination_s": 47.85,
+      "start_sim_s": 8.75,
+      "path_m": 19.087840959217196,
+      "stopped_s": 5.9999999999999964,
+      "longest_stop_s": 4.599999999999998,
+      "min_dynamic_circle_clearance_m": 0.17856900626958738,
+      "terminal_odom_vx_mps": 0.5003889403896461,
+      "terminal_state": "JOINT_ROLLOUT",
+      "terminal_frs_decision": {
+        "stamp": 56.565,
+        "mode": "frs",
+        "joint_rollout": true,
+        "plan_id": 101,
+        "plan_age": 0.28599999999999426,
+        "scale": 1,
+        "stale": false,
+        "feasible": true,
+        "shield": false,
+        "track_count": 1,
+        "decision_ms": 0.137146,
+        "nominal_clearance": 3.021346462156746,
+        "chosen_clearance": 3.021346462156746,
+        "before_v": 0.500393892147237,
+        "v": 0.5,
+        "w": 0,
+        "x": 19.131856490650083,
+        "y": 0.04298051563498409,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9700158659506483,
+      "state_duration_s": {
+        "TRACKING": 2.1000000000000014,
+        "JOINT_ROLLOUT": 40.200000000000074,
+        "JOINT_NO_SAFE_SEQUENCE": 4.599999999999998,
+        "WAIT_JOINT_PLAN": 0.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 405,
+        "mean": 0.05933141481481482,
+        "p95": 0.08576379999999999,
+        "max": 0.3093
+      },
+      "perception_callback_ms": {
+        "count": 1159,
+        "mean": 2.1335276955058853,
+        "p95": 4.555126867489888,
+        "max": 5.668719008099288
+      },
+      "planner_call_ms": {
+        "count": 108,
+        "mean": 57.78791666666666,
+        "p95": 97.53264999999993,
+        "max": 100.781
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.0766684873229819,
+        0.030923552736449193
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08520474813603067,
+        0.21752058047990294
+      ],
+      "matched_observations": 1513,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.08462882266902659,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "ae9c107a262ed928d2a68da7b98c4b539de5802494882036e5912470e3bd7c01",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_0_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 47.1,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_joint_phase_0_trial_1",
+      "method": "frs_joint",
+      "phase_s": 0.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 46.35,
+      "termination_s": 46.35,
+      "start_sim_s": 8.75,
+      "path_m": 19.11563026279171,
+      "stopped_s": 5.199999999999999,
+      "longest_stop_s": 4.100000000000001,
+      "min_dynamic_circle_clearance_m": 0.3234740755468478,
+      "terminal_odom_vx_mps": 0.4998649184570833,
+      "terminal_state": "JOINT_ROLLOUT",
+      "terminal_frs_decision": {
+        "stamp": 55.019,
+        "mode": "frs",
+        "joint_rollout": true,
+        "plan_id": 100,
+        "plan_age": 0.3500000000000014,
+        "scale": 1,
+        "stale": false,
+        "feasible": true,
+        "shield": false,
+        "track_count": 1,
+        "decision_ms": 0.228925,
+        "nominal_clearance": 2.7944422543831173,
+        "chosen_clearance": 2.7944422543831173,
+        "before_v": 0.5002551803553684,
+        "v": 0.5,
+        "w": 0,
+        "x": 19.08792190909896,
+        "y": 0.041884364973067245,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9903754107896076,
+      "state_duration_s": {
+        "TRACKING": 5.29999999999999,
+        "JOINT_ROLLOUT": 36.90000000000012,
+        "JOINT_NO_SAFE_SEQUENCE": 4.100000000000001
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 372,
+        "mean": 0.0671621747311828,
+        "p95": 0.09126614999999999,
+        "max": 0.31588
+      },
+      "perception_callback_ms": {
+        "count": 1153,
+        "mean": 2.1044540974042554,
+        "p95": 4.403379815630612,
+        "max": 5.757450009696186
+      },
+      "planner_call_ms": {
+        "count": 101,
+        "mean": 55.23683168316832,
+        "p95": 79.376,
+        "max": 101.854
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.08600116459604204,
+        0.03687016929926702
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08232748250407253,
+        0.22119135239600882
+      ],
+      "matched_observations": 1526,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.09636997366232003,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "ae9c107a262ed928d2a68da7b98c4b539de5802494882036e5912470e3bd7c01",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_0_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 44.8,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.8300000000000001,
+      "run": "frs_joint_phase_14_trial_0",
+      "method": "frs_joint",
+      "phase_s": 14.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 43.97,
+      "termination_s": 43.97,
+      "start_sim_s": 8.83,
+      "path_m": 19.458271941208874,
+      "stopped_s": 4.0,
+      "longest_stop_s": 4.0,
+      "min_dynamic_circle_clearance_m": 0.1787512407913009,
+      "terminal_odom_vx_mps": 0.4999955616684205,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 52.733,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "track_count": 0,
+        "decision_ms": 0,
+        "nominal_clearance": 0,
+        "chosen_clearance": 0,
+        "spatial_tracking": 1,
+        "empty_fallback": 1,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "before_v": 0.49999817530998997,
+        "v": 0.49999817530998997,
+        "x": 19.137698455085555,
+        "y": 0.11886708811581814,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9656600054167798,
+      "state_duration_s": {
+        "JOINT_ROLLOUT": 35.39999999999999,
+        "TRACKING": 5.299999999999997,
+        "JOINT_NO_SAFE_SEQUENCE": 3.1999999999999957
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 361,
+        "mean": 0.05781990304709141,
+        "p95": 0.085744,
+        "max": 0.16662
+      },
+      "perception_callback_ms": {
+        "count": 1089,
+        "mean": 1.8941943210449592,
+        "p95": 3.365601995028555,
+        "max": 4.514876985922456
+      },
+      "planner_call_ms": {
+        "count": 97,
+        "mean": 51.373969072164954,
+        "p95": 69.1186,
+        "max": 74.455
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.06959230198327329,
+        0.05407179097897262
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.04872903602938003,
+        0.1048895777412161
+      ],
+      "matched_observations": 859,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.08497892473431891,
+      "peak_frs_tracks": 3,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "739937efd2fd01d93503f571104231fc7d12149472cb4eb23013af7051587630",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_14_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 44.5,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.8100000000000005,
+      "run": "frs_joint_phase_14_trial_1",
+      "method": "frs_joint",
+      "phase_s": 14.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 43.69,
+      "termination_s": 43.69,
+      "start_sim_s": 8.81,
+      "path_m": 19.507690457767918,
+      "stopped_s": 3.5,
+      "longest_stop_s": 3.5,
+      "min_dynamic_circle_clearance_m": 0.23300632967087542,
+      "terminal_odom_vx_mps": 0.5000029620423532,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 52.497,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "track_count": 0,
+        "decision_ms": 0,
+        "nominal_clearance": 0,
+        "chosen_clearance": 0,
+        "spatial_tracking": 1,
+        "empty_fallback": 1,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "before_v": 0.4999999967036873,
+        "v": 0.4999999967036873,
+        "x": 19.152828156957884,
+        "y": -0.02019804162150417,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9948782151955369,
+      "state_duration_s": {
+        "JOINT_ROLLOUT": 33.900000000000006,
+        "TRACKING": 6.499999999999993,
+        "JOINT_NO_SAFE_SEQUENCE": 3.200000000000003
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 346,
+        "mean": 0.05886265028901735,
+        "p95": 0.086388,
+        "max": 0.149081
+      },
+      "perception_callback_ms": {
+        "count": 1095,
+        "mean": 1.9348954552780309,
+        "p95": 3.386031603440642,
+        "max": 4.499257018323988
+      },
+      "planner_call_ms": {
+        "count": 96,
+        "mean": 54.392208333333336,
+        "p95": 72.82225,
+        "max": 89.417
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.05901735337674622,
+        0.03789702871020402
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.052670038425540945,
+        0.11138757806462543
+      ],
+      "matched_observations": 873,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.07002242562283517,
+      "peak_frs_tracks": 3,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "739937efd2fd01d93503f571104231fc7d12149472cb4eb23013af7051587630",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_14_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 41.9,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.8100000000000005,
+      "run": "frs_joint_phase_7_trial_0",
+      "method": "frs_joint",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 41.089999999999996,
+      "termination_s": 41.089999999999996,
+      "start_sim_s": 8.81,
+      "path_m": 19.077263145550475,
+      "stopped_s": 0.5,
+      "longest_stop_s": 0.5,
+      "min_dynamic_circle_clearance_m": 0.9121233305932032,
+      "terminal_odom_vx_mps": 0.500223191397431,
+      "terminal_state": "JOINT_ROLLOUT",
+      "terminal_frs_decision": {
+        "stamp": 49.892,
+        "mode": "frs",
+        "joint_rollout": true,
+        "plan_id": 87,
+        "plan_age": 0.4000000000000057,
+        "scale": 1,
+        "stale": false,
+        "feasible": true,
+        "shield": false,
+        "track_count": 1,
+        "decision_ms": 0.144709,
+        "nominal_clearance": 3.084104586848046,
+        "chosen_clearance": 3.084104586848046,
+        "before_v": 0.500223191397431,
+        "v": 0.5,
+        "w": 0,
+        "x": 19.084926990983483,
+        "y": -0.0005956451083262707,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.9843763815917368,
+      "state_duration_s": {
+        "JOINT_ROLLOUT": 36.8,
+        "TRACKING": 3.6999999999999957,
+        "WAIT_JOINT_PLAN": 0.5
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 374,
+        "mean": 0.0653844010695187,
+        "p95": 0.09428429999999999,
+        "max": 0.305047
+      },
+      "perception_callback_ms": {
+        "count": 1026,
+        "mean": 2.0860379302400376,
+        "p95": 3.969204524764791,
+        "max": 5.854704009834677
+      },
+      "planner_call_ms": {
+        "count": 92,
+        "mean": 58.8458695652174,
+        "p95": 86.34325000000003,
+        "max": 100.753
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.035580271626658964,
+        0.028080909120453395
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09156226047343523,
+        0.2210677226738588
+      ],
+      "matched_observations": 1317,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.03130643543044041,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "e62f0f9a0127e201eed11c5a52b52b64986c1e2072652bf4944802562e657a08",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_7_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 40.6,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.8300000000000001,
+      "run": "frs_joint_phase_7_trial_1",
+      "method": "frs_joint",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 39.77,
+      "termination_s": 39.77,
+      "start_sim_s": 8.83,
+      "path_m": 19.51788561234651,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": 0.947636177738817,
+      "terminal_odom_vx_mps": 0.49999999580012183,
+      "terminal_state": "JOINT_ROLLOUT",
+      "terminal_frs_decision": {
+        "stamp": 48.509,
+        "mode": "frs",
+        "joint_rollout": true,
+        "plan_id": 86,
+        "plan_age": 0.4650000000000034,
+        "scale": 1,
+        "stale": false,
+        "feasible": true,
+        "shield": false,
+        "track_count": 1,
+        "decision_ms": 0.228948,
+        "nominal_clearance": 2.849244153884123,
+        "chosen_clearance": 2.849244153884123,
+        "before_v": 0.49999999558227265,
+        "v": 0.5,
+        "w": 0,
+        "x": 19.11703209028985,
+        "y": 0.06723014322057186,
+        "nominal_obstacle": ""
+      },
+      "final_goal_distance_m": 0.996783564666973,
+      "state_duration_s": {
+        "JOINT_ROLLOUT": 35.59999999999998,
+        "TRACKING": 4.100000000000001
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 365,
+        "mean": 0.06343973972602739,
+        "p95": 0.087698,
+        "max": 0.309886
+      },
+      "perception_callback_ms": {
+        "count": 998,
+        "mean": 1.9491705873758085,
+        "p95": 3.790385858155787,
+        "max": 5.275142029859126
+      },
+      "planner_call_ms": {
+        "count": 87,
+        "mean": 55.66114942528736,
+        "p95": 73.0798,
+        "max": 85.015
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.056215368202908046,
+        0.03232358486123245
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09172959899848895,
+        0.22436161070717084
+      ],
+      "matched_observations": 1267,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.063247867033873,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "e62f0f9a0127e201eed11c5a52b52b64986c1e2072652bf4944802562e657a08",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_joint_phase_7_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 18.2,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_0_trial_0",
+      "method": "frs_soft",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 17.45,
+      "start_sim_s": 8.75,
+      "path_m": 6.3463469312419925,
+      "stopped_s": 2.3000000000000007,
+      "longest_stop_s": 2.3000000000000007,
+      "min_dynamic_circle_clearance_m": -0.04043235682771251,
+      "terminal_odom_vx_mps": -0.0012108552940888135,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 26.172,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -0.7301522743296754,
+        "chosen_clearance": 0,
+        "decision_ms": 0.460462,
+        "before_v": 0,
+        "v": 0,
+        "x": 6.4721784314432576,
+        "y": 0.020058357482715075,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 6,
+        "nominal_obstacle": "obstacle_4",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 0,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 3,
+        "unknown_region_count": 3,
+        "unknown_regions": [
+          {
+            "id": "obstacle_2",
+            "x": 1.1735255456289309,
+            "y": 2.166011830519608,
+            "radius": 1.4234889951439762
+          },
+          {
+            "id": "obstacle_5",
+            "x": 11.508886554947225,
+            "y": 2.529985566584977,
+            "radius": 1.2686870561420556
+          },
+          {
+            "id": "obstacle_6",
+            "x": 7.238976492695449,
+            "y": 0.4994350363765025,
+            "radius": 1.2290951743125862
+          }
+        ]
+      },
+      "final_goal_distance_m": 13.53727130327265,
+      "state_duration_s": {
+        "TRACKING": 11.599999999999998,
+        "DYNAMIC_SLOW": 3.400000000000002,
+        "DYNAMIC_WAIT": 1.5999999999999979,
+        "DYNAMIC_SHIELD": 0.8000000000000007
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 9,
+      "frs_infeasible_decisions": 25,
+      "active_frs_decision_ms": {
+        "count": 164,
+        "mean": 0.22143631707317074,
+        "p95": 0.3314437,
+        "max": 0.460462
+      },
+      "perception_callback_ms": {
+        "count": 494,
+        "mean": 2.354283003854803,
+        "p95": 5.214369980967604,
+        "max": 6.320285960100591
+      },
+      "planner_call_ms": {
+        "count": 8,
+        "mean": 33.685,
+        "p95": 41.786249999999995,
+        "max": 42.495
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02753336592519103,
+        0.031574391701148785
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08294002187051147,
+        0.17913942846466036
+      ],
+      "matched_observations": 787,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.026139955558291145,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 3,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "fc03ebd7955be8f9765bdb53a9087799f55700d6b8311cbdff8ff4f490b75f7f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_0_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 18.2,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_0_trial_1",
+      "method": "frs_soft",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 17.45,
+      "start_sim_s": 8.75,
+      "path_m": 6.369000085989631,
+      "stopped_s": 2.3000000000000007,
+      "longest_stop_s": 2.3000000000000007,
+      "min_dynamic_circle_clearance_m": -0.05967613389831994,
+      "terminal_odom_vx_mps": -0.0012244703155028767,
+      "terminal_state": "DYNAMIC_SHIELD",
+      "terminal_frs_decision": {
+        "stamp": 26.124,
+        "mode": "frs",
+        "scale": 0,
+        "stale": 0,
+        "feasible": 0,
+        "shield": 1,
+        "nominal_clearance": -0.7328655676880009,
+        "chosen_clearance": 0,
+        "decision_ms": 0.492234,
+        "before_v": 0,
+        "v": 0,
+        "x": 6.493461511771486,
+        "y": 0.02009021284785781,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 6,
+        "nominal_obstacle": "obstacle_4",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 0,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 3,
+        "unknown_region_count": 3,
+        "unknown_regions": [
+          {
+            "id": "obstacle_2",
+            "x": 1.1716468444751025,
+            "y": 2.169956723756784,
+            "radius": 1.3907458322584212
+          },
+          {
+            "id": "obstacle_5",
+            "x": 11.503316062337053,
+            "y": 2.5533924292930874,
+            "radius": 1.270508247273999
+          },
+          {
+            "id": "obstacle_6",
+            "x": 7.244653724320861,
+            "y": 0.5092281647470629,
+            "radius": 1.308042921100191
+          }
+        ]
+      },
+      "final_goal_distance_m": 13.516012285545001,
+      "state_duration_s": {
+        "TRACKING": 11.7,
+        "DYNAMIC_SLOW": 3.3000000000000007,
+        "DYNAMIC_WAIT": 1.5999999999999979,
+        "DYNAMIC_SHIELD": 0.8000000000000007
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 9,
+      "frs_infeasible_decisions": 25,
+      "active_frs_decision_ms": {
+        "count": 163,
+        "mean": 0.23136842944785277,
+        "p95": 0.3368164,
+        "max": 0.492234
+      },
+      "perception_callback_ms": {
+        "count": 488,
+        "mean": 2.3413752833072126,
+        "p95": 5.342448866576888,
+        "max": 6.4587200176902115
+      },
+      "planner_call_ms": {
+        "count": 9,
+        "mean": 32.687,
+        "p95": 50.660399999999996,
+        "max": 53.068
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02781566359944641,
+        0.03113532434031103
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.0870246644820603,
+        0.17387153041632553
+      ],
+      "matched_observations": 801,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 0,
+      "ego_position_rmse_m": 0.026203349344476164,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 3,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "fc03ebd7955be8f9765bdb53a9087799f55700d6b8311cbdff8ff4f490b75f7f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_0_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 46.8,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_14_trial_0",
+      "method": "frs_soft",
+      "phase_s": 14.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 46.05,
+      "termination_s": 46.05,
+      "start_sim_s": 8.75,
+      "path_m": 18.8999201373286,
+      "stopped_s": 5.699999999999996,
+      "longest_stop_s": 3.299999999999997,
+      "min_dynamic_circle_clearance_m": 0.16561303071715872,
+      "terminal_odom_vx_mps": 0.5000371795486082,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 54.789,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 0.0008964665400128524,
+        "chosen_clearance": 0.0008964665400128524,
+        "decision_ms": 0.213109,
+        "before_v": 0.4999999999754285,
+        "v": 0.4999999999754285,
+        "x": 18.99409735915673,
+        "y": 0.03171871041105723,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 2,
+        "nominal_obstacle": "obstacle_6",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 4.24853659425369e-05,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 1,
+        "unknown_region_count": 1,
+        "unknown_regions": [
+          {
+            "id": "obstacle_5",
+            "x": 13.386732489644741,
+            "y": 0.3070081428044174,
+            "radius": 1.442659071915128
+          }
+        ]
+      },
+      "final_goal_distance_m": 0.9817942210634243,
+      "state_duration_s": {
+        "TRACKING": 40.000000000000156,
+        "DYNAMIC_SLOW": 0.399999999999995,
+        "DYNAMIC_WAIT": 3.1000000000000014,
+        "DYNAMIC_SHIELD": 2.499999999999993
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 25,
+      "frs_infeasible_decisions": 52,
+      "active_frs_decision_ms": {
+        "count": 360,
+        "mean": 0.21067521666666664,
+        "p95": 0.31307130000000005,
+        "max": 0.432863
+      },
+      "perception_callback_ms": {
+        "count": 1072,
+        "mean": 1.8647352732855256,
+        "p95": 3.396512891049495,
+        "max": 4.4179659453220665
+      },
+      "planner_call_ms": {
+        "count": 18,
+        "mean": 34.59594444444444,
+        "p95": 48.740899999999996,
+        "max": 52.146
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02994919898357241,
+        0.01590492718068822
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.0509229426158777,
+        0.13770327657217257
+      ],
+      "matched_observations": 835,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.027717250255108575,
+      "peak_frs_tracks": 3,
+      "peak_unknown_regions": 2,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "53b9c2d85347bafe1f9923f0d5edf03e9fd607811bdde65ae99af334666e4d15",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_14_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 46.5,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_14_trial_1",
+      "method": "frs_soft",
+      "phase_s": 14.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 45.75,
+      "termination_s": 45.75,
+      "start_sim_s": 8.75,
+      "path_m": 18.891863535783834,
+      "stopped_s": 5.5,
+      "longest_stop_s": 3.200000000000003,
+      "min_dynamic_circle_clearance_m": 0.19799322046712808,
+      "terminal_odom_vx_mps": 0.5000394881075176,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 54.428,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 0.09258384529992947,
+        "chosen_clearance": 0.09258384529992947,
+        "decision_ms": 0.18516,
+        "before_v": 0.4999999999900153,
+        "v": 0.4999999999900153,
+        "x": 18.95283372620296,
+        "y": 0.031777241493150414,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 2,
+        "nominal_obstacle": "obstacle_6",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 2.8458479632140724e-05,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 1,
+        "unknown_region_count": 1,
+        "unknown_regions": [
+          {
+            "id": "obstacle_5",
+            "x": 13.410534853173163,
+            "y": 0.2854557980151709,
+            "radius": 1.331137416509381
+          }
+        ]
+      },
+      "final_goal_distance_m": 0.9931541715089162,
+      "state_duration_s": {
+        "TRACKING": 40.10000000000013,
+        "DYNAMIC_SLOW": 0.6000000000000014,
+        "DYNAMIC_WAIT": 3.200000000000003,
+        "DYNAMIC_SHIELD": 1.7999999999999972
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 17,
+      "frs_infeasible_decisions": 46,
+      "active_frs_decision_ms": {
+        "count": 358,
+        "mean": 0.20584785474860337,
+        "p95": 0.32664139999999997,
+        "max": 0.431808
+      },
+      "perception_callback_ms": {
+        "count": 1080,
+        "mean": 1.91296836079952,
+        "p95": 3.4972851455677287,
+        "max": 4.542310955002904
+      },
+      "planner_call_ms": {
+        "count": 18,
+        "mean": 35.74683333333334,
+        "p95": 47.303999999999974,
+        "max": 61.805
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.02932369915668579,
+        0.016434706156481883
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.05325905760675885,
+        0.13388116953950205
+      ],
+      "matched_observations": 850,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.02784641027183987,
+      "peak_frs_tracks": 3,
+      "peak_unknown_regions": 2,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "53b9c2d85347bafe1f9923f0d5edf03e9fd607811bdde65ae99af334666e4d15",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_14_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 40.3,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_7_trial_0",
+      "method": "frs_soft",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 39.55,
+      "termination_s": 39.55,
+      "start_sim_s": 8.75,
+      "path_m": 18.90912057231794,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": 0.6693204708875217,
+      "terminal_odom_vx_mps": 0.4999999373293439,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 48.281,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 2.8475654984913557,
+        "chosen_clearance": 2.8475654984913557,
+        "decision_ms": 0.19567,
+        "before_v": 0.4999999999960959,
+        "v": 0.4999999999960959,
+        "x": 18.98805444450804,
+        "y": 0.031804606284336505,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_7",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 1.8634442556268712e-05,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 1,
+        "unknown_region_count": 0,
+        "unknown_regions": []
+      },
+      "final_goal_distance_m": 0.9762251265462988,
+      "state_duration_s": {
+        "TRACKING": 37.20000000000017,
+        "DYNAMIC_SLOW": 2.299999999999997
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 343,
+        "mean": 0.19719484548104957,
+        "p95": 0.32862769999999997,
+        "max": 0.429416
+      },
+      "perception_callback_ms": {
+        "count": 954,
+        "mean": 2.018297607673672,
+        "p95": 3.76059754344169,
+        "max": 5.405687028542161
+      },
+      "planner_call_ms": {
+        "count": 20,
+        "mean": 37.27575,
+        "p95": 51.27445,
+        "max": 55.729
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.03216223751654736,
+        0.028505062914824415
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09125674531210898,
+        0.23257706306854964
+      ],
+      "matched_observations": 1205,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.027401867073089604,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 2,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "bb505b8a6e7523c31b526e86c5b583ec908ae43be553d660c50a2808fadba5f7",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_7_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 40.3,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.75,
+      "run": "frs_soft_phase_7_trial_1",
+      "method": "frs_soft",
+      "phase_s": 7.0,
+      "status": "success",
+      "success": true,
+      "collision": false,
+      "arrival_s": 39.55,
+      "termination_s": 39.55,
+      "start_sim_s": 8.75,
+      "path_m": 18.91777109763266,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": 0.6550365196195157,
+      "terminal_odom_vx_mps": 0.49993229074348117,
+      "terminal_state": "TRACKING",
+      "terminal_frs_decision": {
+        "stamp": 48.211,
+        "mode": "frs",
+        "scale": 1,
+        "stale": 0,
+        "feasible": 1,
+        "shield": 0,
+        "nominal_clearance": 2.8340368480839357,
+        "chosen_clearance": 2.8340368480839357,
+        "decision_ms": 0.168703,
+        "before_v": 0.4999999999959427,
+        "v": 0.4999999999959427,
+        "x": 18.968907159067065,
+        "y": 0.03180451727870388,
+        "soft_constraint": 1,
+        "frs_weight": 2,
+        "horizon": 3,
+        "track_count": 1,
+        "nominal_obstacle": "obstacle_7",
+        "escape_enabled": 0,
+        "escape_active": 0,
+        "escape_triggered": 0,
+        "escape_feasible": 0,
+        "escape_reason": "disabled",
+        "escape_candidates": 0,
+        "escape_parked_clearance": 0,
+        "escape_chosen_clearance": 0,
+        "w": 1.8146116463921425e-05,
+        "escape_path": [],
+        "planned_speed_required": 0,
+        "planned_speed_limit": 0.5,
+        "spatial_tracking": 1,
+        "moving_track_count": 1,
+        "unknown_region_count": 0,
+        "unknown_regions": []
+      },
+      "final_goal_distance_m": 0.965261480396419,
+      "state_duration_s": {
+        "TRACKING": 37.60000000000018,
+        "DYNAMIC_SLOW": 1.8999999999999986
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": {
+        "count": 344,
+        "mean": 0.20657375000000003,
+        "p95": 0.335822,
+        "max": 0.387954
+      },
+      "perception_callback_ms": {
+        "count": 946,
+        "mean": 2.0797099212005374,
+        "p95": 3.9766147529007867,
+        "max": 5.451523000374436
+      },
+      "planner_call_ms": {
+        "count": 20,
+        "mean": 36.557599999999994,
+        "p95": 49.575300000000006,
+        "max": 53.343
+      },
+      "matched_observed_position_rmse_xy_m": [
+        0.03256732178915293,
+        0.028233800656340378
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.09472740182922636,
+        0.23117885834601318
+      ],
+      "matched_observations": 1204,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.027560559419143458,
+      "peak_frs_tracks": 4,
+      "peak_unknown_regions": 2,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "bb505b8a6e7523c31b526e86c5b583ec908ae43be553d660c50a2808fadba5f7",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/frs_soft_phase_7_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 19.5,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.6099999999999994,
+      "run": "mppi_phase_0_trial_0",
+      "method": "mppi",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 18.89,
+      "start_sim_s": 8.61,
+      "path_m": 6.561530241887039,
+      "stopped_s": 0.5,
+      "longest_stop_s": 0.3000000000000007,
+      "min_dynamic_circle_clearance_m": -0.0411722207902242,
+      "terminal_odom_vx_mps": 0.14428919177777771,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 13.903482551841911,
+      "state_duration_s": {
+        "": 18.800000000000075
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 555,
+        "mean": 2.202187141462288,
+        "p95": 4.456605779705563,
+        "max": 5.547071050386876
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.04740957717153716,
+        0.07375951078850262
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.0817020801319305,
+        0.13567449595774983
+      ],
+      "matched_observations": 831,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.0791725340899985,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "29f012de1e86e23b257d2d47bcd06554ba04fe72c6e7b2580d1c78b833bdab2f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_0_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 19.4,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.5700000000000003,
+      "run": "mppi_phase_0_trial_1",
+      "method": "mppi",
+      "phase_s": 0.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 18.83,
+      "start_sim_s": 8.57,
+      "path_m": 6.582361292343523,
+      "stopped_s": 0.3000000000000007,
+      "longest_stop_s": 0.1999999999999993,
+      "min_dynamic_circle_clearance_m": -0.05997511250774201,
+      "terminal_odom_vx_mps": 0.2652404089190293,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 13.857735415324779,
+      "state_duration_s": {
+        "": 18.80000000000007
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 558,
+        "mean": 2.350062194887856,
+        "p95": 4.743184344260953,
+        "max": 5.827795015648007
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.046476868570628535,
+        0.08034015163551761
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.07839775790328447,
+        0.13123145827201477
+      ],
+      "matched_observations": 830,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.08232345891570199,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "29f012de1e86e23b257d2d47bcd06554ba04fe72c6e7b2580d1c78b833bdab2f",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_0_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 24.200000000000003,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.5899999999999999,
+      "run": "mppi_phase_14_trial_0",
+      "method": "mppi",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 23.610000000000003,
+      "start_sim_s": 8.59,
+      "path_m": 11.617912550304293,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": -0.14009512543058011,
+      "terminal_odom_vx_mps": 0.5000119592669319,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 8.30301788831983,
+      "state_duration_s": {
+        "": 23.60000000000021
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 619,
+        "mean": 1.7574989844921538,
+        "p95": 2.855939016444609,
+        "max": 4.770177009049803
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.026300621539693717,
+        0.015498463256844217
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.04531082451693195,
+        0.13495517261547701
+      ],
+      "matched_observations": 360,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.0219424253389601,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "1ad16a4d9471cb61511e8ab4c26701638bf41c6915bfd41c75922829a8688301",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_14_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 24.200000000000003,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.6099999999999994,
+      "run": "mppi_phase_14_trial_1",
+      "method": "mppi",
+      "phase_s": 14.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 23.590000000000003,
+      "start_sim_s": 8.61,
+      "path_m": 11.553872329313725,
+      "stopped_s": 0.0,
+      "longest_stop_s": 0.0,
+      "min_dynamic_circle_clearance_m": -0.13567570511265759,
+      "terminal_odom_vx_mps": 0.500010928573214,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 8.343064535963252,
+      "state_duration_s": {
+        "": 23.500000000000206
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 621,
+        "mean": 1.7578744617457263,
+        "p95": 2.9722939943894744,
+        "max": 4.512901999987662
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.02298491369911756,
+        0.015529432553914662
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.04399072673065228,
+        0.13100072522469278
+      ],
+      "matched_observations": 356,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 2,
+      "ego_position_rmse_m": 0.018381022549247793,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "1ad16a4d9471cb61511e8ab4c26701638bf41c6915bfd41c75922829a8688301",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_14_trial_1/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 30.200000000000003,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.5800000000000001,
+      "run": "mppi_phase_7_trial_0",
+      "method": "mppi",
+      "phase_s": 7.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 29.620000000000005,
+      "start_sim_s": 8.58,
+      "path_m": 11.903740639895567,
+      "stopped_s": 0.30000000000000426,
+      "longest_stop_s": 0.20000000000000284,
+      "min_dynamic_circle_clearance_m": -0.046457953058704704,
+      "terminal_odom_vx_mps": 0.49995764208860793,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 8.625497827869983,
+      "state_duration_s": {
+        "": 29.6
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 755,
+        "mean": 2.1601396380763327,
+        "p95": 4.080235026776788,
+        "max": 5.324728030245751
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.05854685835087735,
+        0.08903861901471458
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.08443852406828174,
+        0.1433380181752419
+      ],
+      "matched_observations": 918,
+      "unmatched_observations": 1,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.14957112473713405,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "eb214df5499cfa37213be4ac4ff4b37218edb5fe6d939c79aaa7f583f542c2c1",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_7_trial_0/result.json"
+    },
+    {
+      "localization_profile": "velocity_imu",
+      "total_goal_elapsed_s": 30.5,
+      "evaluation_profile": "challenge",
+      "reference_revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+      "start_world": [
+        11.0,
+        0.0,
+        3.14
+      ],
+      "goal_world": [
+        -9.0,
+        0.0
+      ],
+      "goal_radius_m": 1.0,
+      "startup_delay_s": 0.5700000000000003,
+      "run": "mppi_phase_7_trial_1",
+      "method": "mppi",
+      "phase_s": 7.0,
+      "status": "collision",
+      "success": false,
+      "collision": true,
+      "arrival_s": null,
+      "termination_s": 29.93,
+      "start_sim_s": 8.57,
+      "path_m": 11.677259538036708,
+      "stopped_s": 0.3999999999999986,
+      "longest_stop_s": 0.1999999999999993,
+      "min_dynamic_circle_clearance_m": -0.04203441507965067,
+      "terminal_odom_vx_mps": 0.4959759152872797,
+      "terminal_state": "",
+      "terminal_frs_decision": null,
+      "final_goal_distance_m": 8.735032730964589,
+      "state_duration_s": {
+        "": 29.900000000000205
+      },
+      "frs_stale_decisions": 0,
+      "frs_shield_decisions": 0,
+      "frs_infeasible_decisions": 0,
+      "active_frs_decision_ms": null,
+      "perception_callback_ms": {
+        "count": 766,
+        "mean": 2.1565426708662314,
+        "p95": 4.178947754553519,
+        "max": 5.233948992099613
+      },
+      "planner_call_ms": null,
+      "matched_observed_position_rmse_xy_m": [
+        0.09670505943469848,
+        0.07640322520897787
+      ],
+      "matched_velocity_rmse_xy_mps": [
+        0.07848219940522694,
+        0.13962361169555354
+      ],
+      "matched_observations": 924,
+      "unmatched_observations": 0,
+      "velocity_samples_excluded_at_loop_wrap": 1,
+      "ego_position_rmse_m": 0.1761036449584261,
+      "peak_frs_tracks": null,
+      "peak_unknown_regions": 0,
+      "protocol_sha256": "3cc66bd484203905647789df4cd9b5e369975e136473b25cc76e4dc02a984a23",
+      "configuration_sha256": "eb214df5499cfa37213be4ac4ff4b37218edb5fe6d939c79aaa7f583f542c2c1",
+      "source_result": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/navigation/benchmarks/dynamic_dynabarn/results/frs_navigation_fix_20261117/mppi_phase_7_trial_1/result.json"
+    }
+  ],
+  "selection_policy": "All attempts and repeats retained; no method/phase deduplication and no replacement of failed runs",
+  "startup_failures": []
+}

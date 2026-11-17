@@ -1,0 +1,11 @@
+{
+  "scope": "Task/constants only; plant, startup, velocity/sensor and sample-count adaptations remain disclosed",
+  "checks": {
+    "pinned_revision": true,
+    "reference_bytes": true,
+    "start_and_goal": true,
+    "movement_boundary": true,
+    "arrival_and_timeout": true
+  },
+  "all_passed": true
+}

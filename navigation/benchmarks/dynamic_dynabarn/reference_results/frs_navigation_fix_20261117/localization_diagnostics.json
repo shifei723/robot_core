@@ -1,0 +1,182 @@
+[
+  {
+    "run": "mppi_phase_0_trial_0",
+    "method": "mppi",
+    "phase_s": 0,
+    "status": "collision",
+    "position_rmse_m": 0.0791725340899985,
+    "terminal_position_error_m": 0.15662926212841846,
+    "peak_yaw_error_deg": 0.7076369577491061,
+    "terminal_yaw_error_deg": 0.13455743762236128
+  },
+  {
+    "run": "mppi_phase_0_trial_1",
+    "method": "mppi",
+    "phase_s": 0,
+    "status": "collision",
+    "position_rmse_m": 0.08232345891570199,
+    "terminal_position_error_m": 0.15558202809825467,
+    "peak_yaw_error_deg": 0.7037012657417153,
+    "terminal_yaw_error_deg": 0.08152725953898945
+  },
+  {
+    "run": "frs_soft_phase_0_trial_0",
+    "method": "frs_soft",
+    "phase_s": 0,
+    "status": "collision",
+    "position_rmse_m": 0.026139955558291145,
+    "terminal_position_error_m": 0.009471324016298965,
+    "peak_yaw_error_deg": 0.03975044748132314,
+    "terminal_yaw_error_deg": 0.009715514991513066
+  },
+  {
+    "run": "frs_soft_phase_0_trial_1",
+    "method": "frs_soft",
+    "phase_s": 0,
+    "status": "collision",
+    "position_rmse_m": 0.026203349344476164,
+    "terminal_position_error_m": 0.009494169561412198,
+    "peak_yaw_error_deg": 0.04038287118479807,
+    "terminal_yaw_error_deg": 0.009514068951536338
+  },
+  {
+    "run": "frs_joint_phase_0_trial_0",
+    "method": "frs_joint",
+    "phase_s": 0,
+    "status": "success",
+    "position_rmse_m": 0.08462882266902659,
+    "terminal_position_error_m": 0.11288496282720512,
+    "peak_yaw_error_deg": 0.6292065571105144,
+    "terminal_yaw_error_deg": -0.0357301908980969
+  },
+  {
+    "run": "frs_joint_phase_0_trial_1",
+    "method": "frs_joint",
+    "phase_s": 0,
+    "status": "success",
+    "position_rmse_m": 0.09636997366232003,
+    "terminal_position_error_m": 0.12249768288771223,
+    "peak_yaw_error_deg": 0.5990252384595688,
+    "terminal_yaw_error_deg": -0.04900498021214743
+  },
+  {
+    "run": "mppi_phase_7_trial_0",
+    "method": "mppi",
+    "phase_s": 7,
+    "status": "collision",
+    "position_rmse_m": 0.14957112473713408,
+    "terminal_position_error_m": 0.22926697430191306,
+    "peak_yaw_error_deg": 0.7084505121458252,
+    "terminal_yaw_error_deg": 0.25890103476080584
+  },
+  {
+    "run": "mppi_phase_7_trial_1",
+    "method": "mppi",
+    "phase_s": 7,
+    "status": "collision",
+    "position_rmse_m": 0.1761036449584261,
+    "terminal_position_error_m": 0.27746666018195787,
+    "peak_yaw_error_deg": 0.626545275444599,
+    "terminal_yaw_error_deg": 0.5670354483886159
+  },
+  {
+    "run": "frs_soft_phase_7_trial_0",
+    "method": "frs_soft",
+    "phase_s": 7,
+    "status": "success",
+    "position_rmse_m": 0.027401867073089604,
+    "terminal_position_error_m": 0.02586898082566033,
+    "peak_yaw_error_deg": 0.028882491922555698,
+    "terminal_yaw_error_deg": -0.01049404129466153
+  },
+  {
+    "run": "frs_soft_phase_7_trial_1",
+    "method": "frs_soft",
+    "phase_s": 7,
+    "status": "success",
+    "position_rmse_m": 0.027560559419143458,
+    "terminal_position_error_m": 0.025983191782487307,
+    "peak_yaw_error_deg": 0.02870289967943725,
+    "terminal_yaw_error_deg": -0.010276610339737948
+  },
+  {
+    "run": "frs_joint_phase_7_trial_0",
+    "method": "frs_joint",
+    "phase_s": 7,
+    "status": "success",
+    "position_rmse_m": 0.03130643543044041,
+    "terminal_position_error_m": 0.06875810790249073,
+    "peak_yaw_error_deg": 0.41180996129489544,
+    "terminal_yaw_error_deg": 0.005679383281253123
+  },
+  {
+    "run": "frs_joint_phase_7_trial_1",
+    "method": "frs_joint",
+    "phase_s": 7,
+    "status": "success",
+    "position_rmse_m": 0.063247867033873,
+    "terminal_position_error_m": 0.1533342352464056,
+    "peak_yaw_error_deg": 1.0875448963629446,
+    "terminal_yaw_error_deg": 0.0033331793610186264
+  },
+  {
+    "run": "mppi_phase_14_trial_0",
+    "method": "mppi",
+    "phase_s": 14,
+    "status": "collision",
+    "position_rmse_m": 0.0219424253389601,
+    "terminal_position_error_m": 0.014353376665753578,
+    "peak_yaw_error_deg": 0.3150485452467558,
+    "terminal_yaw_error_deg": -0.3104466841194894
+  },
+  {
+    "run": "mppi_phase_14_trial_1",
+    "method": "mppi",
+    "phase_s": 14,
+    "status": "collision",
+    "position_rmse_m": 0.018381022549247793,
+    "terminal_position_error_m": 0.008683083566374875,
+    "peak_yaw_error_deg": 0.5551100969966061,
+    "terminal_yaw_error_deg": -0.5551100969966061
+  },
+  {
+    "run": "frs_soft_phase_14_trial_0",
+    "method": "frs_soft",
+    "phase_s": 14,
+    "status": "success",
+    "position_rmse_m": 0.027717250255108575,
+    "terminal_position_error_m": 0.02425220480683557,
+    "peak_yaw_error_deg": 0.029499432953109635,
+    "terminal_yaw_error_deg": -0.006496214593104793
+  },
+  {
+    "run": "frs_soft_phase_14_trial_1",
+    "method": "frs_soft",
+    "phase_s": 14,
+    "status": "success",
+    "position_rmse_m": 0.02784641027183987,
+    "terminal_position_error_m": 0.02410545373951149,
+    "peak_yaw_error_deg": 0.028582735599337418,
+    "terminal_yaw_error_deg": -0.005229643517877524
+  },
+  {
+    "run": "frs_joint_phase_14_trial_0",
+    "method": "frs_joint",
+    "phase_s": 14,
+    "status": "success",
+    "position_rmse_m": 0.0849789247343189,
+    "terminal_position_error_m": 0.15241678081062926,
+    "peak_yaw_error_deg": 0.8808649994292117,
+    "terminal_yaw_error_deg": -0.09544799054088753
+  },
+  {
+    "run": "frs_joint_phase_14_trial_1",
+    "method": "frs_joint",
+    "phase_s": 14,
+    "status": "success",
+    "position_rmse_m": 0.07002242562283517,
+    "terminal_position_error_m": 0.14939970875050332,
+    "peak_yaw_error_deg": 0.9160823784953428,
+    "terminal_yaw_error_deg": -0.08594427557779878
+  }
+]

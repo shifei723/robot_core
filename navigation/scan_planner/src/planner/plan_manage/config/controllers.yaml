@@ -7,6 +7,12 @@ closed_loop_controller:
     static_spatial_tracking: true
     # 平面动态轨迹使用空间进度，候选以差速运动模型预测并检查 FRS。
     frs_spatial_tracking: true
+    # 可选局部避险恢复：预测等待位置有冲突时检查前进/转向候选。
+    planned_local_speed_required: false
+    joint_rollout_required: false
+    active_escape_enabled: false
+    active_escape_horizon: 2.5
+    active_escape_max_speed: 0.5
     static_cruise_speed: 0.5
     static_acceleration_limit: 0.5
     static_progress_timeout: 2.5

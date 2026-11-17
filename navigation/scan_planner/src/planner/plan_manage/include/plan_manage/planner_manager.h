@@ -9,6 +9,10 @@
 #include <plan_manage/plan_container.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <plan_manage/intent_frs.hpp>
+#include <plan_manage/dynamic_local_path.hpp>
+#include <plan_manage/joint_rollout.hpp>
+#include <std_msgs/msg/float64_multi_array.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <scan_planner_msgs/msg/dynamic_obstacle_array.hpp>
 #include <traj_utils/planning_visualization.h>
 
@@ -45,6 +49,19 @@ namespace scan_planner
       return dynamic_spatial_weight_<=0. ||
           (dynamic_tracks_.fresh(node_->now().seconds()) && dynamic_tracks_.bank.tracks.empty());
     }
+    void setExecutionState(const Eigen::Vector3d& pose,double yaw,double speed,double yaw_rate,double stamp) {
+      if(pose.allFinite() && std::isfinite(yaw) && std::isfinite(speed) && std::isfinite(yaw_rate)) {
+        execution_pose_=pose;execution_yaw_=yaw;execution_speed_=speed;execution_yaw_rate_=yaw_rate;execution_stamp_=stamp;
+      }
+    }
+    bool dynamicLocalPlanDue(double interval) const {
+      if(joint_rollout_enabled_)return node_->now().seconds()-last_local_selection_>=interval;
+      return dynamicLocalRefreshDue(dynamic_local_enabled_,last_local_speed_,dynamic_tracks_.fresh(node_->now().seconds()),
+          !dynamic_tracks_.bank.tracks.empty(),node_->now().seconds(),last_local_selection_,interval);
+    }
+    bool jointRolloutActive()const{return joint_rollout_enabled_ && joint_active_ && joint_id_==local_data_.traj_id_;}
+    const std::vector<Eigen::Vector3d>& jointSafetyPath()const{return joint_path_;}
+    double jointInputStamp()const{return joint_stamp_;}
     PlanParameters pp_;
     LocalTrajData local_data_;
     GlobalTrajData global_data_;
@@ -58,6 +75,18 @@ namespace scan_planner
     BsplineOptimizer::Ptr bspline_optimizer_rebound_;
 
     int continuous_failures_count_{0};
+    bool dynamic_local_enabled_{false};
+    double last_local_selection_{-1},last_local_speed_{0};
+    DynamicLocalPath dynamic_local_;
+    bool joint_rollout_enabled_{false};
+    JointRolloutPlanner joint_rollout_;
+    bool joint_active_{false};std::int64_t joint_id_{-1};double joint_stamp_{-1};
+    std::vector<Eigen::Vector3d> joint_path_;
+    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr joint_rollout_pub_;
+    Eigen::Vector3d execution_pose_{Eigen::Vector3d::Zero()};
+    double execution_yaw_{0},execution_speed_{0},execution_yaw_rate_{0},execution_stamp_{-1};
+    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr local_speed_pub_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr local_decision_pub_;
     bool wheel_grid_trajectory_{false};
     double wheel_search_timeout_{1.0};
     double dynamic_spatial_weight_{0.0};

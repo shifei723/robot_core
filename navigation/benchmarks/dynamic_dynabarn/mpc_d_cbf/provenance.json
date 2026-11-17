@@ -1,0 +1,12 @@
+{
+  "upstream_repository": "https://github.com/jianzhuozhuTHU/MPC-D-CBF",
+  "upstream_revision": "1b355cca60453af41913d35d84d8d869ca9bfde2",
+  "original_file": "local_planner/scripts/local_planner.py",
+  "original_sha256": "13a30ecea39cacaefb68e4e77afd4831a6c016c90f29c0f0a63406427f1970b5",
+  "paper": "https://arxiv.org/abs/2209.08539",
+  "casadi_version": "3.7.2",
+  "math_preservation": "Verbatim upstream MPC_ellip and choose_goal_state AST except v_max=.5,omega_max=1.0,CPU budget .25s and Opti reference for diagnostics; AST equality tested after reversing declared adaptations.",
+  "input_adaptation": "Shared native lidar circle-fit/KF tracks -> 25 CV predicted circular ellipses with 0.95-sigma position expansion; static map walls enclosed separately. Not upstream PCL/MBE/9D-KF pipeline.",
+  "safety_adaptation": "Initial fallback arrays defined; solver failure/stale inputs/overrun stop instead of replaying stale controls. No additional FRS shield.",
+  "reference": "Straight global reference at original .1m spacing; include exact shared endpoint for completion parity."
+}

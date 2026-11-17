@@ -1,0 +1,747 @@
+{
+  "passed": 185,
+  "total": 185,
+  "all_passed": true,
+  "checks": [
+    {
+      "name": "all_planned_attempts_retained",
+      "passed": true
+    },
+    {
+      "name": "frozen_sources",
+      "passed": true
+    },
+    {
+      "name": "installed:navigation/benchmarks/.workspaces/jazzy/install/scan_planner/lib/scan_planner/scan_planner_node",
+      "passed": true
+    },
+    {
+      "name": "installed:navigation/benchmarks/.workspaces/jazzy/install/scan_planner/lib/scan_planner/closed_loop_controller",
+      "passed": true
+    },
+    {
+      "name": "installed:navigation/benchmarks/.workspaces/jazzy/install/dynabarn_ros2/lib/dynabarn_ros2/benchmark_protocol.py",
+      "passed": true
+    },
+    {
+      "name": "installed:navigation/benchmarks/.workspaces/jazzy/install/dynabarn_ros2/lib/dynabarn_ros2/laser_perception.py",
+      "passed": true
+    },
+    {
+      "name": "installed:navigation/benchmarks/.workspaces/jazzy/install/dynabarn_ros2/lib/dynabarn_ros2/compare_evaluate.py",
+      "passed": true
+    },
+    {
+      "name": "installed:navigation/benchmarks/.workspaces/jazzy/install/dynabarn_ros2/lib/dynabarn_ros2/evaluate.py",
+      "passed": true
+    },
+    {
+      "name": "installed:navigation/benchmarks/.workspaces/jazzy/install/dynabarn_ros2/share/dynabarn_ros2/launch/comparison.launch.py",
+      "passed": true
+    },
+    {
+      "name": "installed:navigation/benchmarks/.workspaces/jazzy/install/dynabarn_ros2/share/dynabarn_ros2/launch/dynabarn.launch.py",
+      "passed": true
+    },
+    {
+      "name": "installed:navigation/benchmarks/.workspaces/jazzy/install/dynabarn_ros2/share/dynabarn_ros2/comparison_config/nav2.yaml",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):mppi_actual_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):variant",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 0):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 0):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 0):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 0):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 0):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 0):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 0):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 0):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 0):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 0):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 0):real_joint_frs_execution",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 1):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 1):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 1):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 1):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 1):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 1):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 1):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 1):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 0, 1):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 0, 1):real_joint_frs_execution",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):mppi_actual_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):variant",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 0, 1):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 0):real_joint_frs_execution",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):mppi_actual_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):variant",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 0):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 0):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 0):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 0):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 0):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 0):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 0):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 0):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 0):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 0):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):mppi_actual_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):variant",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 7, 1):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 1):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 1):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 1):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 1):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 1):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 1):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 1):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 1):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 7, 1):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 7, 1):real_joint_frs_execution",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 0):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 0):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 0):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 0):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 0):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 0):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 0):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 0):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 0):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 0):real_joint_frs_execution",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):mppi_actual_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):variant",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 0):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_joint', 14, 1):real_joint_frs_execution",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):mppi_actual_feedback",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):variant",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('mppi', 14, 1):imu_health_guard",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 1):challenge_task",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 1):no_truth_feedback",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 1):native_velocity_gyro_fusion",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 1):variant",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 1):no_estimated_terminal",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 1):motion_clock",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 1):correct_outcome",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 1):actual_command_caps",
+      "passed": true
+    },
+    {
+      "name": "('frs_soft', 14, 1):imu_health_guard",
+      "passed": true
+    }
+  ]
+}

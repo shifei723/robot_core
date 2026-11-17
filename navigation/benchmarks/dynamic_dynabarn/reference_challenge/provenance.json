@@ -1,0 +1,18 @@
+{
+  "repository": "https://github.com/Daffan/the-barn-challenge",
+  "revision": "bf5a226f6088ec96bf0d2dbee3253a8ea6119b83",
+  "files": {
+    "run.py": {
+      "url": "https://raw.githubusercontent.com/Daffan/the-barn-challenge/bf5a226f6088ec96bf0d2dbee3253a8ea6119b83/run.py",
+      "sha256": "16420c814d32055b3779cdb0375b5b89151c9b023099e2e2de37d4db41ba4437"
+    },
+    "README.md": {
+      "url": "https://raw.githubusercontent.com/Daffan/the-barn-challenge/bf5a226f6088ec96bf0d2dbee3253a8ea6119b83/README.md",
+      "sha256": "566a384cc7e201a2a6fcfbb0ec7ac8049e5f304a7a797b82f56be3191395c34d"
+    },
+    "test.sh": {
+      "url": "https://raw.githubusercontent.com/Daffan/the-barn-challenge/bf5a226f6088ec96bf0d2dbee3253a8ea6119b83/test.sh",
+      "sha256": "80d94f4c379739b3e6563136e902414062bdacc3188ef3890f673806a0906432"
+    }
+  }
+}
