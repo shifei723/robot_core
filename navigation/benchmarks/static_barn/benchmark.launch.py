@@ -1,14 +1,17 @@
 """Isolated static BARN comparison; original repository remains unchanged."""
 import importlib.util
 import os
+import sys
 from pathlib import Path
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_share_directory,get_package_prefix
 import yaml
+sys.path.insert(0,str(Path(get_package_prefix("dynabarn_ros2"))/"lib/dynabarn_ros2"))
+from localization_profiles import prepare_setup
 
 def setup(context):
     method = LaunchConfiguration('method').perform(context)
@@ -16,6 +19,14 @@ def setup(context):
     if method not in ('mppi', 'slash') or not 0 <= idx < 300:
         raise ValueError('method must be mppi/slash and world_idx must be 0..299')
     pkg = Path(get_package_share_directory('jackal_helper'))
+    # Isolate generated configuration; use the same encoder/gyro fusion as DynaBARN.
+    shared_setup=prepare_setup(Path(LaunchConfiguration('setup_path').perform(context)),'velocity_imu')
+    nav=yaml.safe_load((shared_setup/'nav2.yaml').read_text())
+    for node in ['controller_server','bt_navigator','velocity_smoother']:
+        nav[node]['ros__parameters']['odom_topic']='/platform/odom/filtered'
+    nav['velocity_smoother']['ros__parameters'].update(max_velocity=[.5,0.,1.],min_velocity=[-.35,0.,-1.])
+    (shared_setup/'nav2.yaml').write_text(yaml.safe_dump(nav,sort_keys=False))
+    context.launch_configurations['setup_path']=str(shared_setup)
     spec = importlib.util.spec_from_file_location('upstream', pkg/'launch/BARN_runner.launch.py')
     upstream = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(upstream)

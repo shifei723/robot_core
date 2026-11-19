@@ -21,6 +21,7 @@ def main():
  for name in ['bspline_opt','path_searching','plan_env','plan_manage','scan_planner_msgs','traj_utils']:
   link(CORE/f'navigation/scan_planner/src/planner/{name}',WORKSPACE/f'src/slash_planner/{name}')
  link(CORE/'navigation/scan_planner/src/perception/geometric_obstacles',WORKSPACE/'src/slash_planner/geometric_obstacles')
+ link(CORE/'navigation/scan_planner/src/simulator/map_generator',WORKSPACE/'src/slash_planner/map_generator')
  link(ROOT/'static_barn/upstream',WORKSPACE/'src/The-Barn-Challenge-Ros2')
  link(ROOT/'dynamic_dynabarn/dynabarn_ros2',WORKSPACE/'src/dynabarn_ros2')
  print(WORKSPACE)
