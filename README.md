@@ -15,6 +15,15 @@
 > - 规模：约 620M，70 个 ROS2 源码包。
 > - **当前版本已验证可编译**：aarch64 / Ubuntu 22.04 / ROS 2 Humble 下 `./build.sh all` 五组全部通过（详见「构建状态」）。
 
+## 可选：336L 视觉惯性定位与动态感知（Jazzy）
+
+新增独立 `ws_perception` 构建组，入口为 `bash build.sh ws_perception`；运行使用
+`LOCALIZATION_MODE=vins bash scripts/run/run_visual_dynamic_perception.sh`，也可选择 `openvins`。
+默认绑定专用 336L、ROS 域 36、Foxglove 9876，支持 YOLO 语义辅助。
+它不自动加入原 Humble 的 `all` 构建或统一环境加载，不改动现有导航安装和录制链路。
+详见 [模块说明](perception/visual_dynamic_perception/README.md) 与
+[启动命令](perception/visual_dynamic_perception/cmd.txt)。
+
 ## 新机器：构建与运行
 
 ```bash
@@ -139,6 +148,7 @@ MAKE_JOBS=4 PKG_SERIAL=0 ./build.sh all   # 大内存机器: 包内 4 线程 + �
 
 | 类别 | 说明 | 主要内容 |
 |---|---|---|
+| `perception/` | 视觉动态感知 | `visual_dynamic_perception/` 集成 · `onboard_detector/` 几何跟踪 |
 | `localization/` | 定位与 SLAM | `lidar_slam/` 激光SLAM · `lidar_localization/` 激光重定位 · `visual_slam/` 视觉/RGB-D |
 | `navigation/` | 导航与规划 | `scan_planner/` 自研局部规划 · nav2 任务管理 · 区域插件 · 强度代价地图 |
 | `sensors/` | 传感器驱动 | `camera/` 相机 · `lidar/` 激光雷达 · `imu_serial/` IMU与串口 |

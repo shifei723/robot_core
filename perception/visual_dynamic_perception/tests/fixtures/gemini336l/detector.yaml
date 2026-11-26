@@ -1,0 +1,96 @@
+/dynamic_detector:
+  ros__parameters:
+    onboard_detector:
+      localization_mode: 1
+      depth_image_topic: /camera/depth/image_raw
+      aligned_depth_image_topic: /camera/depth/image_raw
+      pose_topic: /mavros/local_position/pose
+      odom_topic: /detection/odometry
+      depth_intrinsics:
+      - 311.70135498046875
+      - 311.70135498046875
+      - 320.5
+      - 198.0
+      color_intrinsics:
+      - 369.56494140625
+      - 369.7096862792969
+      - 321.9974670410156
+      - 240.68682861328125
+      depth_scale_factor: 1000.0
+      depth_min_value: 0.3
+      depth_max_value: 5.0
+      depth_filter_margin: 5
+      depth_skip_pixel: 2
+      image_cols: 640
+      image_rows: 400
+      body_to_camera:
+      - 2.220446049250313e-16
+      - 2.220446049250313e-16
+      - 1.0
+      - 0.0
+      - -1.0
+      - 0.0
+      - 2.220446049250313e-16
+      - 0.0
+      - 0.0
+      - -1.0
+      - 2.220446049250313e-16
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+      body_to_camera_color:
+      - -0.0012336717938175035
+      - 0.001741045371240646
+      - 0.9999977234048687
+      - -0.00033748337626457215
+      - -0.99997805034295
+      - -0.006511896083136293
+      - -0.0012223099913162283
+      - -0.023915025711059572
+      - 0.006509753161032972
+      - -0.9999772817271488
+      - 0.0017490406984139728
+      - 7.159533444792032e-06
+      - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+      raycast_max_length: 5.0
+      time_difference: 0.06666666666666667
+      voxel_occupied_thresh: 3
+      ground_height: -5.0
+      dbscan_min_points_cluster: 8
+      dbscan_search_range_epsilon: 0.2
+      filtering_BBox_IOU_threshold: 0.05
+      yolo_overwrite_distance: 3.0
+      history_size: 60
+      similarity_threshold: 0.02
+      fix_size_history_threshold: 10
+      fix_size_dimension_threshold: 0.4
+      e_p: 0.25
+      e_q_pos: 0.01
+      e_q_vel: 0.05
+      e_q_acc: 0.05
+      e_r_pos: 0.04
+      e_r_vel: 0.3
+      e_r_acc: 0.6
+      kalman_filter_averaging_frames: 10
+      frame_skip: 3
+      dynamic_velocity_threshold: 0.15
+      dynamic_voting_threshold: 0.7
+      maximum_skip_ratio: 0.5
+      frames_force_dynamic: 10
+      frames_force_dynamic_check_range: 30
+      dynamic_consistency_threshold: 2
+      constrain_size: false
+      target_object_size:
+      - 0.5
+      - 0.5
+      - 1.7
+      require_uv_confirmation: false
+      ground_filter_enabled: false
+      geometry_motion_classifier: true
+      semantic_assist: true
+      exact_depth_odom_sync: false

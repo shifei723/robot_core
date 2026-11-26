@@ -26,9 +26,12 @@ Estimator::~Estimator()
     }
 }
 
-void Estimator::clearState()
+void Estimator::clearState(bool process_locked)
 {
-    mProcess.lock();
+    if (!process_locked) mProcess.lock();
+    has_last_pose_ = false;
+    last_R.setIdentity(); last_R0.setIdentity();
+    last_P.setZero(); last_P0.setZero();
     while(!accBuf.empty())
         accBuf.pop();
     while(!gyrBuf.empty())
@@ -96,12 +99,12 @@ void Estimator::clearState()
 
     failure_occur = 0;
 
-    mProcess.unlock();
+    if (!process_locked) mProcess.unlock();
 }
 
-void Estimator::setParameter()
+void Estimator::setParameter(bool process_locked)
 {
-    mProcess.lock();
+    if (!process_locked) mProcess.lock();
     for (int i = 0; i < NUM_OF_CAM; i++)
     {
         tic[i] = TIC[i];
@@ -123,7 +126,7 @@ void Estimator::setParameter()
         initThreadFlag = true;
         processThread = std::thread(&Estimator::processMeasurements, this);
     }
-    mProcess.unlock();
+    if (!process_locked) mProcess.unlock();
 }
 
 void Estimator::changeSensorType(int use_imu, int use_stereo)
@@ -607,8 +610,9 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
         {
             ROS_WARN("failure detection!");
             failure_occur = 1;
-            clearState();
-            setParameter();
+            // processMeasurements already owns mProcess here.
+            clearState(true);
+            setParameter(true);
             ROS_WARN("system reboot!");
             return;
         }
@@ -621,6 +625,7 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
             key_poses.push_back(Ps[i]);
 
         last_R = Rs[WINDOW_SIZE];
+        has_last_pose_ = true;
         last_P = Ps[WINDOW_SIZE];
         last_R0 = Rs[0];
         last_P0 = Ps[0];
@@ -1008,11 +1013,16 @@ void Estimator::double2vector()
 
 bool Estimator::failureDetection()
 {
-    return false;
+    // This fork previously disabled every failure check. Reject numerical
+    // divergence before it can be published as camera motion to perception.
+    for (int i = 0; i <= WINDOW_SIZE; ++i) {
+        if (!Ps[i].allFinite() || !Rs[i].allFinite() || Ps[i].norm() > 10000.)
+            return true;
+    }
     if (f_manager.last_track_num < 2)
     {
         ROS_INFO(" little feature %d", f_manager.last_track_num);
-        //return true;
+        return true;
     }
     if (Bas[WINDOW_SIZE].norm() > 2.5)
     {
@@ -1031,26 +1041,26 @@ bool Estimator::failureDetection()
         return true;
     }
     */
+    if (!has_last_pose_) return false;
     Vector3d tmp_P = Ps[WINDOW_SIZE];
     if ((tmp_P - last_P).norm() > 5)
     {
-        //ROS_INFO(" big translation");
-        //return true;
+        ROS_WARN("Implausible visual-odometry translation; resetting estimator");
+        return true;
     }
     if (abs(tmp_P.z() - last_P.z()) > 1)
     {
-        //ROS_INFO(" big z translation");
-        //return true; 
+        return true;
     }
     Matrix3d tmp_R = Rs[WINDOW_SIZE];
     Matrix3d delta_R = tmp_R.transpose() * last_R;
     Quaterniond delta_Q(delta_R);
     double delta_angle;
-    delta_angle = acos(delta_Q.w()) * 2.0 / 3.14 * 180.0;
+    delta_angle = acos(std::max(-1.0, std::min(1.0, std::abs(delta_Q.w())))) * 2.0 / 3.14 * 180.0;
     if (delta_angle > 50)
     {
         ROS_INFO(" big delta_angle ");
-        //return true;
+        return true;
     }
     return false;
 }

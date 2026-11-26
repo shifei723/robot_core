@@ -3,7 +3,7 @@
 # robot_core 分组构建脚本（保留“多工作区”布局，各组隔离 install）
 #
 # 用法:
-#   ./build.sh [ros_ws|rtabmap|ws_nav|agent_ws|tts|all]
+#   ./build.sh [ros_ws|rtabmap|ws_nav|agent_ws|tts|ws_perception|all]
 #   默认 all：按依赖顺序依次构建全部工作区。
 #
 # 依赖关系（构建顺序即加载顺序）:
@@ -23,6 +23,11 @@ while [ -h "$_RC_SRC" ]; do _RC_SRC="$(readlink "$_RC_SRC")"; done
 export ROBOT_CORE="$(cd "$(dirname "$_RC_SRC")" && pwd)"
 cd "$ROBOT_CORE"
 
+# Dispatch before loading a legacy ROS environment; this group owns its Jazzy overlay.
+if [[ "${1:-all}" == ws_perception ]]; then
+  exec bash "$ROBOT_CORE/perception/visual_dynamic_perception/scripts/build.sh"
+fi
+
 : "${ROS_DISTRO:=humble}"
 [ -f "/opt/ros/$ROS_DISTRO/setup.bash" ] && source "/opt/ros/$ROS_DISTRO/setup.bash"
 
@@ -37,6 +42,7 @@ PKG_WORKERS="${PKG_WORKERS:-1}"
 # 嵌入式/小内存机器保持 1（默认）；大内存机器可设 PKG_SERIAL=0 改回并行。
 PKG_SERIAL="${PKG_SERIAL:-1}"
 GROUP="${1:-all}"
+
 
 # ---- 各工作区包含的源码目录（相对 ROBOT_CORE）----
 PATHS_ros_ws="localization/lidar_slam localization/lidar_localization \
@@ -105,7 +111,7 @@ case "$GROUP" in
     unset _FAILED _g
     ;;
   *)
-    echo "用法: $0 [ros_ws|rtabmap|ws_nav|agent_ws|tts|all]" >&2
+    echo "用法: $0 [ros_ws|rtabmap|ws_nav|agent_ws|tts|ws_perception|all]" >&2
     exit 1
     ;;
 esac

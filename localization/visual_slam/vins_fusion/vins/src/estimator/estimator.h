@@ -46,7 +46,7 @@ class Estimator
   public:
     Estimator();
     ~Estimator();
-    void setParameter();
+    void setParameter(bool process_locked = false);
 
     // interface
     void initFirstPose(Eigen::Vector3d p, Eigen::Matrix3d r);
@@ -59,7 +59,8 @@ class Estimator
     void changeSensorType(int use_imu, int use_stereo);
 
     // internal
-    void clearState();
+    void clearState(bool process_locked = false);
+    bool has_last_pose_ = false;
     bool initialStructure();
     bool visualInitialAlign();
     bool relativePose(Matrix3d &relative_R, Vector3d &relative_T, int &l);

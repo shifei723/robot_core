@@ -151,3 +151,10 @@ Thumbs.db
 
 # 运行时 PID 锁文件（pc_monitor 进程锁，不应入库）
 .monitor.pid
+
+# Optional visual-inertial/dynamic-perception local assets and dependencies.
+/perception/visual_dynamic_perception/.deps/
+/perception/visual_dynamic_perception/runtime/
+/perception/visual_dynamic_perception/logs/
+!sensors/camera/orbbec_camera/orbbec_camera/SDK/**/*.so
+!sensors/camera/orbbec_camera/orbbec_camera/SDK/**/*.so.*

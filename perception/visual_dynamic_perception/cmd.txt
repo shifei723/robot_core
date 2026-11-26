@@ -1,0 +1,24 @@
+# 在 robot_core 根目录执行；先停止原 robot_sense 专用检测服务。
+# 首次依赖准备：
+# bash perception/visual_dynamic_perception/scripts/bootstrap_dependencies.sh
+
+# 编译独立 Jazzy 工作区
+bash build.sh ws_perception
+
+# VINS-Fusion + YOLO + 动态检测 + Foxglove（不自动启动 RViz2）
+LOCALIZATION_MODE=vins bash scripts/run/run_visual_dynamic_perception.sh
+
+# OpenVINS：与上面二选一
+LOCALIZATION_MODE=openvins bash scripts/run/run_visual_dynamic_perception.sh
+
+# 关闭 YOLO 对照
+# YOLO_ASSIST=0 LOCALIZATION_MODE=vins bash scripts/run/run_visual_dynamic_perception.sh
+
+# Foxglove 地址：ws://localhost:9876；远端替换为本机 IP。
+# 导入 perception/visual_dynamic_perception/config/336l_yolo_foxglove.json。
+
+# 可选 RViz2
+bash scripts/run/view_visual_dynamic_perception.sh
+
+# 离线回归
+bash perception/visual_dynamic_perception/scripts/test.sh

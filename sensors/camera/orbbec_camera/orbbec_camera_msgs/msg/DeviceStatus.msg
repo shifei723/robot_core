@@ -1,0 +1,7 @@
+std_msgs/Header header
+bool device_online
+string connection_type
+bool customer_calibration_ready
+bool calibration_from_factory
+bool calibration_from_launch_param
+orbbec_camera_msgs/StreamStatus[] streams

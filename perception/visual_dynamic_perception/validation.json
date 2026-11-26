@@ -1,0 +1,113 @@
+{
+  "validated_at": "2026-11-25T17:20:40.182995",
+  "platform": "Ubuntu 24.04 x86_64 / ROS2 Jazzy / Python3.12",
+  "build": {
+    "command": "bash build.sh ws_perception",
+    "packages_finished": 9,
+    "success": true,
+    "log": "runtime/migration_build.log"
+  },
+  "unit_tests": {
+    "rgbd_motion": 3,
+    "body_odometry": 1,
+    "openvins_config": 1,
+    "yolo_model": 1,
+    "all_passed": true
+  },
+  "integration_cases": {
+    "semantic_matched": {
+      "static_frames_with_dynamic_boxes": 0,
+      "moving_frames_with_dynamic_boxes": 104,
+      "moving_dynamic_point_messages": 104,
+      "filtered_cloud_messages": 195,
+      "cleared_frames_with_dynamic_boxes": 0,
+      "pose_loss_frames_with_dynamic_boxes": 0,
+      "tracked_peak_boxes": 2,
+      "node_alive": true
+    },
+    "semantic_unmatched_weak": {
+      "static_frames_with_dynamic_boxes": 0,
+      "moving_frames_with_dynamic_boxes": 0,
+      "moving_dynamic_point_messages": 0,
+      "filtered_cloud_messages": 196,
+      "cleared_frames_with_dynamic_boxes": 0,
+      "pose_loss_frames_with_dynamic_boxes": 0,
+      "tracked_peak_boxes": 2,
+      "node_alive": true
+    },
+    "semantic_unknown_strong": {
+      "static_frames_with_dynamic_boxes": 0,
+      "moving_frames_with_dynamic_boxes": 100,
+      "moving_dynamic_point_messages": 100,
+      "filtered_cloud_messages": 194,
+      "cleared_frames_with_dynamic_boxes": 0,
+      "pose_loss_frames_with_dynamic_boxes": 0,
+      "tracked_peak_boxes": 4,
+      "node_alive": true
+    },
+    "semantic_stale_fallback": {
+      "static_frames_with_dynamic_boxes": 0,
+      "moving_frames_with_dynamic_boxes": 105,
+      "moving_dynamic_point_messages": 105,
+      "filtered_cloud_messages": 195,
+      "cleared_frames_with_dynamic_boxes": 0,
+      "pose_loss_frames_with_dynamic_boxes": 0,
+      "tracked_peak_boxes": 2,
+      "node_alive": true
+    },
+    "pose_loss_cleanup": {
+      "static_frames_with_dynamic_boxes": 0,
+      "moving_frames_with_dynamic_boxes": 106,
+      "moving_dynamic_point_messages": 106,
+      "filtered_cloud_messages": 194,
+      "cleared_frames_with_dynamic_boxes": 0,
+      "pose_loss_frames_with_dynamic_boxes": 0,
+      "tracked_peak_boxes": 2,
+      "node_alive": true
+    },
+    "openvins_motion": {
+      "source": "synthetic stationary -> 0.4m lateral translation -> stationary, domain37",
+      "body_odometry_count": 1854,
+      "odometry_count": 1854,
+      "initial_stationary_count": 279,
+      "final_stationary_count": 373,
+      "estimated_translation_m": 0.42800415148296106,
+      "truth_translation_m": 0.4,
+      "final_span_m": [
+        6.244306705762326e-06,
+        0.0011400554833697618,
+        5.724721832114997e-06
+      ],
+      "finite": true,
+      "passed": true
+    }
+  },
+  "package_prefixes": {
+    "onboard_detector": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/install/ws_perception/onboard_detector",
+    "camera_models": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/install/ws_perception/camera_models",
+    "vins": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/install/ws_perception/vins",
+    "ov_core": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/install/ws_perception/ov_core",
+    "ov_init": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/install/ws_perception/ov_init",
+    "ov_msckf": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/install/ws_perception/ov_msckf",
+    "orbbec_camera": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/install/ws_perception/orbbec_camera",
+    "orbbec_camera_msgs": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/install/ws_perception/orbbec_camera_msgs",
+    "orbbec_description": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/install/ws_perception/orbbec_description",
+    "foxglove_bridge": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/perception/visual_dynamic_perception/.deps/opt/ros/jazzy",
+    "vision_msgs": "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/perception/visual_dynamic_perception/.deps/opt/ros/jazzy"
+  },
+  "standalone_clean_environment_verified": true,
+  "startup_guard": {
+    "command": [
+      "bash",
+      "/home/robotx-2/ws_tianji_sharpa/temp/robot_core/scripts/run/run_visual_dynamic_perception.sh"
+    ],
+    "cwd": "/tmp",
+    "exit_code": 1,
+    "output": "Required dynamic-detection camera CPC87630003A is not connected.\n"
+  },
+  "live_hardware_test": {
+    "performed": false,
+    "reason": "Dedicated camera CPC87630003A is not connected; camera CPC876300042 is not used."
+  },
+  "git_commit_created": false
+}

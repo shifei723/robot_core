@@ -19,7 +19,11 @@
 #include "image_encodings.hpp"
 #include <visualization_msgs/msg/marker.hpp>
 #include <std_msgs/msg/bool.hpp>
+#if __has_include(<cv_bridge/cv_bridge.hpp>)
+#include <cv_bridge/cv_bridge.hpp>
+#else
 #include <cv_bridge/cv_bridge.h>
+#endif
 #include <iostream>
 // #include <ros/package.h>
 #include <ament_index_cpp/get_package_share_directory.hpp>

@@ -18,7 +18,11 @@
 #include <sensor_msgs/msg/image.hpp>
 // #include <sensor_msgs/image_encodings.h>
 #include "image_encodings.hpp"
+#if __has_include(<cv_bridge/cv_bridge.hpp>)
+#include <cv_bridge/cv_bridge.hpp>
+#else
 #include <cv_bridge/cv_bridge.h>
+#endif
 #include <nav_msgs/msg/path.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <geometry_msgs/msg/point_stamped.h>

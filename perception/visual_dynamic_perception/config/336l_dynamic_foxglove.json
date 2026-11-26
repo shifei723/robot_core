@@ -1,0 +1,121 @@
+{
+  "configById": {
+    "3D!dynamic336l": {
+      "cameraState": {
+        "distance": 7,
+        "perspective": true,
+        "phi": 60,
+        "thetaOffset": 225,
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          2,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "fovy": 45,
+        "near": 0.05,
+        "far": 100
+      },
+      "followMode": "follow-pose",
+      "followTf": "map",
+      "scene": {
+        "enableStats": true
+      },
+      "transforms": {},
+      "topics": {
+        "/camera/depth/points": {
+          "visible": true,
+          "pointSize": 2,
+          "colorMode": "flat",
+          "color": "#9daec4"
+        },
+        "/onboard_detector/filtered_depth_cloud": {
+          "visible": false,
+          "pointSize": 3
+        },
+        "/onboard_detector/tracked_bboxes": {
+          "visible": false
+        },
+        "/onboard_detector/dynamic_bboxes": {
+          "visible": true
+        },
+        "/onboard_detector/dynamic_point_cloud": {
+          "visible": true,
+          "pointSize": 5,
+          "colorMode": "flat",
+          "color": "#ff4343"
+        },
+        "/onboard_detector/velocity_visualization": {
+          "visible": false
+        }
+      },
+      "layers": {}
+    },
+    "Image!dynamic336l": {
+      "cameraState": {
+        "distance": 7,
+        "perspective": true,
+        "phi": 60,
+        "thetaOffset": 225,
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          2,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "fovy": 45,
+        "near": 0.05,
+        "far": 100
+      },
+      "scene": {},
+      "transforms": {},
+      "topics": {},
+      "layers": {},
+      "imageMode": {
+        "imageTopic": "/onboard_detector/detected_depth_map"
+      }
+    },
+    "RawMessages!dynamic336l": {
+      "topicPath": "/onboard_detector/dynamic_bboxes",
+      "diffEnabled": false,
+      "showFullMessageForDiff": false
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "linkedGlobalVariables": [],
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "direction": "row",
+    "first": "3D!dynamic336l",
+    "second": {
+      "direction": "column",
+      "first": "Image!dynamic336l",
+      "second": "RawMessages!dynamic336l",
+      "splitPercentage": 70
+    },
+    "splitPercentage": 65
+  }
+}

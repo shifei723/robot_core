@@ -15,7 +15,11 @@
 #include <thread>
 #include <mutex>
 #include <rclcpp/rclcpp.hpp>
+#if __has_include(<cv_bridge/cv_bridge.hpp>)
+#include <cv_bridge/cv_bridge.hpp>
+#else
 #include <cv_bridge/cv_bridge.h>
+#endif
 #include <opencv2/opencv.hpp>
 #include "estimator/estimator.h"
 #include "estimator/parameters.h"
@@ -276,15 +280,15 @@ int main(int argc, char **argv)
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr sub_imu = NULL;
     if(USE_IMU)
     {
-        sub_imu = n->create_subscription<sensor_msgs::msg::Imu>(IMU_TOPIC, rclcpp::SensorDataQoS().keep_last(2000), imu_callback);
+        sub_imu = n->create_subscription<sensor_msgs::msg::Imu>(IMU_TOPIC, rclcpp::QoS(2000).reliable(), imu_callback);
     }
     auto sub_feature = n->create_subscription<sensor_msgs::msg::PointCloud>("/feature_tracker/feature", rclcpp::QoS(rclcpp::KeepLast(2000)), feature_callback);
-    auto sub_img0 = n->create_subscription<sensor_msgs::msg::Image>(IMAGE0_TOPIC, rclcpp::SensorDataQoS(), img0_callback);
+    auto sub_img0 = n->create_subscription<sensor_msgs::msg::Image>(IMAGE0_TOPIC, rclcpp::QoS(5).reliable(), img0_callback);
 
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr sub_img1 = NULL;
     if(STEREO)
     {
-        sub_img1 = n->create_subscription<sensor_msgs::msg::Image>(IMAGE1_TOPIC, rclcpp::SensorDataQoS(), img1_callback);
+        sub_img1 = n->create_subscription<sensor_msgs::msg::Image>(IMAGE1_TOPIC, rclcpp::QoS(5).reliable(), img1_callback);
     }
 
     auto sub_restart = n->create_subscription<std_msgs::msg::Bool>("/vins_restart", rclcpp::QoS(rclcpp::KeepLast(100)), restart_callback);
